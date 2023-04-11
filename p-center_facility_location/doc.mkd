@@ -1,0 +1,86 @@
+## Class FacilityLocation Documentation
+This class is designed to implement two algorithms for the uncapacitated facility location problem. 
+- The first algorithm is a greedy approach based on the Geometric-Algorithm-1 (GON). 
+- The second algorithm is an exact algorithm based on the integer linear programming (ILP) model.
+
+### Class attributes
+- *locations_coordinates*: list of tuples with the coordinates of the chosen facilities.
+- *locations_index*: list with the indices of the chosen facilities in the original input array.
+- *solution_value*: the objective function value of the chosen facilities.
+- *solver_status*: status of the solver.
+- *instance*: the instance of the optimization model.
+- *result*: the optimization result object.
+
+
+### Constructor
+#### Signature
+
+```python
+def __init__(self, coordinates: List[Tuple[float, float]], 
+             n_of_locations_to_choose: int, distance_matrix: np.ndarray):
+```
+This function initializes a FacilityLocation instance.
+
+#### Arguments
+- **coordinates** : list of tuples with the x and y coordinates of the demand points.
+- **n_of_locations_to_choose** : integer, the number of facilities to choose.
+- **distance_matrix** : two-dimensional numpy array, the matrix of pairwise distances between the demand points.
+
+## Methods
+### Method 1: solve_gon()
+This method implements the GON algorithm.
+
+#### Signature
+
+```python
+def solve_gon(self):
+```
+#### Arguments
+None
+
+#### Output
+None
+
+### Method 2: solve_gon_plus(n_trial)
+This method implements an extension of the GON algorithm, called GON+.
+
+#### Signature
+
+```python
+def solve_gon_plus(self, n_trial: int):
+```
+#### Arguments
+**n_trial** : integer, the number of trials for the GON+ algorithm.
+#### Output
+None
+
+### Method 3: solve_exact()
+This method implements an exact algorithm based on the ILP model.
+
+#### Signature
+
+```python
+def solve(self, mode = "exact", algorithm = "gon", n_trial = None):
+```
+#### Arguments
+None
+
+#### Output
+None
+
+### Method 4: solve()
+This method is the one that should be called to solve the problem. It uses one f the three methods above, depending on the value of the input parameters.
+
+#### Parameters
+- **mode**: str, default "exact"
+  - Determines the mode of optimization. Can either be "exact" or "approx".
+- **algorithm**: str, default "gon"
+  - Determines the algorithm to be used for the "approx" mode. Can either be "gon" or "gon_plus".
+- **n_trial**: int or None, default None
+  - Number of trials for the "gon_plus" algorithm. Only used if algorithm is set to "gon_plus". If None, the number of trials is set to self.n which is the number of vertices in the polygon.
+
+#### Returns
+- If mode is "**exact**", the method returns the exact solution to the optimization problem by calling the *__solve_exact* method.
+- If mode is "**approx**" and algorithm is "**gon**", the method returns an approximate solution to the optimization problem by calling the *__solve_gon* method.
+- If mode is "**approx**" and algorithm is "**gon_plus**", the method returns an approximate solution to the optimization problem using the "**gon_plus**" algorithm which is a heuristic algorithm that improves the *__solve_gon* algorithm by running it multiple times with randomized vertex orderings. The best solution found across all trials is returned.
+- If mode is not "**exact**" or "**approx**", the method returns a string message saying "mode must be either '**exact**' or '**approx**'".

@@ -60,7 +60,7 @@ This method implements an exact algorithm based on the ILP model.
 #### Signature
 
 ```python
-def solve(self, mode = "exact", algorithm = "gon", n_trial = None):
+def solve_exact(self):
 ```
 #### Arguments
 None
@@ -70,6 +70,12 @@ None
 
 ### Method 4: solve()
 This method is the one that should be called to solve the problem. It uses one f the three methods above, depending on the value of the input parameters.
+
+#### Signature
+
+```python
+def solve(self, mode = "exact", algorithm = "gon", n_trial = None):
+```
 
 #### Parameters
 - **mode**: str, default "exact"

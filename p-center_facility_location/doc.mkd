@@ -1,92 +1,88 @@
-## Class FacilityLocation Documentation
+# Documentation
+
+## Class AdjacencyMatrix
+This class is designed to create an adjacency matrix from a list of coordinates. 
+
+### Class attributes
+- **coordinates**: 
+  - a gpd.geoseries.GeoSeries object containing the input coordinates that are used to create the adjacency matrix.
+- **mode**: 
+  - a string indicating the type of travel mode used to calculate the distances between the coordinates when kind is set to "osrm". The default value is "distance".
+- **kind**: 
+  - a string indicating the type of adjacency matrix to create. The options are "geometric" or "osrm". The default value is "geometric".
+- **epsg**: 
+  - an integer indicating the coordinate reference system (CRS) code used for the input coordinates. The default value is 32610, which corresponds to the WGS 84 / UTM zone 10N CRS.
+- **adjacency_matrix**: 
+  - a NumPy array containing the adjacency matrix that is created from the input coordinates. The values in the array represent the distances between pairs of points in the coordinate set. The dimensions of the array are n by n, where n is the number of input coordinates. If kind is set to "geometric", the distances are calculated using the Euclidean distance between the points. If kind is set to "osrm", the distances are calculated using the OpenStreetMap Routing Machine (OSRM) API.
+
+### Class public methods
+- `create_adjacency_matrix(self)`:
+  - This method is used to create an **adjacency matrix** for a set of coordinates representing geographic points. The method takes into account three different cases based on the value of the **kind** and **mode** attribute:
+
+  - "**Geometric**" Case:
+    - If `self.kind` is set to "**geometric**", the method first converts the coordinates to a specific coordinate reference system (CRS) using the to_crs() method from a geopandas (gpd) GeoSeries object. Then, it calculates the pairwise distances between the coordinates. The calculated distances are stored in a **square matrix**, which represents the adjacency matrix, where n is the number of coordinates.
+
+  - "**OSRM**" Case:
+    - If `self.kind` is set to "**osrm**", the method assumes that the coordinates are in a format that can be used with the **OpenStreetMap Routing Machine (OSRM) API**. It first prepares the coordinates by converting them into a list of coordinate pairs. Then, it constructs URLs for making API calls to the OSRM service in chunks of 100 coordinates at a time (to avoid exceeding API limitations). For each pair of source and destination chunks, it makes an API request to OSRM to obtain the distances or durations between all pairs of coordinates in those chunks (depending on the value of `self.mode`), using the requests library. The resulting distances are extracted from the JSON response, and they are stored in the **distances numpy array**, which represents the adjacency matrix.
+
+## Class FacilityLocation 
 This class is designed to implement two algorithms for the uncapacitated facility location problem. 
-- The first algorithm is a greedy approach based on the Geometric-Algorithm-1 (GON). 
+- The first algorithm is a greedy approach (GON). 
 - The second algorithm is an exact algorithm based on the integer linear programming (ILP) model.
 
 ### Class attributes
-- *locations_coordinates*: list of tuples with the coordinates of the chosen facilities.
-- *locations_index*: list with the indices of the chosen facilities in the original input array.
-- *solution_value*: the objective function value of the chosen facilities.
-- *solver_status*: status of the solver.
-- *instance*: the instance of the optimization model.
-- *result*: the optimization result object.
+- **coordinates**: 
+  - a GeoSeries containing the coordinates of the demand points.
+- **n_of_locations_to_choose**: 
+  - the number of facilities to open.
+- **adjacency_matrix**: 
+  - a NumPy array representing the adjacency matrix between demand points.
+- **adjacency_matrix_weight**: 
+  - a string representing the type of input matrix.
+- **n_of_demand_points**: 
+  - the number of demand points.
+- **solution_value**: 
+  - the objective value of the best solution found by the algorithm.
+- **algorithm**: 
+  - a string representing the algorithm used to solve the problem (either "GON" or "exact").
+- **solver_status**: 
+  - the status of the solver.
+- **instance**: 
+  - the instance of the Pyomo model.
+- **result**: 
+  - the result of solving the Pyomo model.
+- **computation_time**: 
+  - the time taken to solve the problem.
 
+### Class public methods
+- `solve(self, mode = "exact", algorithm = "gon", n_trial = None)`: 
+  - It is used to solve the facility location problem. It takes in three arguments:
+    - **mode**: 
+      - This argument specifies whether the solution should be exact or approximate. It has two possible values: "**exact**" or "**approx**".
+    - **algorithm**: 
+      - This argument is used when mode is set to "**approx**". It specifies the algorithm to be used for the approximate solution. It has two possible values: "**gon**" or "**gon_plus**".
+    - **n_trial**: 
+      - This argument is used when algorithm is set to "**gon_plus**". It specifies the number of trials to be used in the **GON+** algorithm.
 
-### Constructor
-#### Signature
+- `plot(self)` this method plots the solution computed by the solve() method. 
+  - If the locations_coordinates attribute is **None**, the method returns the message "**solve the problem first**". 
+  - Otherwise, the method creates a scatter plot with **blue** markers for the coordinates of the **original** **points** and **red** **markers** for the **coordinates** of the **points** **selected** as locations. The method returns the fig and ax objects of the plot.
 
-```python
-def __init__(self, coordinates: List[Tuple[float, float]], 
-             n_of_locations_to_choose: int, distance_matrix: np.ndarray):
-```
-This function initializes a FacilityLocation instance.
+## class FacilityLocationReport
+The **FacilityLocationReport** class is used to represent a report containing facility location information. 
 
-#### Arguments
-- **coordinates** : list of tuples with the x and y coordinates of the demand points.
-- **n_of_locations_to_choose** : integer, the number of facilities to choose.
-- **distance_matrix** : two-dimensional numpy array, the matrix of pairwise distances between the demand points.
+### Class attributes
+- **facility_locations**: 
+  - a list of FacilityLocation objects, which represents the facility location solutions.
 
-## Methods
-### Method 1: solve_gon()
-This method implements the GON algorithm.
+### Class public methods
+The class has three main methods:
 
-#### Signature
+- `__init__(self, facility_locations: list[FacilityLocation])`: 
+  - This is the constructor method for the **FacilityLocationReport** class. It takes a list of **FacilityLocation** objects as input, which represents the facilities and their locations. It initializes the object with the provided list of FacilityLocation objects.
 
-```python
-def solve_gon(self):
-```
-#### Arguments
-None
+- `graphical_algorithm_solutions_comparison(self)`: 
+  - This method generates **scatter plots** to compare facility location solutions for different algorithms. It uses the matplotlib library to create scatter plots, with one plot for each **algorithm** and **weight** combination. This can help visually analyze and compare the performance of different algorithms in solving facility location problems.
 
-#### Output
-None
-
-### Method 2: solve_gon_plus(n_trial)
-This method implements an extension of the GON algorithm, called GON+.
-
-#### Signature
-
-```python
-def solve_gon_plus(self, n_trial: int):
-```
-#### Arguments
-**n_trial** : integer, the number of trials for the GON+ algorithm.
-#### Output
-None
-
-### Method 3: solve_exact()
-This method implements an exact algorithm based on the ILP model.
-
-#### Signature
-
-```python
-def solve_exact(self):
-```
-#### Arguments
-None
-
-#### Output
-None
-
-### Method 4: solve()
-This method is the one that should be called to solve the problem. It uses one f the three methods above, depending on the value of the input parameters.
-
-#### Signature
-
-```python
-def solve(self, mode = "exact", algorithm = "gon", n_trial = None):
-```
-
-#### Parameters
-- **mode**: str, default "exact"
-  - Determines the mode of optimization. Can either be "exact" or "approx".
-- **algorithm**: str, default "gon"
-  - Determines the algorithm to be used for the "approx" mode. Can either be "gon" or "gon_plus".
-- **n_trial**: int or None, default None
-  - Number of trials for the "gon_plus" algorithm. Only used if algorithm is set to "gon_plus". If None, the number of trials is set to self.n which is the number of vertices in the polygon.
-
-#### Returns
-- If mode is "**exact**", the method returns the exact solution to the optimization problem by calling the *__solve_exact* method.
-- If mode is "**approx**" and algorithm is "**gon**", the method returns an approximate solution to the optimization problem by calling the *__solve_gon* method.
-- If mode is "**approx**" and algorithm is "**gon_plus**", the method returns an approximate solution to the optimization problem using the "**gon_plus**" algorithm which is a heuristic algorithm that improves the *__solve_gon* algorithm by running it multiple times with randomized vertex orderings. The best solution found across all trials is returned.
-- If mode is not "**exact**" or "**approx**", the method returns a string message saying "mode must be either '**exact**' or '**approx**'".
+- `graphical_adjacency_matrix_solutions_comparison(self)`: 
+  - This method generates scatter plots to compare facility location solutions for different **algorithms**, with different colors for each **weight** combination to avoid overlapping of points. It uses the matplotlib library to create scatter plots, with one plot for each algorithm. This can help visually analyze and compare the performance of different algorithms in solving facility location problems, while taking into account different weight combinations.

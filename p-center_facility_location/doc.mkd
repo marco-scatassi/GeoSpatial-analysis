@@ -17,7 +17,7 @@ This class is designed to create an adjacency matrix from a list of coordinates.
 
 ### Class public methods
 - `create_adjacency_matrix(self)`:
-  - This method is used to create an **adjacency matrix** for a set of coordinates representing geographic points. The method takes into account three different cases based on the value of the **kind** and **mode** attribute:
+  - This method is used to create an **adjacency matrix** for a set of coordinates representing geographic points. The method takes into account three different cases based on the value of the attributes **kind** and **mode**:
 
   - "**Geometric**" Case:
     - If `self.kind` is set to "**geometric**", the method first converts the coordinates to a specific coordinate reference system (CRS) using the to_crs() method from a geopandas (gpd) GeoSeries object. Then, it calculates the pairwise distances between the coordinates. The calculated distances are stored in a **square matrix**, which represents the adjacency matrix, where n is the number of coordinates.

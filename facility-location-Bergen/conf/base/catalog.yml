@@ -3,3 +3,8 @@
 # Documentation for this file format can be found in "The Data Catalog"
 # Link: https://docs.kedro.org/en/stable/data/data_catalog.html
 
+
+collections:
+  type: pickle.PickleDataSet
+  filepath: data/02_intermediate/collections.pickle
+  backend: pickle

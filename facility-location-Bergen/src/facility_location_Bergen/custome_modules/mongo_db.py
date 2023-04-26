@@ -9,23 +9,26 @@ def get_database(db_name, connection_string):
    return client[db_name]
 
 # ----------------------------------------------------- get collection -----------------------------------------------------
-def retrieve_collections_names(db: database.Database, name: str, days: list):
-    collections_names = [name+"_data_"+day for day in days]
+def retrieve_collections_names(db: database.Database, name: str, day: str):
+    collections_names = name+"_data_"+day 
     return collections_names
 
 # ----------------------------------------------- get database and collection ----------------------------------------------
-def retrieve_database_and_collections(db_name: str, days: list, which: list, connection_string="mongodb://localhost:27017"):
-   if isinstance(days, list) and isinstance(which, list):
-      pass
-   else:
-      raise TypeError('days and/or which must be a list')
-
+def retrieve_database_and_collections(db_name: str, day: str, which: list, connection_string="mongodb://localhost:27017"):
    # Get the database
    db = get_database(db_name, connection_string)
    # define the collections names
    collections_names = []
    for name in which:
-      collections_names += retrieve_collections_names(db, name, days)
+      collections_names += [retrieve_collections_names(db, name, day)]
    # Get the collections
    collections = {collection_name:db[collection_name] for collection_name in collections_names}
    return db, collections
+
+# ------------------------------------------------- get only empty collection ------------------------------------------------
+def take_empty_collections(collections: dict):
+    empty_collections = {}
+    for collection_name, collection in collections.items():
+        if collection.count_documents({}) == 0:
+            empty_collections[collection_name] = collection
+    return empty_collections

@@ -23,3 +23,21 @@ cleaning.25_04_2023.trigger_25_04_2023:
 cleaning.26_04_2023.trigger_26_04_2023:
     type: pickle.PickleDataSet
     filepath: data/02_intermediate/cleaning_26_04_2023_trigger_26_04_2023.pkl
+is_done_cleaning_21_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/02_intermediate/is_done_cleaning_21_04_2023.pkl
+is_done_cleaning_22_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/02_intermediate/is_done_cleaning_22_04_2023.pkl
+is_done_cleaning_23_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/02_intermediate/is_done_cleaning_23_04_2023.pkl
+is_done_cleaning_24_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/02_intermediate/is_done_cleaning_24_04_2023.pkl
+is_done_cleaning_25_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/02_intermediate/is_done_cleaning_25_04_2023.pkl
+is_done_cleaning_26_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/02_intermediate/is_done_cleaning_26_04_2023.pkl

@@ -13,6 +13,7 @@ import pytz
 import copy
 import json
 import geojson
+import regex as re
 import numpy as np
 import pandas as pd
 from dateutil import parser
@@ -20,23 +21,14 @@ from pymongo import database
 from get_api_call_time import get_api_call_time
 from geojson import GeometryCollection, LineString
 from kedro.extras.datasets.json import JSONDataSet
+from kedro.extras.datasets.pickle import PickleDataSet
+from retrieve_global_parameters import retrieve_catalog_path
 from mongo_db import retrieve_database_and_collections, take_empty_collections
 
 # -------------------------------------------- compose_url_to_raw_data ---------------------------------------------- #
-def compose_url_to_raw_data(db_name: str, day: str, root_dir: str):
-    # retrieve database and collections wrappers
-    db, collections = retrieve_database_and_collections(db_name, day, ["raw", "processed"])
-    empty_collections = take_empty_collections(collections)
-    # check if the number of empty collections is not more than 2
-    if len(empty_collections) > 2:
-        raise ValueError("No more than one date can be processed at a time, please select only one new date.")
-    # compose the urls to the raw data
-    day_ = np.unique([key[-10:] for key in empty_collections.keys()])
-    # check if the day_ is not empty
-    if len(day_) == 0:
-        return []
-    dirs = [dir for dir in os.listdir(root_dir+f"\\{day_[0]}") if dir[:10] in day_]
-    dirs_urls = [os.path.join(root_dir+f"\\{day_[0]}", dir) for dir in dirs]
+def compose_url_to_raw_data(day: str, root_dir: str):
+    dirs = [dir for dir in os.listdir(root_dir+f"\\{day}") if dir[:10] in day]
+    dirs_urls = [os.path.join(root_dir+f"\\{day}", dir) for dir in dirs]
     file_urls = [os.path.join(dir_url, file) for dir_url in dirs_urls for file in os.listdir(dir_url)]
     return file_urls
 
@@ -109,7 +101,15 @@ def geometry_processing(input_data: list):
     return geo_processed_data
 
 
-def process_raw_data(urls: list):
+def process_raw_data(urls: list, db_name: str, day: str):
+    # retrieve database and collections wrappers
+    db, collections = retrieve_database_and_collections(db_name, day, ["processed"])
+    key_list = list(collections.keys())
+    processed_collection = collections[key_list[0]]
+    
+    if processed_collection.count_documents({}) != 0:
+        return []
+    
     # load the raw data
     raw_data =  load_raw_data(urls)
     time_processed_collections_documents = splitting_and_time_processing(raw_data)
@@ -119,23 +119,31 @@ def process_raw_data(urls: list):
 # ---------------------------------------------- insert_documents_in_the_collections -------------------------------- #
 def insert_raw_data(urls: list, db_name: str, day: str):
     # retrieve database and collections wrappers
-    db, collections = retrieve_database_and_collections(db_name, day, ["raw", "processed"])
-    empty_collections = take_empty_collections(collections)
+    db, collections = retrieve_database_and_collections(db_name, day, ["raw"])
+    key_list = list(collections.keys())
+    raw_collection = collections[key_list[0]]
     
-    # load the raw data
-    raw_data = load_raw_data(urls)
-    
-    # insert the documents in the collections
-    for key, value in empty_collections.items():
-        if "raw" in key:
-            value.insert_many(list(raw_data.values()))
-        else:
-            pass
+    # check if the collection is empty
+    if raw_collection.count_documents({}) == 0:
+        # load the raw data
+        raw_data = load_raw_data(urls)
+        
+        # insert the documents in the collections
+        for key, value in raw_collection.items():
+            if "raw" in key:
+                value.insert_many(list(raw_data.values()))
+            else:
+                pass
 
 def insert_processed_data(processed_data: dict, db_name: str, day: str):
+    finished = False
+    
     # retrieve database and collections wrappers
     db, collections = retrieve_database_and_collections(db_name, day, ["raw", "processed"])
     empty_collections = take_empty_collections(collections)
+    
+    if len(empty_collections) == 0:
+        finished = True
     
     # insert the documents in the collections
     for key, value in empty_collections.items():
@@ -143,3 +151,32 @@ def insert_processed_data(processed_data: dict, db_name: str, day: str):
             pass
         elif "processed" in key:
             value.insert_many(list(processed_data))
+            finished = True
+    
+    return finished
+
+def update_data_catalog_trigger(trigger, day):
+    finished = False
+    file_path = f"data/02_intermediate/cleaning_{day}_trigger_{day}.pkl"
+    if trigger:
+        catalog_path = retrieve_catalog_path()
+        with open(catalog_path, "r+") as f:
+            contents = f.read()
+            result = re.search(fr"cleaning.{day}.trigger_{day}:", contents)
+            if result is None:
+                contents = "\n".join([contents, 
+                                  "\n    ".join([f"cleaning.{day}.trigger_{day}:",
+                                                 f"type: pickle.PickleDataSet",
+                                                 f"filepath: {file_path}"])])
+                
+            f.seek(0)
+            f.truncate()
+            f.write(contents)
+        
+        finished = True
+        
+        bool_data = PickleDataSet(filepath=file_path)
+        bool_data.save(finished)
+        
+        
+    return finished

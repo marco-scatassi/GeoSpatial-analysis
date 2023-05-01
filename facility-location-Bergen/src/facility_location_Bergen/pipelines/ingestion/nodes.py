@@ -127,13 +127,9 @@ def insert_raw_data(urls: list, db_name: str, day: str):
     if raw_collection.count_documents({}) == 0:
         # load the raw data
         raw_data = load_raw_data(urls)
-        
         # insert the documents in the collections
-        for key, value in raw_collection.items():
-            if "raw" in key:
-                value.insert_many(list(raw_data.values()))
-            else:
-                pass
+        raw_collection.insert_many(list(raw_data.values()))
+        
 
 def insert_processed_data(processed_data: dict, db_name: str, day: str):
     finished = False

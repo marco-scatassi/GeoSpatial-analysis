@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 # print INFO message with timestamp
 def print_INFO_message_timestamp(message: str):

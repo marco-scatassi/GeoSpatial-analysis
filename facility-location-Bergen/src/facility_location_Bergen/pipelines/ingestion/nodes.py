@@ -151,6 +151,7 @@ def insert_processed_data(processed_data: dict, db_name: str, day: str):
     
     return finished
 
+# ---------------------------------------------- update_data_catalog_trigger --------------------------------------- #
 def update_data_catalog_trigger(trigger, day):
     finished = False
     file_path = f"data/02_intermediate/cleaning_{day}_trigger_{day}.pkl"

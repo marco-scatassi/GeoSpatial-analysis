@@ -65,3 +65,15 @@ is_done_cleaning_29_04_2023:
 is_done_cleaning_30_04_2023:
     type: pickle.PickleDataSet
     filepath: data/02_intermediate/is_done_cleaning_30_04_2023.pkl
+gdf20_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/20_04_2023.geojson
+visualization.gif20_04_2023morning:
+    type: matplotlib.MatplotlibWriter
+    filepath: data/08_reporting/AnimatedPlot20_04_2023morning.gif
+visualization.gif20_04_2023midday:
+    type: matplotlib.MatplotlibWriter
+    filepath: data/08_reporting/AnimatedPlot20_04_2023midday.gif
+visualization.gif20_04_2023afternoon:
+    type: matplotlib.MatplotlibWriter
+    filepath: data/08_reporting/AnimatedPlot20_04_2023afternoon.gif

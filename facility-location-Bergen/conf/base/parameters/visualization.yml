@@ -1,5 +1,9 @@
-# This is a boilerplate parameters config generated for pipeline 'visualization'
-# using Kedro 0.18.7.
-#
-# Documentation for this file format can be found in "Parameters"
-# Link: https://docs.kedro.org/en/0.18.7/kedro_project_setup/configuration.html#parameters
+visualization.date00: 
+    day: "20_04_2023"
+    time: "morning"
+visualization.date01: 
+    day: "20_04_2023"
+    time: "midday"
+visualization.date02: 
+    day: "20_04_2023"
+    time: "afternoon"

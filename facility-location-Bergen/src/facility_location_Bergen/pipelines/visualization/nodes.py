@@ -151,7 +151,9 @@ def animate(i, ax, df_dict2):
         ax.plot('lat', 'lon', data=df.where(df.color=="orange"), linewidth=0.5, c="orange", transform=ccrs.Geodetic())
         ax.plot('lat', 'lon', data=df.where(df.color=="red"), linewidth=0.5, c="red", transform=ccrs.Geodetic())
         
-        ax.set_title(f"Traffic across time in Bergen: {list(df_dict2.keys())[i]}")
+        tz = pytz.timezone('Europe/Oslo')
+        
+        ax.set_title(f"Traffic across time in Bergen: {list(df_dict2.keys())[i].astimezone(tz).strftime('%Y-%m-%d %H:%M')}")
         print_INFO_message(f"Time to plot the {i+1}th of {len(df_dict2.keys())} dates: {time()-ts:.2f} seconds")
     
 def create_and_save_animation(date: dict, trigger: bool):

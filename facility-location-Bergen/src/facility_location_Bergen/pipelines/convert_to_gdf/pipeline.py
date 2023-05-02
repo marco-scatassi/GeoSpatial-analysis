@@ -20,18 +20,18 @@ def create_child_pipeline(key, value) -> list:
         ),
         node(
             func=from_json_to_gdf,
-            inputs=[f"params:{key}", "gdf_already_created", "paths_gdf"],
+            inputs=[f"params:{key}", "gdf_already_created"],
             outputs="trigger",
             name="from_json_to_gdf"
         ),
         node(
             func=update_data_catalog_gdf,
-            inputs=[f"params:{key}", "trigger", "paths_gdf"],
-            outputs="trigger_gdf",
+            inputs=[f"params:{key}", "trigger"],
+            outputs="finished_gdf",
             name="update_data_catalog_gdf"
         )
     ],
-    namespace=f"convert_to_gdf.{value}",
+    namespace=f"convert_to_gdf.{value['day']}",
     parameters={key:key})
 
 

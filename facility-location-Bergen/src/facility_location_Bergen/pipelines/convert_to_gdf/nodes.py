@@ -24,9 +24,10 @@ def verify_gdf_already_created(date: dict):
 
 
 # -------------------------------- retrieve_data_from_mongoDB  and convert them to a geopandas df --------------------------------
-def from_json_to_gdf(date: dict, already_created: bool, saving_path: str):
+def from_json_to_gdf(date: dict, already_created: bool):
     finished = already_created
     db_name = retrieve_db_name()
+    saving_path = retrieve_gdf_path(date)
     if not already_created:
         # set the first and last date of the date
         first_date = datetime.strptime(f"{date['day']}T07:30:00.000+02:00", "%d_%m_%YT%H:%M:%S.%f%z")
@@ -58,10 +59,11 @@ def from_json_to_gdf(date: dict, already_created: bool, saving_path: str):
 
 
 # ---------------------------------------------- update_data_catalog --------------------------------------- 
-def update_data_catalog_gdf(date, trigger, gdf_path):
+def update_data_catalog_gdf(date, trigger):
     finished = False
     if trigger:
         catalog_path = retrieve_catalog_path()
+        gdf_path = retrieve_gdf_path(date)
         
         with open(catalog_path, "r+") as f:
             contents = f.read()

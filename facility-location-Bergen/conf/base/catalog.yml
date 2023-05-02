@@ -89,3 +89,30 @@ visualization.gif21_04_2023midday:
 visualization.gif21_04_2023morning:
     type: matplotlib.MatplotlibWriter
     filepath: data/08_reporting/AnimatedPlot21_04_2023morning.gif
+gdf22_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/22_04_2023.geojson
+gdf23_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/23_04_2023.geojson
+gdf24_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/24_04_2023.geojson
+gdf25_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/25_04_2023.geojson
+gdf26_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/26_04_2023.geojson
+gdf27_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/27_04_2023.geojson
+gdf28_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/28_04_2023.geojson
+gdf29_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/29_04_2023.geojson
+gdf30_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/30_04_2023.geojson

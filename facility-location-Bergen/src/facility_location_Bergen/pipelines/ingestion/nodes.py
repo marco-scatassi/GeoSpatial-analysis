@@ -22,11 +22,12 @@ from get_api_call_time import get_api_call_time
 from geojson import GeometryCollection, LineString
 from kedro.extras.datasets.json import JSONDataSet
 from kedro.extras.datasets.pickle import PickleDataSet
-from retrieve_global_parameters import retrieve_catalog_path
 from mongo_db import retrieve_database_and_collections, take_empty_collections
+from retrieve_global_parameters import retrieve_catalog_path, retrieve_db_name, retrieve_raw_data_root_dir
 
 # -------------------------------------------- compose_url_to_raw_data ---------------------------------------------- #
-def compose_url_to_raw_data(day: str, root_dir: str):
+def compose_url_to_raw_data(day: str):
+    root_dir = retrieve_raw_data_root_dir()
     dirs = [dir for dir in os.listdir(root_dir+f"\\{day}") if dir[:10] in day]
     dirs_urls = [os.path.join(root_dir+f"\\{day}", dir) for dir in dirs]
     file_urls = [os.path.join(dir_url, file) for dir_url in dirs_urls for file in os.listdir(dir_url)]
@@ -101,7 +102,8 @@ def geometry_processing(input_data: list):
     return geo_processed_data
 
 
-def process_raw_data(urls: list, db_name: str, day: str):
+def process_raw_data(urls: list, day: str):
+    db_name = retrieve_db_name()
     # retrieve database and collections wrappers
     db, collections = retrieve_database_and_collections(db_name, day, ["processed"])
     key_list = list(collections.keys())
@@ -117,7 +119,8 @@ def process_raw_data(urls: list, db_name: str, day: str):
     return processed_collections_documents
 
 # ---------------------------------------------- insert_documents_in_the_collections -------------------------------- #
-def insert_raw_data(urls: list, db_name: str, day: str):
+def insert_raw_data(urls: list, day: str):
+    db_name = retrieve_db_name()
     # retrieve database and collections wrappers
     db, collections = retrieve_database_and_collections(db_name, day, ["raw"])
     key_list = list(collections.keys())
@@ -131,9 +134,9 @@ def insert_raw_data(urls: list, db_name: str, day: str):
         raw_collection.insert_many(list(raw_data.values()))
         
 
-def insert_processed_data(processed_data: dict, db_name: str, day: str):
+def insert_processed_data(processed_data: dict, day: str):
     finished = False
-    
+    db_name = retrieve_db_name()
     # retrieve database and collections wrappers
     db, collections = retrieve_database_and_collections(db_name, day, ["raw", "processed"])
     empty_collections = take_empty_collections(collections)
@@ -154,15 +157,15 @@ def insert_processed_data(processed_data: dict, db_name: str, day: str):
 # ---------------------------------------------- update_data_catalog_trigger --------------------------------------- #
 def update_data_catalog_trigger(trigger, day):
     finished = False
-    file_path = f"data/02_intermediate/cleaning_{day}_trigger_{day}.pkl"
+    file_path = f"data/02_intermediate/cleaning_{day}_trigger_cleaning_{day}.pkl"
     if trigger:
         catalog_path = retrieve_catalog_path()
         with open(catalog_path, "r+") as f:
             contents = f.read()
-            result = re.search(fr"cleaning.{day}.trigger_{day}:", contents)
+            result = re.search(fr"cleaning.{day}.trigger_cleaning_{day}:", contents)
             if result is None:
                 contents = "\n".join([contents, 
-                                  "\n    ".join([f"cleaning.{day}.trigger_{day}:",
+                                  "\n    ".join([f"cleaning.{day}.trigger_cleaning_{day}:",
                                                  f"type: pickle.PickleDataSet",
                                                  f"filepath: {file_path}"])])
                 

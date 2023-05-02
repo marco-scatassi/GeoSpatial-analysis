@@ -19,10 +19,9 @@ from urllib.request import urlopen, Request
 from matplotlib.animation import FuncAnimation
 from mongo_db import retrieve_database_and_collections
 from kedro.extras.datasets.pickle import PickleDataSet
-from retrieve_global_parameters import retrieve_catalog_path
 from convert_geometry import toMultiLineString, toExtremePoints
 from log import print_INFO_message_timestamp, print_INFO_message
-from retrieve_file_path import retrieve_gdf_path, retrieve_gif_saving_path
+from retrieve_global_parameters import retrieve_catalog_path, retrieve_gdf_path, retrieve_gif_saving_path
 
 # -------------------------------------------- process data to plot them --------------------------------------------
 # define the color of the lines based on the jam factor

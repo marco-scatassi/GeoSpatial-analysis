@@ -18,7 +18,7 @@ def register_pipelines() -> Dict[str, Pipeline]:
         # ------------- chain ingestion and cleaning pipelines ---------------
         finished = False
         for e in pipe.outputs():
-            if "finished" in e:
+            if "finished_ingestion" in e:
                 finished = True
         
         if finished:
@@ -29,6 +29,18 @@ def register_pipelines() -> Dict[str, Pipeline]:
         else:
             pipelines["__default__"] += pipe
 
-        # --------- chain convert_to_gdf and visualization pipelines ---------
+        # # --------- chain convert_to_gdf and visualization pipelines ---------
+        # finished = False
+        # for e in pipe.outputs():
+        #     if "finished" in e:
+        #         finished = True
         
+        # if finished:
+        #     mapping = {}
+        #     for e in pipe.outputs():
+        #         mapping[e] = e.replace("finished", "trigger").replace("ingestion", "cleaning")    
+        #     pipelines["__default__"] += pipeline(pipe=pipe, outputs=mapping)
+        # else:
+        #     pipelines["__default__"] += pipe
+            
     return pipelines

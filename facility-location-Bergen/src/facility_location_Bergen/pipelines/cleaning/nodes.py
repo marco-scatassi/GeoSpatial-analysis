@@ -7,46 +7,48 @@ import sys
 sys.path.append(r'C:\Users\Marco\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\src\facility_location_Bergen\custome_modules')
 
 import os
-import json
 import pickle
 import geojson
 import regex as re
-import numpy as np
 import pandas as pd
 import pymongo as pm
-import geopandas as gpd
-from kedro.config import ConfigLoader
-from kedro.framework.project import settings
+from log import print_INFO_message_timestamp  
 from kedro.extras.datasets.pickle import PickleDataSet
-from retrieve_global_parameters import retrieve_catalog_path
-from mongo_db import retrieve_database_and_collections, take_empty_collections
+from mongo_db import retrieve_database_and_collections  
+from retrieve_global_parameters import retrieve_catalog_path, retrieve_db_name
 
 # -------------------------------------------- verify_cleaning_already_done --------------------------------------------
-def verify_cleaning_already_done(day):
+def verify_cleaning_already_done(day, trigger_from_ingestion = False):
     is_done = False
     
-    file_path = f"data/02_intermediate/is_done_cleaning_{day}.pkl"
-    if os.path.exists(file_path):
-        with open(file_path, "rb") as file:
-            is_done = pickle.load(file)
+    if trigger_from_ingestion:
+        file_path = f"data/02_intermediate/is_done_cleaning_{day}.pkl"
+        if os.path.exists(file_path):
+            with open(file_path, "rb") as file:
+                is_done = pickle.load(file)
+    
+    if is_done:
+        print_INFO_message_timestamp(f"Cleaning for {day} already done.")
     
     return is_done
 
 # --------------------------------------------- filter_data_geographically ---------------------------------------------
-def filter_data_geographically(db_name, day, polygon_vertex: list, trigger_from_ingestion = False, already_done = False):
+def filter_data_geographically(day, polygon_vertex: list, already_done: bool):
     finished = False
+    db_name = retrieve_db_name()
     # retrieve database and collections
     db, collections = retrieve_database_and_collections(db_name, day, ["processed", "clean"])
     # retrieve collections
     key_list = list(collections.keys())
     processed_collection = collections[key_list[0]]
     clean_collection = collections[key_list[1]]
-    
-    if clean_collection.count_documents({}) != 0:
-        finished = True
-        return finished
+     
+    if not already_done:
         
-    if trigger_from_ingestion and not already_done:
+        if clean_collection.count_documents({}) != 0:
+            finished = True
+            return finished
+
         polygon = geojson.Polygon([polygon_vertex])
         # create index
         processed_collection.create_index([("geometry", pm.GEOSPHERE)])
@@ -54,16 +56,17 @@ def filter_data_geographically(db_name, day, polygon_vertex: list, trigger_from_
         cursor = processed_collection.find(
         {"geometry": {"$geoWithin": {"$geometry": polygon}}})
         clean_collection.insert_many(cursor)
-        
+            
         finished = True
     
     return finished
     
 
 # ------------------------------------------ keep_common_road_segments_across_time ------------------------------------------
-def keep_common_road_segments_across_time(db_name, day, trigger = False, already_done = False):
+def keep_common_road_segments_across_time(day, trigger = False):
     finished = False
-    if trigger and not already_done:
+    db_name = retrieve_db_name()
+    if trigger:
         # retrieve database and collections
         db, collections = retrieve_database_and_collections(db_name, day, ["raw", "clean"])
         key_list = list(collections.keys())
@@ -89,10 +92,10 @@ def keep_common_road_segments_across_time(db_name, day, trigger = False, already
     
     
 # --------------------------------------------- remove_unnecessary_field ---------------------------------------------
-def remove_unnecessary_fields(db_name, day, trigger = False, already_done = False):
+def remove_unnecessary_fields(day, trigger = False):
     finished = False
-    
-    if trigger and not already_done:
+    db_name = retrieve_db_name()
+    if trigger:
         # retrieve database and collections
         db, collections = retrieve_database_and_collections(db_name, day, ["clean"])
         key_list = list(collections.keys())
@@ -104,7 +107,7 @@ def remove_unnecessary_fields(db_name, day, trigger = False, already_done = Fals
         
     return finished
 
-
+# --------------------------------------------- update data catalog ---------------------------------------------
 def update_data_catalog_trigger(trigger, day):
     finished = False
     file_path = f"data/02_intermediate/is_done_cleaning_{day}.pkl"

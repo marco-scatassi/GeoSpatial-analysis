@@ -14,25 +14,25 @@ def create_child_pipeline(key, value) -> list:
     return pipeline([
         node(
           func=verify_cleaning_already_done,  
-          inputs=[f"params:{key}"],
+          inputs=[f"params:{key}", f"trigger_cleaning_{value}"],
           outputs="is_done",
           name="verify_cleaning_already_done"
         ),
         node(
             func=filter_data_geographically,
-            inputs=["db_name", f"params:{key}", "params:polygon_vertex", f"trigger_{value}", "is_done"],
+            inputs=[f"params:{key}", "params:polygon_vertex", "is_done"],
             outputs="trigger_filter",
             name="filter_data_geographically"
             ),
         node(
             func=keep_common_road_segments_across_time,
-            inputs=["db_name", f"params:{key}", "trigger_filter", "is_done"],
+            inputs=[f"params:{key}", "trigger_filter"],
             outputs="trigger_keep",
             name="keep_common_road_segments_across_time"
             ),
         node(
             func=remove_unnecessary_fields,
-            inputs=["db_name", f"params:{key}", "trigger_keep", "is_done"],
+            inputs=[f"params:{key}", "trigger_keep"],
             outputs="trigger_remove",
             name="remove_unnecessary_fields"
             ),
@@ -58,13 +58,4 @@ def create_pipeline(**kwargs) -> Pipeline:
     
     cleaning_pipeline = sum(child_pipelines)
     
-    # --------- chain retrieve_global_params and cleaning pipelines ---------
-    mapping={}
-    for e in cleaning_pipeline.all_inputs():
-        if "db_name" in e:
-            mapping[e]="db_name"
-                
-        if "raw_data_root_dir" in e:
-            mapping[e]="raw_data_root_dir"  
-        
-    return pipeline(pipe=cleaning_pipeline, inputs=mapping, tags=["cleaning"])
+    return pipeline(pipe=cleaning_pipeline, tags=["cleaning"])

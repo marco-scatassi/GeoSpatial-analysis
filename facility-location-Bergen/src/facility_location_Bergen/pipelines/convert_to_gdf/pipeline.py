@@ -20,7 +20,7 @@ def create_child_pipeline(key, value) -> list:
         ),
         node(
             func=from_json_to_gdf,
-            inputs=["db_name", f"params:{key}", "gdf_already_created", "paths_gdf"],
+            inputs=[f"params:{key}", "gdf_already_created", "paths_gdf"],
             outputs="trigger",
             name="from_json_to_gdf"
         ),
@@ -45,11 +45,5 @@ def create_pipeline(**kwargs) -> Pipeline:
             child_pipelines.append(create_child_pipeline(key, value))
     
     convert_to_gdf_pipeline = sum(child_pipelines)
-    
-    # --------- chain retrieve_global_params and visualization pipelines ---------
-    mapping={}
-    for e in convert_to_gdf_pipeline.all_inputs():
-        if "db_name" in e:
-            mapping[e]="db_name"
             
-    return pipeline(pipe=convert_to_gdf_pipeline, inputs=mapping, tags=["convert_to_gdf"])
+    return pipeline(pipe=convert_to_gdf_pipeline, tags=["convert_to_gdf"])

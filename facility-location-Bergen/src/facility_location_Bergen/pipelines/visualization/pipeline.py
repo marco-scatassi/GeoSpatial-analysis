@@ -39,11 +39,5 @@ def create_pipeline(**kwargs) -> Pipeline:
             child_pipelines.append(create_child_pipeline(key, value))
     
     visualization_pipeline = sum(child_pipelines)
-    
-    # --------- chain retrieve_global_params and visualization pipelines ---------
-    mapping={}
-    for e in visualization_pipeline.all_inputs():
-        if "db_name" in e:
-            mapping[e]="db_name"
             
-    return pipeline(pipe=visualization_pipeline, inputs=mapping, tags=["visualization"])
+    return pipeline(pipe=visualization_pipeline, tags=["visualization"])

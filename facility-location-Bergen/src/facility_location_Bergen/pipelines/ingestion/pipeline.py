@@ -14,32 +14,32 @@ def create_child_pipeline(key, value) -> list:
     return pipeline([
         node(
             func=compose_url_to_raw_data,
-            inputs=[f"params:{key}", "raw_data_root_dir"],
+            inputs=[f"params:{key}"],
             outputs="urls",
             name="compose_url_to_raw_data"
         ),
         node(
             func=insert_raw_data,
-            inputs=["urls", "db_name", f"params:{key}"],
+            inputs=["urls", f"params:{key}"],
             outputs=None,
             name="insert_raw_data"
         ),
         node(
             func=process_raw_data,
-            inputs=["urls", "db_name", f"params:{key}"],
+            inputs=["urls", f"params:{key}"],
             outputs="processed_data",
             name="process_raw_data"
         ),
         node(
             func=insert_processed_data,
-            inputs=["processed_data", "db_name",f"params:{key}"],
+            inputs=["processed_data",f"params:{key}"],
             outputs="trigger",
             name="insert_documents_in_the_collections"
         ),
         node(
             func=update_data_catalog_trigger,
             inputs=["trigger", f"params:{key}"],
-            outputs=f"finished_{value}",
+            outputs=f"finished_ingestion_{value}",
             name="update_data_catalog_trigger"
         )
     ],
@@ -58,13 +58,4 @@ def create_pipeline(**kwargs) -> Pipeline:
     
     ingestion_pipeline = sum(child_pipelines)
     
-    # --------- chain retrieve_global_params and ingestion pipelines ---------
-    mapping={}
-    for e in ingestion_pipeline.all_inputs():
-        if "db_name" in e:
-            mapping[e]="db_name"
-                
-        if "raw_data_root_dir" in e:
-            mapping[e]="raw_data_root_dir"  
-            
-    return pipeline(pipe=ingestion_pipeline, inputs=mapping, tags=["ingestion"])
+    return pipeline(pipe=ingestion_pipeline, tags=["ingestion"])

@@ -1,28 +1,28 @@
 
-cleaning.20_04_2023.trigger_20_04_2023:
+cleaning.20_04_2023.trigger_cleaning_20_04_2023:
     type: pickle.PickleDataSet
-    filepath: data/02_intermediate/cleaning_20_04_2023_trigger_20_04_2023.pkl
-cleaning.21_04_2023.trigger_21_04_2023:
+    filepath: data/02_intermediate/cleaning_20_04_2023_trigger_cleaning_20_04_2023.pkl
+cleaning.21_04_2023.trigger_cleaning_21_04_2023:
     type: pickle.PickleDataSet
-    filepath: data/02_intermediate/cleaning_21_04_2023_trigger_21_04_2023.pkl
-cleaning.22_04_2023.trigger_22_04_2023:
+    filepath: data/02_intermediate/cleaning_21_04_2023_trigger_cleaning_21_04_2023.pkl
+cleaning.22_04_2023.trigger_cleaning_22_04_2023:
     type: pickle.PickleDataSet
-    filepath: data/02_intermediate/cleaning_22_04_2023_trigger_22_04_2023.pkl
-cleaning.23_04_2023.trigger_23_04_2023:
+    filepath: data/02_intermediate/cleaning_22_04_2023_trigger_cleaning_22_04_2023.pkl
+cleaning.23_04_2023.trigger_cleaning_23_04_2023:
     type: pickle.PickleDataSet
-    filepath: data/02_intermediate/cleaning_23_04_2023_trigger_23_04_2023.pkl
+    filepath: data/02_intermediate/cleaning_23_04_2023_trigger_cleaning_23_04_2023.pkl
 is_done_cleaning_20_04_2023:
     type: pickle.PickleDataSet
     filepath: data/02_intermediate/is_done_cleaning_20_04_2023.pkl
-cleaning.24_04_2023.trigger_24_04_2023:
+cleaning.24_04_2023.trigger_cleaning_24_04_2023:
     type: pickle.PickleDataSet
-    filepath: data/02_intermediate/cleaning_24_04_2023_trigger_24_04_2023.pkl
-cleaning.25_04_2023.trigger_25_04_2023:
+    filepath: data/02_intermediate/cleaning_24_04_2023_trigger_cleaning_24_04_2023.pkl
+cleaning.25_04_2023.trigger_cleaning_25_04_2023:
     type: pickle.PickleDataSet
-    filepath: data/02_intermediate/cleaning_25_04_2023_trigger_25_04_2023.pkl
-cleaning.26_04_2023.trigger_26_04_2023:
+    filepath: data/02_intermediate/cleaning_25_04_2023_trigger_cleaning_25_04_2023.pkl
+cleaning.26_04_2023.trigger_cleaning_26_04_2023:
     type: pickle.PickleDataSet
-    filepath: data/02_intermediate/cleaning_26_04_2023_trigger_26_04_2023.pkl
+    filepath: data/02_intermediate/cleaning_26_04_2023_trigger_cleaning_26_04_2023.pkl
 is_done_cleaning_21_04_2023:
     type: pickle.PickleDataSet
     filepath: data/02_intermediate/is_done_cleaning_21_04_2023.pkl
@@ -41,24 +41,24 @@ is_done_cleaning_25_04_2023:
 is_done_cleaning_26_04_2023:
     type: pickle.PickleDataSet
     filepath: data/02_intermediate/is_done_cleaning_26_04_2023.pkl
-cleaning.27_04_2023.trigger_27_04_2023:
+cleaning.27_04_2023.trigger_cleaning_27_04_2023:
     type: pickle.PickleDataSet
-    filepath: data/02_intermediate/cleaning_27_04_2023_trigger_27_04_2023.pkl
-cleaning.28_04_2023.trigger_28_04_2023:
+    filepath: data/02_intermediate/cleaning_27_04_2023_trigger_cleaning_27_04_2023.pkl
+cleaning.28_04_2023.trigger_cleaning_28_04_2023:
     type: pickle.PickleDataSet
-    filepath: data/02_intermediate/cleaning_28_04_2023_trigger_28_04_2023.pkl
+    filepath: data/02_intermediate/cleaning_28_04_2023_trigger_cleaning_28_04_2023.pkl
 is_done_cleaning_27_04_2023:
     type: pickle.PickleDataSet
     filepath: data/02_intermediate/is_done_cleaning_27_04_2023.pkl
 is_done_cleaning_28_04_2023:
     type: pickle.PickleDataSet
     filepath: data/02_intermediate/is_done_cleaning_28_04_2023.pkl
-cleaning.29_04_2023.trigger_29_04_2023:
+cleaning.29_04_2023.trigger_cleaning_29_04_2023:
     type: pickle.PickleDataSet
-    filepath: data/02_intermediate/cleaning_29_04_2023_trigger_29_04_2023.pkl
-cleaning.30_04_2023.trigger_30_04_2023:
+    filepath: data/02_intermediate/cleaning_29_04_2023_trigger_cleaning_29_04_2023.pkl
+cleaning.30_04_2023.trigger_cleaning_30_04_2023:
     type: pickle.PickleDataSet
-    filepath: data/02_intermediate/cleaning_30_04_2023_trigger_30_04_2023.pkl
+    filepath: data/02_intermediate/cleaning_30_04_2023_trigger_cleaning_30_04_2023.pkl
 is_done_cleaning_29_04_2023:
     type: pickle.PickleDataSet
     filepath: data/02_intermediate/is_done_cleaning_29_04_2023.pkl

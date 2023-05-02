@@ -8,11 +8,9 @@ import geopandas as gpd
 from datetime import datetime
 from mongo_db import retrieve_database_and_collections
 from kedro.extras.datasets.pickle import PickleDataSet
-from retrieve_global_parameters import retrieve_catalog_path
 from convert_geometry import toMultiLineString, toExtremePoints
 from log import print_INFO_message_timestamp, print_INFO_message
-from retrieve_file_path import retrieve_gdf_path, retrieve_gif_saving_path
-
+from retrieve_global_parameters import retrieve_catalog_path, retrieve_gdf_path, retrieve_db_name
 
 # -------------------------------------------- verify_gdf_already_created --------------------------------------------
 def verify_gdf_already_created(date: dict):
@@ -26,8 +24,9 @@ def verify_gdf_already_created(date: dict):
 
 
 # -------------------------------- retrieve_data_from_mongoDB  and convert them to a geopandas df --------------------------------
-def from_json_to_gdf(db_name:str, date: dict, already_created: bool, saving_path: str):
+def from_json_to_gdf(date: dict, already_created: bool, saving_path: str):
     finished = already_created
+    db_name = retrieve_db_name()
     if not already_created:
         # set the first and last date of the date
         first_date = datetime.strptime(f"{date['day']}T07:30:00.000+02:00", "%d_%m_%YT%H:%M:%S.%f%z")

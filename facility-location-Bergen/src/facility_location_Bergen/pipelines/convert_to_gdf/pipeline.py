@@ -13,19 +13,25 @@ from kedro.pipeline import Pipeline, node, pipeline
 def create_child_pipeline(key, value) -> list:
     return pipeline([
         node(
-            func=create_and_save_animation,
-            inputs=[f"params:{key}", "trigger_gdf"],
-            outputs="trigger_gif",
-            name="create_animation"
+            func=verify_gdf_already_created,
+            inputs=[f"params:{key}"],
+            outputs="gdf_already_created",
+            name="verify_gdf_already_created"
         ),
         node(
-            func=update_data_catalog_gif,
-            inputs=[f"params:{key}", "trigger_gif"],
-            outputs=None,
-            name="update_data_catalog_gif"
+            func=from_json_to_gdf,
+            inputs=["db_name", f"params:{key}", "gdf_already_created", "paths_gdf"],
+            outputs="trigger",
+            name="from_json_to_gdf"
+        ),
+        node(
+            func=update_data_catalog_gdf,
+            inputs=[f"params:{key}", "trigger", "paths_gdf"],
+            outputs="trigger_gdf",
+            name="update_data_catalog_gdf"
         )
     ],
-    namespace=f"visualization.{value}",
+    namespace=f"convert_to_gdf.{value}",
     parameters={key:key})
 
 
@@ -35,15 +41,15 @@ def create_pipeline(**kwargs) -> Pipeline:
     child_pipelines = []
     
     for key, value in conf_params.items():
-        if "visualization.date" in key and conf_params[key] is not None :
+        if "convert_to_gdf.date" in key and conf_params[key] is not None :
             child_pipelines.append(create_child_pipeline(key, value))
     
-    visualization_pipeline = sum(child_pipelines)
+    convert_to_gdf_pipeline = sum(child_pipelines)
     
     # --------- chain retrieve_global_params and visualization pipelines ---------
     mapping={}
-    for e in visualization_pipeline.all_inputs():
+    for e in convert_to_gdf_pipeline.all_inputs():
         if "db_name" in e:
             mapping[e]="db_name"
             
-    return pipeline(pipe=visualization_pipeline, inputs=mapping, tags=["visualization"])
+    return pipeline(pipe=convert_to_gdf_pipeline, inputs=mapping, tags=["convert_to_gdf"])

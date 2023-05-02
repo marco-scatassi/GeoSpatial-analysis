@@ -28,5 +28,7 @@ def register_pipelines() -> Dict[str, Pipeline]:
             pipelines["__default__"] += pipeline(pipe=pipe, outputs=mapping)
         else:
             pipelines["__default__"] += pipe
-    
+
+        # --------- chain convert_to_gdf and visualization pipelines ---------
+        
     return pipelines

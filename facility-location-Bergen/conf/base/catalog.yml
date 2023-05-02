@@ -77,3 +77,15 @@ visualization.gif20_04_2023midday:
 visualization.gif20_04_2023afternoon:
     type: matplotlib.MatplotlibWriter
     filepath: data/08_reporting/AnimatedPlot20_04_2023afternoon.gif
+gdf21_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/21_04_2023.geojson
+visualization.gif21_04_2023afternoon:
+    type: matplotlib.MatplotlibWriter
+    filepath: data/08_reporting/AnimatedPlot21_04_2023afternoon.gif
+visualization.gif21_04_2023midday:
+    type: matplotlib.MatplotlibWriter
+    filepath: data/08_reporting/AnimatedPlot21_04_2023midday.gif
+visualization.gif21_04_2023morning:
+    type: matplotlib.MatplotlibWriter
+    filepath: data/08_reporting/AnimatedPlot21_04_2023morning.gif

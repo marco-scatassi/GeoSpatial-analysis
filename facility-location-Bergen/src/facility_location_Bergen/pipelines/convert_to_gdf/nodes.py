@@ -60,7 +60,7 @@ def from_json_to_gdf(date: dict, already_created: bool):
 
 # ---------------------------------------------- update_data_catalog --------------------------------------- 
 def update_data_catalog_gdf(date, trigger):
-    finished = False
+    gdf = None
     if trigger:
         catalog_path = retrieve_catalog_path()
         gdf_path = retrieve_gdf_path(date)
@@ -70,7 +70,7 @@ def update_data_catalog_gdf(date, trigger):
             result = re.search(fr"gdf{date['day']}:", contents)
             if result is None:
                 contents = "\n".join([contents, 
-                                  "\n    ".join([f"gdf{date['day']}:",
+                                  "\n    ".join([f"convert_to_gdf.{date['day']}.gdf.{date['day']}:",
                                                  f"type: pickle.PickleDataSet",
                                                  f"filepath: {gdf_path}"])])
                 
@@ -78,6 +78,6 @@ def update_data_catalog_gdf(date, trigger):
             f.truncate()
             f.write(contents)
         
-        finished = True
+        gdf = PickleDataSet(filepath=gdf_path)
         
-    return finished 
+    return gdf

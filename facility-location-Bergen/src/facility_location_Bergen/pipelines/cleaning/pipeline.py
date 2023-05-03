@@ -25,14 +25,8 @@ def create_child_pipeline(key, value) -> list:
             name="filter_data_geographically"
             ),
         node(
-            func=keep_common_road_segments_across_time,
-            inputs=[f"params:{key}", "trigger_filter"],
-            outputs="trigger_keep",
-            name="keep_common_road_segments_across_time"
-            ),
-        node(
             func=remove_unnecessary_fields,
-            inputs=[f"params:{key}", "trigger_keep"],
+            inputs=[f"params:{key}", "trigger_filter"],
             outputs="trigger_remove",
             name="remove_unnecessary_fields"
             ),

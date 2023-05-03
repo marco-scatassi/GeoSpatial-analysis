@@ -65,7 +65,7 @@ is_done_cleaning_29_04_2023:
 is_done_cleaning_30_04_2023:
     type: pickle.PickleDataSet
     filepath: data/02_intermediate/is_done_cleaning_30_04_2023.pkl
-gdf20_04_2023:
+convert_to_gdf.20_04_2023.gdf.20_04_2023:
     type: pickle.PickleDataSet
     filepath: data/03_primary/20_04_2023.geojson
 visualization.gif20_04_2023morning:
@@ -77,7 +77,7 @@ visualization.gif20_04_2023midday:
 visualization.gif20_04_2023afternoon:
     type: matplotlib.MatplotlibWriter
     filepath: data/08_reporting/AnimatedPlot20_04_2023afternoon.gif
-gdf21_04_2023:
+convert_to_gdf.21_04_2023.gdf.21_04_2023:
     type: pickle.PickleDataSet
     filepath: data/03_primary/21_04_2023.geojson
 visualization.gif21_04_2023afternoon:
@@ -89,30 +89,30 @@ visualization.gif21_04_2023midday:
 visualization.gif21_04_2023morning:
     type: matplotlib.MatplotlibWriter
     filepath: data/08_reporting/AnimatedPlot21_04_2023morning.gif
-gdf22_04_2023:
+convert_to_gdf.22_04_2023.gdf.22_04_2023:
     type: pickle.PickleDataSet
     filepath: data/03_primary/22_04_2023.geojson
-gdf23_04_2023:
+convert_to_gdf.23_04_2023.gdf.23_04_2023:
     type: pickle.PickleDataSet
     filepath: data/03_primary/23_04_2023.geojson
-gdf24_04_2023:
+convert_to_gdf.24_04_2023.gdf.24_04_2023:
     type: pickle.PickleDataSet
     filepath: data/03_primary/24_04_2023.geojson
-gdf25_04_2023:
+convert_to_gdf.25_04_2023.gdf.25_04_2023:
     type: pickle.PickleDataSet
     filepath: data/03_primary/25_04_2023.geojson
-gdf26_04_2023:
+convert_to_gdf.26_04_2023.gdf.26_04_2023:
     type: pickle.PickleDataSet
     filepath: data/03_primary/26_04_2023.geojson
-gdf27_04_2023:
+convert_to_gdf.27_04_2023.gdf.27_04_2023:
     type: pickle.PickleDataSet
     filepath: data/03_primary/27_04_2023.geojson
-gdf28_04_2023:
+convert_to_gdf.28_04_2023.gdf.28_04_2023:
     type: pickle.PickleDataSet
     filepath: data/03_primary/28_04_2023.geojson
-gdf29_04_2023:
+convert_to_gdf.29_04_2023.gdf.29_04_2023:
     type: pickle.PickleDataSet
     filepath: data/03_primary/29_04_2023.geojson
-gdf30_04_2023:
+convert_to_gdf.30_04_2023.gdf.30_04_2023:
     type: pickle.PickleDataSet
     filepath: data/03_primary/30_04_2023.geojson

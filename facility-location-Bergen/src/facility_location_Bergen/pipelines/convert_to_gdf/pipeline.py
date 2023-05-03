@@ -27,7 +27,7 @@ def create_child_pipeline(key, value) -> list:
         node(
             func=update_data_catalog_gdf,
             inputs=[f"params:{key}", "trigger"],
-            outputs="finished_gdf",
+            outputs="gdf",
             name="update_data_catalog_gdf"
         )
     ],
@@ -45,5 +45,5 @@ def create_pipeline(**kwargs) -> Pipeline:
             child_pipelines.append(create_child_pipeline(key, value))
     
     convert_to_gdf_pipeline = sum(child_pipelines)
-            
+    
     return pipeline(pipe=convert_to_gdf_pipeline, tags=["convert_to_gdf"])

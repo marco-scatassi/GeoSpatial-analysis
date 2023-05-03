@@ -54,7 +54,7 @@ def get_dates(date: str):
 
     
 # process geodataframe to plot data
-def process_gdf_to_plot_data(date: dict, file_path: str):
+def process_gdf_to_plot_data(date: dict, gdf: gpd.GeoDataFrame):
     print_INFO_message_timestamp(f"Processing data for {date['day']} {date['time']}")
     
     t = time()
@@ -64,8 +64,6 @@ def process_gdf_to_plot_data(date: dict, file_path: str):
     df_dict = {}
     first_date, last_date = get_dates(date)
     # load geodataframe
-    gdf_ = PickleDataSet(filepath=file_path) 
-    gdf = gdf_.load()
     gdf_sample = gdf.where(
         (gdf["api_call_time"]>=first_date) & (gdf["api_call_time"]<=last_date)
         ).dropna(how="all")
@@ -156,27 +154,25 @@ def animate(i, ax, df_dict2):
         ax.set_title(f"Traffic across time in Bergen: {list(df_dict2.keys())[i].astimezone(tz).strftime('%Y-%m-%d %H:%M')}")
         print_INFO_message(f"Time to plot the {i+1}th of {len(df_dict2.keys())} dates: {time()-ts:.2f} seconds")
     
-def create_and_save_animation(date: dict, trigger: bool):
+def create_and_save_animation(date, gdf):
     finished = False
-    if trigger or trigger is None:
-        gdf_path = retrieve_gdf_path(date)
-        if os.path.exists(gdf_path):
-            df_dict2 = process_gdf_to_plot_data(date, gdf_path)
-            saving_path = retrieve_gif_saving_path(date)
-            fig, ax = set_figure_background()   
+    if gdf is not None:
+        df_dict2 = process_gdf_to_plot_data(date, gdf)
+        saving_path = retrieve_gif_saving_path(date)
+        fig, ax = set_figure_background()   
             
-            ani = FuncAnimation(fig=fig, 
+        ani = FuncAnimation(fig=fig, 
                             func=partial(animate, ax=ax, df_dict2=df_dict2),
                             frames=[100]+list(range(len(df_dict2.keys()))), 
                             interval=1000, 
                             repeat_delay=False,
                             cache_frame_data=False)
             
-            ani.save(saving_path, dpi=200)
-            finished = True
+        ani.save(saving_path, dpi=200)
+        finished = True
             
-        else:
-            raise FileNotFoundError(f"File {saving_path} does not exist")
+    else:
+        raise FileNotFoundError(f"{gdf} does not exist")
         
     return finished
 

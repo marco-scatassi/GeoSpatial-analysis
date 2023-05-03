@@ -14,7 +14,7 @@ def create_child_pipeline(key, value) -> list:
     return pipeline([
         node(
             func=create_and_save_animation,
-            inputs=[f"params:{key}", "trigger_gdf"],
+            inputs=[f"params:{key}", f"gdf.{value['day']}"],
             outputs="trigger_gif",
             name="create_animation"
         ),
@@ -43,11 +43,11 @@ def create_pipeline(**kwargs) -> Pipeline:
     # ------------- chain convert_to_gdf and cleaning pipelines ---------------
     mapping = {}
     for e in visualization_pipeline.all_inputs():
-        if "morning.trigger_gdf" in e:
-            mapping[e] = e.replace("morning.trigger_gdf", "finished_gdf").replace("visualization", "convert_to_gdf") 
-        if "midday.trigger_gdf" in e:
-            mapping[e] = e.replace("midday.trigger_gdf", "finished_gdf").replace("visualization", "convert_to_gdf")
-        if "afternoon.trigger_gdf" in e:
-            mapping[e] = e.replace("afternoon.trigger_gdf", "finished_gdf").replace("visualization", "convert_to_gdf")
+        if "morning.gdf" in e:
+            mapping[e] = e.replace("morning.gdf", "gdf").replace("visualization", "convert_to_gdf") 
+        if "midday.gdf" in e:
+            mapping[e] = e.replace("midday.gdf", "gdf").replace("visualization", "convert_to_gdf")
+        if "afternoon.gdf" in e:
+            mapping[e] = e.replace("afternoon.gdf", "gdf").replace("visualization", "convert_to_gdf")
             
     return pipeline(pipe=visualization_pipeline, inputs=mapping, tags=["visualization"])

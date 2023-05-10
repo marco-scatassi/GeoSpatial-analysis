@@ -131,3 +131,5 @@ def update_data_catalog_trigger(trigger, day):
         bool_data.save(finished)
         
     return finished
+
+

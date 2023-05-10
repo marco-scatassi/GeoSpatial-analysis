@@ -32,9 +32,21 @@ def retrieve_raw_data_root_dir():
     conf_params = retrieve_global_parameters()
     return conf_params["raw_data_root_dir"]
 
-def retrieve_gdf_path(date: dict):
+def retrieve_gdf_path(date: dict, processed=False):
+    if type(date) == str:
+        dt = date
+    else:
+        dt = date['day']
+        
     # define saving paths
-    saving_path = f"data/03_primary/{date['day']}.geojson"
+    if processed:
+        saving_path = f"data/03_primary/{dt}_processed.geojson"
+    else:
+        saving_path = f"data/03_primary/{dt}.geojson"
+    return saving_path
+
+def retrieve_gdf_average_path(time):
+    saving_path = f"data/03_primary/average_{time}.geojson"
     return saving_path
 
 def retrieve_gif_saving_path(date: dict):

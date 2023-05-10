@@ -90,7 +90,8 @@ def geometry_processing(input_data: list):
         # create the geometry field (in order to comply the geojson format)
         geo_processed_data[-1]["geometry"] = GeometryCollection(
             [LineString([(e['lng'],e['lat']) for e in i['points']])for i in raw_data_links])
-            
+        # create the geometry_length field
+        geo_processed_data[-1]["geometry_length"] = [i['length'] for i in raw_data_links]
         # bring embedded fields to the top level
         for k in geo_processed_data[-1]['location']:
             geo_processed_data[-1][k] = geo_processed_data[-1]['location'][k]

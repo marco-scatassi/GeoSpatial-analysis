@@ -25,14 +25,8 @@ def create_child_pipeline(key, value) -> list:
             name="filter_data_geographically"
             ),
         node(
-            func=remove_unnecessary_fields,
-            inputs=[f"params:{key}", "trigger_filter"],
-            outputs="trigger_remove",
-            name="remove_unnecessary_fields"
-            ),
-        node(
             func=update_data_catalog_trigger,
-            inputs=["trigger_remove", f"params:{key}"],
+            inputs=["trigger_filter", f"params:{key}"],
             outputs=None,
             name="update_data_catalog_trigger"
         )

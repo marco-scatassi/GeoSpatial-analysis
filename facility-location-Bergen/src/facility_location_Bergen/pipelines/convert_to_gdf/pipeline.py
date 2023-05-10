@@ -21,13 +21,25 @@ def create_child_pipeline(key, value) -> list:
         node(
             func=from_json_to_gdf,
             inputs=[f"params:{key}", "gdf_already_created"],
-            outputs="trigger",
+            outputs="trigger1",
             name="from_json_to_gdf"
         ),
         node(
+            func=verify_process_gdf_already_done,
+            inputs=[f"params:{key}", "trigger1"],
+            outputs="process_gdf_already_done",
+            name="verify_process_gdf_already_done"
+        ),
+        node(
+            func=process_gdf,
+            inputs=[f"params:{key}", "process_gdf_already_done"],
+            outputs="trigger2",
+            name="process_gdf"
+        ),
+        node(
             func=update_data_catalog_gdf,
-            inputs=[f"params:{key}", "trigger"],
-            outputs="gdf",
+            inputs=[f"params:{key}", "trigger2"],
+            outputs="finished",
             name="update_data_catalog_gdf"
         )
     ],
@@ -41,7 +53,7 @@ def create_pipeline(**kwargs) -> Pipeline:
     child_pipelines = []
     
     for key, value in conf_params.items():
-        if "convert_to_gdf.date" in key and conf_params[key] is not None :
+        if "convert_to_gdf.date" in key and conf_params[key]["day"] is not None :
             child_pipelines.append(create_child_pipeline(key, value))
     
     convert_to_gdf_pipeline = sum(child_pipelines)

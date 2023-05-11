@@ -49,6 +49,10 @@ def retrieve_gdf_average_path(time):
     saving_path = f"data/03_primary/average_{time}.geojson"
     return saving_path
 
+def retrieve_average_graph_path(time):
+    saving_path = f"data/03_primary/average_graph_{time}.pkl"
+    return saving_path
+
 def retrieve_gif_saving_path(date: dict):
     # define saving paths
     saving_path = f"data/08_reporting/AnimatedPlot{date['day']}{date['time']}.gif"

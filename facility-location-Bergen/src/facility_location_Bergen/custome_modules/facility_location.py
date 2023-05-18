@@ -1,15 +1,16 @@
-import geopandas as gpd
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import folium 
-import requests
+import sys
+sys.path.append(r'C:\Users\Marco\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\src\facility_location_Bergen\custome_modules')
+
+import dill
 import json
 import time
-import dill
-import os
-import pyomo.environ as pyo
+import requests
+import numpy as np
+import geopandas as gpd
 from pyomo.environ import *
+import pyomo.environ as pyo
+import matplotlib.pyplot as plt
+from log import print_INFO_message_timestamp, print_INFO_message
 
 
 ## Class to create an adjacency matrix from a list of coordinates
@@ -137,12 +138,21 @@ class FacilityLocation:
     solution_value = None
     algorithm = None
     solver_status = None
+    model = None
     instance = None
     result = None
     computation_time = None
     
-    def __init__(self, coordinates: gpd.geoseries.GeoSeries, n_of_locations_to_choose: int, adjancency_matrix: AdjacencyMatrix):
+    def __init__(self, coordinates: gpd.geoseries.GeoSeries, 
+                 n_of_locations_to_choose: int, 
+                 adjancency_matrix: AdjacencyMatrix,
+                 candidate_coordinates: gpd.geoseries.GeoSeries = None):
+        
         self.coordinates = coordinates
+        if candidate_coordinates is None:
+            self.candidate_coordinates = coordinates
+        else:
+            self.candidate_coordinates = candidate_coordinates
         self.n_of_locations_to_choose = n_of_locations_to_choose
         self.adjacency_matrix = adjancency_matrix.adjacency_matrix
         self.adjacency_matrix_weight = self.__get_weight(adjancency_matrix)
@@ -223,7 +233,7 @@ class FacilityLocation:
         return sum([model.x[j] for j in model.J])  == pyo.value(model.p)
 
     def __maximalDistance(self, model, i):
-        return sum(model.d[i, j] * model.y[i, j] for j in model.J) <= model.L
+        return sum(model.d[j, i] * model.y[i, j] for j in model.J) <= model.L
 
         
     def __servedByOpenFacility(self, model, i, j):
@@ -238,15 +248,15 @@ class FacilityLocation:
         model = pyo.AbstractModel()
 
         #---------------------------index sets-------------------------------
-        model.I = pyo.RangeSet(0, len(self.coordinates)-1)
-        model.J = pyo.RangeSet(0, len(self.coordinates)-1)
+        model.I = pyo.Set(initialize = list(self.coordinates.index))
+        model.J = pyo.Set(initialize = list(self.candidate_coordinates.index))
 
         #---------------------------parameters-------------------------------
         # define the number of locations to be opened (p)
         model.p = pyo.Param(within = PositiveIntegers)
 
         # define the distance matrix (d)
-        model.d = pyo.Param(model.I, model.J, within = NonNegativeReals)
+        model.d = pyo.Param(model.J, model.I, within = NonNegativeReals)
 
         #---------------------------variables--------------------------------
         # define the binary variables for the location decision (x)
@@ -275,21 +285,30 @@ class FacilityLocation:
         #-----------------------objective function---------------------------
         model.maximalDistanceObj = Objective(rule = self.__maximalDistanceObj, sense = minimize)
         
+        self.model = model
+        
         return model
     
     def __solve_exact(self):
+        print_INFO_message("Defining the abstract model...")
         model = self.__DefineAbstractModel()
-        distance_data = {(i, j): self.adjacency_matrix[i][j] for i in range(self.n_of_demand_points) for j in range(self.n_of_demand_points)}
+        
+        print_INFO_message_timestamp("Initializing data...")
+        distance_data = {(j, i): self.adjacency_matrix[j][i] for j in self.candidate_coordinates.index for i in self.coordinates.index}
         data = {None: {'p': {None: self.n_of_locations_to_choose}, 
                        'd': distance_data}}
+        
+        print_INFO_message("Creating the instance...")
         self.instance = model.create_instance(data)
+        
+        print_INFO_message_timestamp("Solving the model...")
         opt = SolverFactory('cplex')
 
         self.result = opt.solve(self.instance)
         
         self.solution_value = self.instance.L.value
-        self.locations_index = [i for i in range(self.n_of_demand_points) if self.instance.x[i].value == 1]
-        self.locations_coordinates = [self.coordinates.iloc[i] for i in self.locations_index]
+        self.locations_index = [j for j in self.candidate_coordinates.index if self.instance.x[j].value == 1]
+        self.locations_coordinates = [self.candidate_coordinates.loc[j] for j in self.locations_index]
         
         # Update the status of the solver
         if self.result.solver.status == pyo.SolverStatus.ok and self.result.solver.termination_condition == pyo.TerminationCondition.optimal:
@@ -305,13 +324,16 @@ class FacilityLocation:
         t1 = time.time()
         
         if mode == "exact":
+            print_INFO_message_timestamp("Solving the problem exactly...")
             self.__solve_exact()
         
         elif mode == "approx":
             if algorithm == "gon":
+                print_INFO_message_timestamp("Solving the problem approximately using the GON algorithm...")
                 self.__solve_gon()
                 
             elif algorithm == "gon_plus":
+                print_INFO_message_timestamp("Solving the problem approximately using the GON+ algorithm...")
                 self.__solve_gon_plus(n_trial)
 
         else:
@@ -358,9 +380,9 @@ class FacilityLocation:
 class FacilityLocationReport:
     
     # ---------------------------------------------------------------- define the constructor ---------------------------------------------------------------
-    def __init__(self, facility_locations: list[FacilityLocation]):
-        self.facility_locations = facility_locations
-        
+    def __init__(self, facility_locations: dict[FacilityLocation]):
+        self.facility_locations = list(facility_locations.values())
+        self.keys = list(facility_locations.keys())
         
     # ---------------------------------------------------------------- define the methods -------------------------------------------------------------------
     # function to jitter the data to avoid overlapping of the points
@@ -399,9 +421,8 @@ class FacilityLocationReport:
         
         n = len(weight_names_and_index)
         m = len(algorithm_names_and_index)
-          
+        
         fig, axs = plt.subplots(nrows=n, ncols=m, sharex=True, sharey=True, figsize=(15,15))
-
         
         for i, algorithm_name in enumerate(algorithm_names_and_index.keys()):
             for j, weight_name in enumerate(weight_names_and_index.keys()):
@@ -428,23 +449,60 @@ class FacilityLocationReport:
         
     
     def graphical_adjacency_marix_solutions_comparison(self):
-        colors = ['red', 'green', 'orange', 'purple', 'pink', 'brown', 'grey', 'olive', 'cyan']
+        colors = ['red', 'green', 'orange', 'pink', 'brown', 'grey', 'olive', 'cyan']
         
         algorithm_names_and_index = self.__algorithm_from_list_to_dict()
         n = len(algorithm_names_and_index.keys())
         
-        fig, axs = plt.subplots(nrows=1, ncols=n, sharey=True, figsize=(15,5))
+        if n > 1:
+            fig, axs = plt.subplots(nrows=1, ncols=n, sharey=True, figsize=(15,5))
+        else:
+            fig, axs = plt.subplots(nrows=1, ncols=1, sharey=True, figsize=(5,5))
+            axs = [axs]
         
         for i, algorithm_name in enumerate(algorithm_names_and_index.keys()):
-            axs[i].scatter([x for x in np.array(self.facility_locations[i].coordinates)[:,0]], [x for x in np.array(self.facility_locations[i].coordinates)[:,1]], c = 'blue')
+            axs[i].scatter([c.x for c in self.facility_locations[i].coordinates.geometry], 
+                           [c.y for c in self.facility_locations[i].coordinates.geometry], 
+                           c = 'blue',
+                           alpha=0.5)
             axs[i].set_title(algorithm_name)
             axs[i].set_xlabel("Longitude")
             axs[i].set_ylabel("Latitude")
-            
-            
+                
+                
             for k, j in enumerate(algorithm_names_and_index[algorithm_name]):
-                x = self.__rand_jitter([x for x in np.array(self.facility_locations[j].locations_coordinates)[:,0]])
-                y = self.__rand_jitter([x for x in np.array(self.facility_locations[j].locations_coordinates)[:,1]])
+                x = self.__rand_jitter([c["geometry"].coords.xy[0][0] for c in self.facility_locations[j].locations_coordinates])
+                y = self.__rand_jitter([c["geometry"].coords.xy[1][0] for c in self.facility_locations[j].locations_coordinates])
                 axs[i].scatter(x, y, c = colors[k], label = self.facility_locations[j].adjacency_matrix_weight)
+                
+            axs[i].legend()
             
+    
+    def graphical_keys_solutions_comparison(self):
+        colors = ['red', 'green', 'orange', 'pink', 'brown', 'grey', 'olive', 'cyan']
+        algorithm_names_and_index = self.__algorithm_from_list_to_dict()
+        n = len(algorithm_names_and_index.keys())
+        
+        if n > 1:
+            fig, axs = plt.subplots(nrows=1, ncols=n, sharey=True, figsize=(15,5))
+        else:
+            fig, axs = plt.subplots(nrows=1, ncols=1, sharey=True, figsize=(8,10))
+            axs = [axs]
+        
+        
+        for i, algorithm_name in enumerate(algorithm_names_and_index.keys()):
+            axs[i].scatter([c.x for c in self.facility_locations[i].coordinates.geometry], 
+                           [c.y for c in self.facility_locations[i].coordinates.geometry], 
+                           c = 'blue',
+                           alpha=0.5)
+            axs[i].set_title(algorithm_name)
+            axs[i].set_xlabel("Longitude")
+            axs[i].set_ylabel("Latitude")
+                
+                
+            for k, j in enumerate(algorithm_names_and_index[algorithm_name]):
+                x = self.__rand_jitter([c["geometry"].coords.xy[0][0] for c in self.facility_locations[j].locations_coordinates])
+                y = self.__rand_jitter([c["geometry"].coords.xy[1][0] for c in self.facility_locations[j].locations_coordinates])
+                axs[i].scatter(x, y, c = colors[k], label = self.keys[j])
+                
             axs[i].legend()

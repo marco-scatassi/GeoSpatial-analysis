@@ -53,6 +53,17 @@ def retrieve_average_graph_path(time):
     saving_path = f"data/03_primary/average_graph_{time}.pkl"
     return saving_path
 
+def retrieve_adj_matrix_path(time, free_flow=False):
+    if free_flow:
+        saving_path = f"data/03_primary/adj_matrix_{time}_free_flow.pkl"
+    else:
+        saving_path = f"data/03_primary/adj_matrix_{time}.pkl"
+    return saving_path
+
+def retrieve_adj_mapping_path(time):
+    saving_path = f"data/03_primary/adj_mapping_{time}.pkl"
+    return saving_path
+
 def retrieve_gif_saving_path(date: dict):
     # define saving paths
     saving_path = f"data/08_reporting/AnimatedPlot{date['day']}{date['time']}.gif"

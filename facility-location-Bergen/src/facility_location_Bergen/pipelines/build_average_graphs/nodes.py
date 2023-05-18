@@ -13,12 +13,8 @@ import pandas as pd
 import pickle as pkl
 import datetime as dt
 import networkx as nx
-import cartopy.io.img_tiles as cimgt
-from shapely.geometry import MultiPoint
-from urllib.request import urlopen, Request
-from mongo_db import retrieve_database_and_collections
+from convert_geometry import toExtremePoints
 from kedro.extras.datasets.pickle import PickleDataSet
-from convert_geometry import toMultiLineString, toExtremePoints
 from log import print_INFO_message_timestamp, print_INFO_message
 from retrieve_global_parameters import retrieve_average_graph_path, retrieve_catalog_path, retrieve_gdf_average_path
 
@@ -50,6 +46,7 @@ def build_graph(gdf_average):
     for row in gdf_average.values:
         lines = pd.Series(row[mapping["geometry.multi_line"]])
         speed = row[mapping["currentFlow.speedUncapped"]]
+        free_flow_speed = row[mapping["currentFlow.freeFlow"]]
         lengths = row[mapping["geometry_length"]]
         description = row[mapping["description"]]
     
@@ -60,9 +57,9 @@ def build_graph(gdf_average):
             t1 = tuple([p1.coords.xy[0][0], p1.coords.xy[1][0]])
         # if the road is closed, set the weight to a very high number
             if speed == 0:
-                G.add_edge(t0, t1, weight=100000, speed=speed, description=description)
+                G.add_edge(t0, t1, weight=100000, speed=speed, free_flow_speed=free_flow_speed, description=description)
             else:
-                G.add_edge(t0, t1, weight=lengths[i]/speed, speed=speed, description=description)
+                G.add_edge(t0, t1, weight=lengths[i]/speed, weight2=lengths[i]/free_flow_speed, speed=speed, free_flow_speed=free_flow_speed, description=description)
     return G
 
 
@@ -165,7 +162,5 @@ def update_data_catalog(time, trigger):
             f.seek(0)
             f.truncate()
             f.write(contents)
-        
-        finished = True
-        
+
     return finished

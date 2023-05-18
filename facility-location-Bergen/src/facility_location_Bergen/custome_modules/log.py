@@ -9,3 +9,5 @@ def print_INFO_message_timestamp(message: str):
 # print INFO message
 def print_INFO_message(message: str):
     print(f"                    INFO     {message}")
+    
+    

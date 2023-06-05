@@ -8,6 +8,8 @@ sys.path.append(
 import os
 import yaml
 import time as ptime
+import pickle as pkl
+from PIL import Image
 import streamlit as st
 from pathlib import Path
 from kedro.runner import SequentialRunner
@@ -17,12 +19,22 @@ from kedro.framework.project import find_pipelines
 from kedro.framework.startup import bootstrap_project
 from log import print_INFO_message_timestamp, print_INFO_message
 from facility_location import FacilityLocation, FacilityLocationReport
+
 from retrieve_global_parameters import (
-    retrieve_solution_path,
+    retrieve_light_solution_path,
     retrieve_solution_vs_scenario_path,
 )
 
+from graphical_analysis import (
+    compute_rel_diff,
+    compute_min_distance_df,
+    objective_function_value_under_different_cases,
+    travel_times_distribution_under_different_cases,
+    average_travel_time_across_under_different_cases
+)
+
 st.set_page_config(layout = "wide")
+session_state = st.session_state
 
 metadata = bootstrap_project(Path.cwd())
 
@@ -156,25 +168,108 @@ if __name__ == '__main__':
             else:
                 st.write(f"Preprocessing for {time} solution data has already been done")
             
-            st.write("Preprocessing for all the scenarios has been completed!")
+        st.write("Preprocessing for all the scenarios has been completed!")
         
     st.markdown("---")
         
-    ############################################## GENERATE VISUALIZATION ##############################################
-    button3 = st.button("Generate visualization")
+    ############################################## LOAD DATA ##############################################
+    button3 = st.button("Load data for solution analysis")
     
     if button3:
-        fls_exact = {}
+        
+        if f"fls_exact_{facilities_number}" not in session_state:
+            fls_exact = {}
 
-        for time in TIMES:
-            print_INFO_message(f"Loading exact solution for {time}")
-            st.write(f"Loading exact solution for {time}")
-            path = retrieve_solution_path(facilities_number, time)
-            fls_exact[time] = FacilityLocation.load(path)
-            ptime.sleep(5)
+            for time in TIMES:
+                print_INFO_message_timestamp(f"Loading exact solution for {time}")
+                st.write(f"Loading exact solution for {time}")
+                path = retrieve_light_solution_path(facilities_number, time)
+                fls_exact[time] = FacilityLocation.load(path)
+                ptime.sleep(8)
+            
+            session_state[f"fls_exact_{facilities_number}"] = fls_exact
+            st.write("Data has been loaded")
         
-        report_exact = FacilityLocationReport(fls_exact)
-        fig = report_exact.graphical_keys_solutions_comparison()
-        temp_path = r"facility-location-Bergen\data\00_temp"
+        if f"dfs_{facilities_number}" not in session_state:
+            root = rf".\data\08_reporting\{facilities_number}_locations"
+            paths = [p for p in os.listdir(root) if ("solution_vs_scenario" in p) and ("worst" not in p)]
+            
+            dfs = {}
+
+            for path in paths:
+                with open(os.path.join(root, path), "rb") as f:
+                    key = tuple(path.removesuffix(".pkl").split("_")[-2:])
+                    if key[0] == "day":
+                        key = tuple(["all_day", key[1]])
+                        
+                    dfs[key] = pkl.load(f)
+            
+            session_state[f"dfs_{facilities_number}"] = dfs
+            
+        if f"dfs_worst_{facilities_number}" not in session_state:
+            root = rf".\data\08_reporting\{facilities_number}_locations"
+            paths_worst = [p for p in os.listdir(root) if ("solution_vs_scenario" in p) and ("worst" in p)]
+            
+            dfs_worst = {}
+
+            for path in paths_worst:
+                with open(os.path.join(root, path), "rb") as f:
+                    key = tuple(path.removesuffix(".pkl").split("_")[-3:-1])
+                    if key[0] == "day":
+                        key = tuple(["all_day", key[1]])
+                        
+                    dfs_worst[key] = pkl.load(f)
+            
+            session_state[f"dfs_worst_{facilities_number}"] = dfs_worst
+            
+        st.write("Data has been loaded")
+
+    st.markdown("---")
+    
+    ############################################## GENERATE VIZ ##############################################    
+    button4 = st.button("Generate vizualizations")
+    
+    if button4:
+        col1, col2, col3 = st.columns(3)
         
-        st.pyplot(fig)
+        dfs = session_state[f"dfs_{facilities_number}"]
+        dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
+        session_state[f"df_min_{facilities_number}"] = compute_min_distance_df(dfs, dfs_worst)
+        
+        with col2:
+            temp_path = rf".\data\00_temp\graphical_keys_solutions_comparison_{facilities_number}.png"
+            fls_exact = session_state[f"fls_exact_{facilities_number}"]
+            report_exact = FacilityLocationReport(fls_exact)
+            fig = report_exact.graphical_keys_solutions_comparison()
+            fig.savefig(temp_path)
+            fig_png = Image.open(temp_path)
+            st.image(fig_png, width=600, caption="Graphical comparison of the solutions")
+
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            fls_exact = session_state[f"fls_exact_{facilities_number}"]
+            dfs = session_state[f"dfs_{facilities_number}"]
+            dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
+            
+            rel_diffs = list(range(len(TIMES)-1))
+            rel_diffs_worst = list(range(len(TIMES)-1))
+            for i, time in enumerate(TIMES[1:]):
+                rel_diffs[i], rel_diffs_worst[i] = compute_rel_diff(fls_exact, dfs, dfs_worst, time)
+
+            fig = objective_function_value_under_different_cases(rel_diffs, rel_diffs_worst)
+            st.plotly_chart(fig, use_container_width=True)
+
+        with col2:
+            df_min = session_state[f"df_min_{facilities_number}"]
+            fig = average_travel_time_across_under_different_cases(df_min)
+            st.plotly_chart(fig, use_container_width=True)
+        
+        
+        
+        df_min = session_state[f"df_min_{facilities_number}"]
+            
+        fig = travel_times_distribution_under_different_cases(df_min)
+        st.plotly_chart(fig, use_container_width=True)
+        
+    st.markdown("---")

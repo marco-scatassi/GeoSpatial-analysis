@@ -100,7 +100,10 @@ def retrieve_worst_adj_mapping_path(time):
 def retrieve_solution_path(facilities_number, time):
     path = f"data/07_model_output/{facilities_number}_locations/deterministic_exact_solutions/exact_solution_{time}.pkl"  
     return path
-    
+
+def retrieve_light_solution_path(facilities_number, time):
+    path = f"data/07_model_output/{facilities_number}_locations/deterministic_exact_solutions/light_exact_solution_{time}.pkl"  
+    return path
     
 def retrieve_solution_vs_scenario_path(
     facilities_number, time_solution, time_scenario, weight, worst=False):

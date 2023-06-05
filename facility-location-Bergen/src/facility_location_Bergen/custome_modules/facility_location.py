@@ -461,7 +461,11 @@ class FacilityLocationReport:
     # ---------------------------------------------------------------- define the methods -------------------------------------------------------------------
     # function to jitter the data to avoid overlapping of the points
     def __rand_jitter(self, list):
-        stdev = 0.01 * (max(list) - min(list))
+        scale_factor = max(list) - min(list)
+        if scale_factor != 0:
+            stdev = 0.01 * (scale_factor)
+        else:
+            stdev = 0.0008
         return list + np.random.randn(len(list)) * stdev
 
     # get the number of different algorithms
@@ -601,7 +605,7 @@ class FacilityLocationReport:
             axs[i].legend()
 
     def graphical_keys_solutions_comparison(self):
-        colors = ["red", "green", "orange", "pink", "brown", "grey", "olive", "cyan"]
+        colors = ["red", "lawngreen", "magenta", "blue", "aqua", "darkorange"]
         algorithm_names_and_index = self.__algorithm_from_list_to_dict()
         n = len(algorithm_names_and_index.keys())
 
@@ -615,10 +619,10 @@ class FacilityLocationReport:
             axs[i].scatter(
                 [c.x for c in self.facility_locations[i].coordinates.geometry],
                 [c.y for c in self.facility_locations[i].coordinates.geometry],
-                c="blue",
-                alpha=0.5,
+                c="grey",
+                alpha=0.1,
             )
-            axs[i].set_title(algorithm_name)
+            axs[i].set_title(f"{algorithm_name} Solution locations")
             axs[i].set_xlabel("Longitude")
             axs[i].set_ylabel("Latitude")
 

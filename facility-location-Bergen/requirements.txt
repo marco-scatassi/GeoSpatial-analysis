@@ -1,0 +1,11 @@
+streamlit
+plotly
+matplotlib
+tensorflow
+numpy
+pandas
+pickle
+os
+time
+PIL
+pathlib

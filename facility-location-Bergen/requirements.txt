@@ -4,5 +4,4 @@ matplotlib
 tensorflow
 numpy
 pandas
-PIL
 pathlib

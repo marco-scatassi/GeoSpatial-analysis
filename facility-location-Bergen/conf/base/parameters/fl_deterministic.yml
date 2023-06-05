@@ -1,0 +1,5 @@
+fl_deterministic.data:
+  facilities_number: 1
+  ratio1: 0.2
+  ratio2: 0.1
+  seed: 324324

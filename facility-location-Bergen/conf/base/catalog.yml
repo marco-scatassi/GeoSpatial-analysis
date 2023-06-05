@@ -416,3 +416,93 @@ build_average_graphs.midday.average_graph.midday:
 build_average_graphs.morning.average_graph.morning:
     type: pickle.PickleDataSet
     filepath: data/03_primary/average_graph_morning.pkl
+solution_comparison.solution_vs_scenario_all_day_free_flow_all_day_weight2:
+    type: pickle.PickleDataSet
+    filepath: data/08_reporting/solution_vs_scenario_all_day_free_flow_all_day_weight2.pkl
+solution_comparison.solution_vs_scenario_all_day_free_flow_all_day_weight:
+    type: pickle.PickleDataSet
+    filepath: data/08_reporting/solution_vs_scenario_all_day_free_flow_all_day_weight.pkl
+solution_comparison.solution_vs_scenario_all_day_free_flow_morning_weight:
+    type: pickle.PickleDataSet
+    filepath: data/08_reporting/solution_vs_scenario_all_day_free_flow_morning_weight.pkl
+solution_comparison.solution_vs_scenario_all_day_free_flow_midday_weight:
+    type: pickle.PickleDataSet
+    filepath: data/08_reporting/solution_vs_scenario_all_day_free_flow_midday_weight.pkl
+solution_comparison.solution_vs_scenario_all_day_free_flow_afternoon_weight:
+    type: pickle.PickleDataSet
+    filepath: data/08_reporting/solution_vs_scenario_all_day_free_flow_afternoon_weight.pkl
+build_worst_average_gdfs.all_day.gdf_worst_average_all_day:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/worst_average_all_day.geojson
+build_worst_average_gdfs.morning.gdf_worst_average_morning:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/worst_average_morning.geojson
+build_worst_average_gdfs.midday.gdf_worst_average_midday:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/worst_average_midday.geojson
+build_worst_average_gdfs.afternoon.gdf_worst_average_afternoon:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/worst_average_afternoon.geojson
+build_average_graphs.afternoon.worst_average_graph.afternoon:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/worst_average_graph_afternoon.pkl
+build_average_graphs.all_day.worst_average_graph.all_day:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/worst_average_graph_all_day.pkl
+build_average_graphs.midday.worst_average_graph.midday:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/worst_average_graph_midday.pkl
+build_average_graphs.morning.worst_average_graph.morning:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/worst_average_graph_morning.pkl
+build_adjacency_matrix.afternoon.worst_adj_matrix.afternoon:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/worst_adj_matrix_afternoon.pkl
+build_adjacency_matrix.afternoon.worst_adj_mapping_matrix.afternoon:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/worst_adj_mapping_afternoon.pkl
+build_adjacency_matrix.all_day.worst_adj_matrix.all_day:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/worst_adj_matrix_all_day.pkl
+build_adjacency_matrix.all_day.worst_adj_mapping_matrix.all_day:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/worst_adj_mapping_all_day.pkl
+build_adjacency_matrix.midday.worst_adj_matrix.midday:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/worst_adj_matrix_midday.pkl
+build_adjacency_matrix.midday.worst_adj_mapping_matrix.midday:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/worst_adj_mapping_midday.pkl
+build_adjacency_matrix.morning.worst_adj_matrix.morning:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/worst_adj_matrix_morning.pkl
+build_adjacency_matrix.morning.worst_adj_mapping_matrix.morning:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/worst_adj_mapping_morning.pkl
+solution_comparison.solution_vs_scenario_all_day_free_flow_all_day_weight2_worst:
+    type: pickle.PickleDataSet
+    filepath: data/08_reporting/solution_vs_scenario_all_day_free_flow_all_day_weight2_worst.pkl
+solution_comparison.solution_vs_scenario_all_day_free_flow_all_day_weight_worst:
+    type: pickle.PickleDataSet
+    filepath: data/08_reporting/solution_vs_scenario_all_day_free_flow_all_day_weight_worst.pkl
+solution_comparison.solution_vs_scenario_all_day_free_flow_morning_weight_worst:
+    type: pickle.PickleDataSet
+    filepath: data/08_reporting/solution_vs_scenario_all_day_free_flow_morning_weight_worst.pkl
+solution_comparison.solution_vs_scenario_all_day_free_flow_midday_weight_worst:
+    type: pickle.PickleDataSet
+    filepath: data/08_reporting/solution_vs_scenario_all_day_free_flow_midday_weight_worst.pkl
+solution_comparison.solution_vs_scenario_all_day_free_flow_afternoon_weight_worst:
+    type: pickle.PickleDataSet
+    filepath: data/08_reporting/solution_vs_scenario_all_day_free_flow_afternoon_weight_worst.pkl
+build_average_graphs.afternoon.worst_average_graph.afternoon:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/worst_average_graph_afternoon.pkl
+build_average_graphs.all_day.worst_average_graph.all_day:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/worst_average_graph_all_day.pkl
+build_average_graphs.midday.worst_average_graph.midday:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/worst_average_graph_midday.pkl
+build_average_graphs.morning.worst_average_graph.morning:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/worst_average_graph_morning.pkl

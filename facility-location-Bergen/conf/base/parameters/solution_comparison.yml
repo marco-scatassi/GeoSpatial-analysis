@@ -1,0 +1,12 @@
+solution_comparison.8:
+  facilities_number: 3
+  time_scenario: afternoon
+  time_solution: all_day_free_flow
+  weight: weight
+  worst: 'False'
+solution_comparison.9:
+  facilities_number: 3
+  time_scenario: afternoon
+  time_solution: all_day_free_flow
+  weight: weight
+  worst: 'True'

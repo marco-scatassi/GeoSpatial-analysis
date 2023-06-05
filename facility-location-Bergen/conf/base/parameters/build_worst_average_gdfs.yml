@@ -1,0 +1,7 @@
+# This is a boilerplate parameters config generated for pipeline 'build_worst_average_gdfs'
+# using Kedro 0.18.7.
+#
+# Documentation for this file format can be found in "Parameters"
+# Link: https://docs.kedro.org/en/0.18.7/kedro_project_setup/configuration.html#parameters
+
+build_worst_average_gdfs.days: ['20_04_2023', '21_04_2023', '22_04_2023', '23_04_2023', '24_04_2023', '25_04_2023', '26_04_2023', '27_04_2023', '28_04_2023', '29_04_2023', '30_04_2023']

@@ -6,8 +6,7 @@ def print_INFO_message_timestamp(message: str):
     timestamp = "[" + now.strftime("%m/%d/%y %H:%M:%S") + "]"
     print(f"{timestamp} INFO     {message}")
 
+
 # print INFO message
 def print_INFO_message(message: str):
     print(f"                    INFO     {message}")
-    
-    

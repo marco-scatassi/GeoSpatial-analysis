@@ -11,6 +11,9 @@ dill
 scikit-learn
 Pyomo~=6.5.0
 
+# custom modules
+git+https://github.com/marco-scatassi/GeoSpatial-analysis/facility-location-Bergen/src/facility_location_Bergen/custome_modules
+
 # kedro requirements
 black~=22.0
 flake8>=3.7.9, <5.0

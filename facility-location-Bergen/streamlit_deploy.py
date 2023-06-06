@@ -177,8 +177,8 @@ if __name__ == '__main__':
             for time in TIMES:
                 print_INFO_message_timestamp(f"Loading exact solution for {time}")
                 st.write(f"Loading exact solution for {time}")
-                path = retrieve_light_solution_path(facilities_number, time)
-                fls_exact[time] = FacilityLocation.load("./"+path)
+                path = r"/app/geospatial-analysis/facility-location-Bergen/"+retrieve_light_solution_path(facilities_number, time)
+                fls_exact[time] = FacilityLocation.load(path)
                 ptime.sleep(8)
             
             session_state[f"fls_exact_{facilities_number}"] = fls_exact

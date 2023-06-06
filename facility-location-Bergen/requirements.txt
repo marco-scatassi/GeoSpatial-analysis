@@ -12,7 +12,7 @@ scikit-learn
 Pyomo~=6.5.0
 
 # custom modules
-git+https://github.com/marco-scatassi/GeoSpatial-analysis/facility-location-Bergen/src/facility_location_Bergen/custome_modules
+git+https://github.com/marco-scatassi/Geospatial-analysis-custom-module@main
 
 # kedro requirements
 black~=22.0

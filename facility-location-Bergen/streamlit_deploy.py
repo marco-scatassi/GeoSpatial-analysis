@@ -29,7 +29,8 @@ from src.facility_location_Bergen.custome_modules.graphical_analysis import (
 st.set_page_config(layout = "wide")
 session_state = st.session_state
 
-metadata = bootstrap_project(Path.cwd())
+project_path = r"app\GeoSpatial-analysis\facility-location-Bergen"
+metadata = bootstrap_project(project_path)
 
 TIMES = ["all_day_free_flow", "all_day", "morning", "midday", "afternoon"]
 

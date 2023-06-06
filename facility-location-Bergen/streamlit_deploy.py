@@ -29,7 +29,7 @@ from src.facility_location_Bergen.custome_modules.graphical_analysis import (
 st.set_page_config(layout = "wide")
 session_state = st.session_state
 
-project_path = r"facility-location-Bergen"
+project_path = r""
 metadata = bootstrap_project(project_path)
 
 TIMES = ["all_day_free_flow", "all_day", "morning", "midday", "afternoon"]

@@ -192,7 +192,7 @@ if __name__ == '__main__':
             st.write("Data has been loaded")
         
         if f"dfs_{facilities_number}" not in session_state:
-            root = rf".\data\08_reporting\{facilities_number}_locations"
+            root = rf"/app/geospatial-analysis/facility-location-Bergen/data/08_reporting/{facilities_number}_locations"
             paths = [p for p in os.listdir(root) if ("solution_vs_scenario" in p) and ("worst" not in p)]
             
             dfs = {}
@@ -208,7 +208,7 @@ if __name__ == '__main__':
             session_state[f"dfs_{facilities_number}"] = dfs
             
         if f"dfs_worst_{facilities_number}" not in session_state:
-            root = rf".\data\08_reporting\{facilities_number}_locations"
+            root = rf"/app/geospatial-analysis/facility-location-Bergen/data/08_reporting/{facilities_number}_locations"
             paths_worst = [p for p in os.listdir(root) if ("solution_vs_scenario" in p) and ("worst" in p)]
             
             dfs_worst = {}
@@ -238,7 +238,7 @@ if __name__ == '__main__':
         session_state[f"df_min_{facilities_number}"] = compute_min_distance_df(dfs, dfs_worst)
         
         with col2:
-            temp_path = rf".\data\00_temp\graphical_keys_solutions_comparison_{facilities_number}.png"
+            temp_path = rf"/app/geospatial-analysis/facility-location-Bergen/data/00_temp/graphical_keys_solutions_comparison_{facilities_number}.png"
             fls_exact = session_state[f"fls_exact_{facilities_number}"]
             report_exact = FacilityLocationReport(fls_exact)
             fig = report_exact.graphical_keys_solutions_comparison()

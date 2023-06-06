@@ -95,7 +95,7 @@ if __name__ == '__main__':
         
         for time in TIMES:
             need_to_run = False
-            path = retrieve_solution_path(n_facilities, time)
+            path = r"/app/geospatial-analysis/facility-location-Bergen/"+retrieve_light_solution_path(n_facilities, time)
             if os.path.exists(path) == False:
                 need_to_run = True
                 st.write(f"The model will run for {time} data")
@@ -131,7 +131,7 @@ if __name__ == '__main__':
                 time_scenario = time
                 weight = "weight"
 
-            path = retrieve_solution_vs_scenario_path(facilities_number, TIME_SOLUTION, time_scenario, weight)
+            path = r"/app/geospatial-analysis/facility-location-Bergen/"+retrieve_solution_vs_scenario_path(facilities_number, TIME_SOLUTION, time_scenario, weight)
             
             if os.path.exists(path) == False:
                 st.write(f"Start preprocessing for {time} solution data...")

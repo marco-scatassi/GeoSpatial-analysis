@@ -1,10 +1,3 @@
-import sys
-
-sys.path.append(
-    r".\src\facility_location_Bergen\custome_modules"
-)
-
-
 import os
 import yaml
 import time as ptime

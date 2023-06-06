@@ -1,10 +1,13 @@
 streamlit
 plotly
-matplotlib
+matplotlib~=3.5.2
 tensorflow
 numpy
 pandas
+geopandas~=0.12.2
 pathlib
+PyYAML
+Pyomo~=6.5.0
 
 # kedro requirements
 black~=22.0

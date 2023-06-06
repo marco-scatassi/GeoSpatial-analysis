@@ -1,7 +1,7 @@
 import sys
 
 sys.path.append(
-    r"C:\Users\Marco\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\src\facility_location_Bergen\custome_modules"
+    r".\src\facility_location_Bergen\custome_modules"
 )
 
 

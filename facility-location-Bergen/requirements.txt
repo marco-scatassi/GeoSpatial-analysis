@@ -11,11 +11,6 @@ dill
 scikit-learn
 Pyomo~=6.5.0
 
-# custom modules
-git+ssh://github.com/marco-scatassi/Geospatial-analysis-custom-module.git@main
-
-
-
 # kedro requirements
 black~=22.0
 flake8>=3.7.9, <5.0

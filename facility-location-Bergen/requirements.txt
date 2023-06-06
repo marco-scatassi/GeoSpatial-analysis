@@ -5,3 +5,4 @@ tensorflow
 numpy
 pandas
 pathlib
+kedro

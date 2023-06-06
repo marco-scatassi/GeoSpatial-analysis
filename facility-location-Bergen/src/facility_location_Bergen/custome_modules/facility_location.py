@@ -1,9 +1,3 @@
-import sys
-
-sys.path.append(
-    r"C:\Users\Marco\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\src\facility_location_Bergen\custome_modules"
-)
-
 import dill
 import json
 import time
@@ -13,7 +7,7 @@ import geopandas as gpd
 from pyomo.environ import *
 import pyomo.environ as pyo
 import matplotlib.pyplot as plt
-from log import print_INFO_message_timestamp, print_INFO_message
+from custome_modules.log import print_INFO_message_timestamp, print_INFO_message
 
 
 ## Class to create an adjacency matrix from a list of coordinates

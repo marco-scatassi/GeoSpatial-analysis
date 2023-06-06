@@ -12,7 +12,8 @@ scikit-learn
 Pyomo~=6.5.0
 
 # custom modules
-git+https://github.com/marco-scatassi/Geospatial-analysis-custom-module@main
+git+ssh://github.com/marco-scatassi/Geospatial-analysis-custom-module.git@main
+
 
 
 # kedro requirements

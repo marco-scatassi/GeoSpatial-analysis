@@ -8,6 +8,7 @@ geopandas~=0.12.2
 pathlib
 PyYAML
 dill
+scikit-learn
 Pyomo~=6.5.0
 
 # kedro requirements

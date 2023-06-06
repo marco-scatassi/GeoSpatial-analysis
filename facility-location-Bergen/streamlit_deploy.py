@@ -17,15 +17,15 @@ from kedro.pipeline import Pipeline, pipeline
 from kedro.framework.session import KedroSession
 from kedro.framework.project import find_pipelines
 from kedro.framework.startup import bootstrap_project
-from log import print_INFO_message_timestamp, print_INFO_message
-from facility_location import FacilityLocation, FacilityLocationReport
+from src.facility_location_Bergen.custome_modules.log import print_INFO_message_timestamp, print_INFO_message
+from src.facility_location_Bergen.custome_modules.facility_location import FacilityLocation, FacilityLocationReport
 
-from retrieve_global_parameters import (
+from src.facility_location_Bergen.custome_modules.retrieve_global_parameters import (
     retrieve_light_solution_path,
     retrieve_solution_vs_scenario_path,
 )
 
-from graphical_analysis import (
+from src.facility_location_Bergen.custome_modules.graphical_analysis import (
     compute_rel_diff,
     compute_min_distance_df,
     objective_function_value_under_different_cases,

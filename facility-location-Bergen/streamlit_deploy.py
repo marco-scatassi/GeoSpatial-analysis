@@ -81,7 +81,7 @@ if __name__ == '__main__':
     button1 = st.button("Run the model")
     
     if button1:
-        with open(r".\conf\base\parameters\fl_deterministic.yml", "w") as f:
+        with open(r"/app/geospatial-analysis/facility-location-Bergen/conf/base/parameters/fl_deterministic.yml", "w") as f:
             yaml.dump({
                 "fl_deterministic.data":{
                 "facilities_number": facilities_number,
@@ -135,7 +135,7 @@ if __name__ == '__main__':
             
             if os.path.exists(path) == False:
                 st.write(f"Start preprocessing for {time} solution data...")
-                with open(r".\conf\base\parameters\solution_comparison.yml", "w") as f:
+                with open(r"/app/geospatial-analysis/facility-location-Bergen/conf/base/parameters/solution_comparison.yml", "w") as f:
                     yaml.dump({
                         f"solution_comparison.{2*i}":{
                         "time_solution": TIME_SOLUTION,

@@ -3,11 +3,13 @@ import json
 import time
 import requests
 import numpy as np
+import cloudpickle
 import geopandas as gpd
+import sputility as spt
 from pyomo.environ import *
 import pyomo.environ as pyo
 import matplotlib.pyplot as plt
-from .log import print_INFO_message_timestamp, print_INFO_message
+from log import print_INFO_message_timestamp, print_INFO_message
 
 
 ## Class to create an adjacency matrix from a list of coordinates
@@ -168,6 +170,7 @@ class FacilityLocation:
 
     # ----------------------------------------------- define the constructor -----------------------------------------------
 
+    model = None
     locations_coordinates = None
     locations_index = None
     solution_value = None
@@ -377,6 +380,7 @@ class FacilityLocation:
         else:
             self.solver_status = self.result.solver.termination_condition
 
+    
     # ---------------------------------------- implement the methods to solve the problem -----------------------------------
     def solve(self, mode="exact", algorithm="gon", n_trial=None):
         t1 = time.time()
@@ -444,6 +448,239 @@ class FacilityLocation:
         return a
 
 
+
+# class to define the Stochastic Facility Location problem
+class StochasticFacilityLocation:
+    # ----------------------------------------------- define the constructor -----------------------------------------------
+
+    solver_status = None
+    solution_value = None
+    scenarios_names = None
+    locations_index = None
+    computation_time = None
+    locations_coordinates = None
+    first_stage_solution = None
+    second_stage_variables = None
+    scenarios_probabilities = None
+
+    def __init__(
+        self,
+        coordinates: gpd.geoseries.GeoSeries,
+        n_of_locations_to_choose: int,
+        candidate_coordinates: gpd.geoseries.GeoSeries = None,
+    ):
+        
+        self.coordinates = coordinates
+        if candidate_coordinates is None:
+            self.candidate_coordinates = coordinates
+        else:
+            self.candidate_coordinates = candidate_coordinates
+        self.n_of_locations_to_choose = n_of_locations_to_choose
+        self.n_of_demand_points = len(coordinates)
+    
+    # def __getstate__(self):
+    #     # for k,v in self.__dict__.items():
+    #     #     print(k, type(v)) 
+    #     attributes = self.__dict__.copy()
+    #     return attributes
+    
+# --------------------------------------------- model the 2 stage stochastic programm ------------------------------------------
+    # define model constraints
+    def __completeSingleCoverage(self, model, i):
+        return sum(model.y[i, j] for j in model.J) == 1
+
+    def __maximumLocations(self, model):
+        return sum([model.x[j] for j in model.J]) == pyo.value(model.p)
+
+    def __maximalDistance(self, model, i):
+        return sum(model.d[j, i] * model.y[i, j] for j in model.J) <= model.L
+
+    def __servedByOpenFacility(self, model, i, j):
+        return model.y[i, j] <= model.x[j]
+
+    # define the objective function
+    def __maximalDistanceObj(self, model):
+        return model.L
+
+    def __DefineAbstractModel(self):
+        # -------------------------abastract model----------------------------
+        model = pyo.AbstractModel()
+
+        # ---------------------------index sets-------------------------------
+        model.I = pyo.Set(initialize=list(self.coordinates.index))
+        model.J = pyo.Set(initialize=list(self.candidate_coordinates.index))
+
+        # ---------------------------parameters-------------------------------
+        # define the number of locations to be opened (p)
+        model.p = pyo.Param(within=PositiveIntegers)
+
+        # define the distance matrix (d)
+        model.d = pyo.Param(model.J, model.I, within=NonNegativeReals)
+
+        # ---------------------------variables--------------------------------
+        # define the binary variables for the location decision (x)
+        model.x = Var(model.J, within=Binary)
+
+        # define the binary variables for the assignment decision (y)
+        model.y = Var(model.I, model.J, within=Binary)
+
+        # define the auxiliary variable for the maximal distance (L)
+        model.L = Var(within=NonNegativeReals)
+
+        # --------------------------constraints-------------------------------
+        # define a constraint for each demand point to be covered by a single location
+        model.completeSingleCoverage = Constraint(
+            model.I, rule=self.__completeSingleCoverage
+        )
+
+        # define a constraint for the maximum number of locations
+        model.maximumLocations = Constraint(rule=self.__maximumLocations)
+
+        # define a constraint for the maximal distance (L is an auxiliary variable)
+        model.maximalDistance = Constraint(model.I, rule=self.__maximalDistance)
+
+        # define a constraint for each demand point to be served by an open facility
+        model.servedByOpenFacility = Constraint(
+            model.I, model.J, rule=self.__servedByOpenFacility
+        )
+
+        # -----------------------objective function---------------------------
+        # ------ first stage objective function ------
+        model.firstStageObj = Expression(
+            rule=0
+        )
+        
+        # ------ second stage objective function ------    
+        model.secondStageObj = Expression(
+            rule=self.__maximalDistanceObj
+        )
+
+        #------- global objective function -------
+        def globalObj(model):
+            return model.firstStageObj + model.secondStageObj
+
+        model.maximalDistanceObj = Objective(rule = globalObj, sense = minimize)
+
+        self.model = model
+        
+        return model    
+    
+    
+    
+    # -------------------------------------------- utility methods to solve the model -------------------------------------------
+    def __scenarioData(self, scenarioName, scenarios_data):
+        modelData = {None: dict()}
+        modelData[None]['p'] = {None: self.n_of_locations_to_choose}
+        
+        modelData[None]['d'] = dict()
+        modelData[None]['d'] =  {
+            (j, i): scenarios_data[scenarioName].adjacency_matrix[j][i]
+            for j in self.candidate_coordinates.index
+            for i in self.coordinates.index
+        }
+        return modelData
+    
+    def __scenarioProbability(self, scenarioName, scenariosProbabilities):
+        return scenariosProbabilities[scenarioName]
+    
+    # ---------------------------------------- implement the methods to solve the problem -----------------------------------
+    def solve(self, scenarios_data: dict, scenarioProbabilities: dict, method="EF", max_iter=25):
+        t1 = time.time()
+        
+        # ------------------------- abastract model ----------------------------
+        print_INFO_message("Defining the abstract model...")
+        model = self.__DefineAbstractModel()
+        
+        # ------------------------- initialize data ----------------------------
+        print_INFO_message_timestamp("Initializing data...")
+        self.scenarios_names = list(scenarios_data.keys())
+        self.scenarios_probabilities = scenarioProbabilities
+        
+        if method == "LS":
+            options = {
+                "root_solver": "cplex_persistent",
+                "sp_solver": "cplex_persistent",
+                "max_iter": max_iter,
+            }
+        elif method == "EF":
+            options = {"solver": "cplex_direct"}
+                
+        all_scenario_names = list(scenarios_data.keys())
+        
+        scenario_creator_kwargs={
+                        'model': model, 
+                        'scenarioData': self.__scenarioData,
+                        'scenarios': scenarios_data, 
+                        'scenariosProbabilities': scenarioProbabilities,
+                        'scenarioProbability': self.__scenarioProbability,
+                        'firstStageObjective': 'FirstStageObjective', 
+                        'firstStageVariables': ['x']}
+        
+
+        print_INFO_message_timestamp("Solving the model...")
+        opt = SolverFactory("cplex")
+
+        result = spt.RP_solution(options, 
+                                      all_scenario_names, 
+                                      scenario_creator_kwargs, 
+                                      method=method,
+                                      verbose=False)
+        
+        instance = result[0].root
+        
+        if method == "LS":
+            self.solution_value = result[0].root.obj()
+        elif method == "EF":
+            self.solution_value = result[0].get_objective_value()
+            
+        
+        self.locations_index = [
+            j for j in self.candidate_coordinates.index if instance.x[j].value == 1
+        ]
+        self.locations_coordinates = [
+            self.candidate_coordinates.loc[j] for j in self.locations_index
+        ]
+        
+        self.first_stage_solution = {
+            k: result[0].root.x[k].value for k in result[0].root.x
+        }
+        
+        self.second_stage_solution = {}
+        for name in self.scenarios_names:
+            self.second_stage_solution[name] = {k:result[0].local_scenarios["afternoon"].y[k].value 
+                                                for k in result[0].local_scenarios["afternoon"].y}
+
+        # Update the status of the solver
+        if result[1] == pyo.TerminationCondition.optimal:
+            self.solver_status = "Optimal solution found"
+        elif result[1] == pyo.TerminationCondition.infeasible:
+            self.solver_status = "Problem is infeasible"
+        else:
+            self.solver_status = result[1]
+
+        t2 = time.time()
+
+        self.computation_time = t2 - t1
+
+    # ---------------------------------------- implement the methods to save and load the matrix -----------------------------------
+    # save the solution
+    def save(self, file_name):
+        if self.locations_coordinates == None:
+            return "solve the problem first"
+    
+        with open(file_name, "wb") as f:
+            dill.dump(self, f)
+
+    # load the solution
+    @staticmethod
+    def load(file_name):
+        with open(file_name, "rb") as f:
+            a = dill.load(f)
+
+        return a
+    
+    
+    
 # class to visualize fFacility location problem solutions
 class FacilityLocationReport:
 

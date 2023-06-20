@@ -29,7 +29,8 @@ from src.facility_location_Bergen.custome_modules.graphical_analysis import (
 st.set_page_config(layout = "wide")
 session_state = st.session_state
 
-metadata = bootstrap_project(Path.cwd())
+project_path = r"C:\Users\Marco\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen"
+metadata = bootstrap_project(project_path)
 
 TIMES = ["all_day_free_flow", "all_day", "morning", "midday", "afternoon"]
 
@@ -70,100 +71,100 @@ if __name__ == '__main__':
     st.markdown("---")
     
     ############################################## RUN THE MODEL ##############################################
-    button1 = st.button("Run the model")
+    # button1 = st.button("Run the model")
     
-    if button1:
-        with open(r".\conf\base\parameters\fl_deterministic.yml", "w") as f:
-            yaml.dump({
-                "fl_deterministic.data":{
-                "facilities_number": facilities_number,
-                "ratio1": ratio1,
-                "ratio2": ratio2,
-                "seed": seed
-                }
-            }, f)
+    # if button1:
+    #     with open(r".\conf\base\parameters\fl_deterministic.yml", "w") as f:
+    #         yaml.dump({
+    #             "fl_deterministic.data":{
+    #             "facilities_number": facilities_number,
+    #             "ratio1": ratio1,
+    #             "ratio2": ratio2,
+    #             "seed": seed
+    #             }
+    #         }, f)
             
-        n_facilities = facilities_number
+    #     n_facilities = facilities_number
         
-        for time in TIMES:
-            need_to_run = False
-            path = retrieve_solution_path(n_facilities, time)
-            if os.path.exists(path) == False:
-                need_to_run = True
-                st.write(f"The model will run for {time} data")
-            else:
-                st.write(f"The model has already been run for {time} data")
+    #     for time in TIMES:
+    #         need_to_run = False
+    #         path = retrieve_light_solution_path(n_facilities, time)
+    #         if os.path.exists(path) == False:
+    #             need_to_run = True
+    #             st.write(f"The model will run for {time} data")
+    #         else:
+    #             st.write(f"The model has already been run for {time} data")
         
-        if need_to_run:
-        # Create an instance of KedroSession
-            with KedroSession.create(metadata.package_name) as session:
-                # Load the Kedro project context
-                context = session.load_context()
-                pipelines = find_pipelines()
-                runner = SequentialRunner( )
-                otput_data = runner.run(pipelines["fl_deterministic"], catalog=context.catalog)
-                message = otput_data["fl_deterministic.message"]
+    #     if need_to_run:
+    #     # Create an instance of KedroSession
+    #         with KedroSession.create(metadata.package_name) as session:
+    #             # Load the Kedro project context
+    #             context = session.load_context()
+    #             pipelines = find_pipelines()
+    #             runner = SequentialRunner( )
+    #             otput_data = runner.run(pipelines["fl_deterministic"], catalog=context.catalog)
+    #             message = otput_data["fl_deterministic.message"]
                 
-            st.write(message+"!")
+    #         st.write(message+"!")
             
       
-    st.markdown("---")
+    # st.markdown("---")
     
     ############################################## RUN SOLUTION COMPARISON ##############################################
-    button2 = st.button("Process data for solution analysis")
+    # button2 = st.button("Process data for solution analysis")
     
-    TIME_SOLUTION = "all_day_free_flow"
+    # TIME_SOLUTION = "all_day_free_flow"
     
-    if button2:
-        for i, time in enumerate(TIMES):
-            if time == "all_day_free_flow":
-                time_scenario = "all_day"
-                weight = "weight2"
-            else:
-                time_scenario = time
-                weight = "weight"
+    # if button2:
+    #     for i, time in enumerate(TIMES):
+    #         if time == "all_day_free_flow":
+    #             time_scenario = "all_day"
+    #             weight = "weight2"
+    #         else:
+    #             time_scenario = time
+    #             weight = "weight"
 
-            path = retrieve_solution_vs_scenario_path(facilities_number, TIME_SOLUTION, time_scenario, weight)
+    #         path = retrieve_solution_vs_scenario_path(facilities_number, TIME_SOLUTION, time_scenario, weight)
             
-            if os.path.exists(path) == False:
-                st.write(f"Start preprocessing for {time} solution data...")
-                with open(r".\conf\base\parameters\solution_comparison.yml", "w") as f:
-                    yaml.dump({
-                        f"solution_comparison.{2*i}":{
-                        "time_solution": TIME_SOLUTION,
-                        "time_scenario": time_scenario,
-                        "facilities_number": facilities_number,
-                        "weight": weight,
-                        "worst": "False"
-                        },
-                    }, f)
+    #         if os.path.exists(path) == False:
+    #             st.write(f"Start preprocessing for {time} solution data...")
+    #             with open(r".\conf\base\parameters\solution_comparison.yml", "w") as f:
+    #                 yaml.dump({
+    #                     f"solution_comparison.{2*i}":{
+    #                     "time_solution": TIME_SOLUTION,
+    #                     "time_scenario": time_scenario,
+    #                     "facilities_number": facilities_number,
+    #                     "weight": weight,
+    #                     "worst": "False"
+    #                     },
+    #                 }, f)
                     
-                    if weight != "weight2":
-                        yaml.dump({
-                        f"solution_comparison.{2*i+1}":{
-                        "time_solution": TIME_SOLUTION,
-                        "time_scenario": time_scenario,
-                        "facilities_number": facilities_number,
-                        "weight": weight,
-                        "worst": "True"
-                        }}, f)
+    #                 if weight != "weight2":
+    #                     yaml.dump({
+    #                     f"solution_comparison.{2*i+1}":{
+    #                     "time_solution": TIME_SOLUTION,
+    #                     "time_scenario": time_scenario,
+    #                     "facilities_number": facilities_number,
+    #                     "weight": weight,
+    #                     "worst": "True"
+    #                     }}, f)
                     
-                # Create an instance of KedroSession
-                with KedroSession.create(metadata.package_name) as session:
-                    # Load the Kedro project context
-                    context = session.load_context()
-                    pipelines = find_pipelines()
-                    runner = SequentialRunner( )
-                    otput_data = runner.run(pipelines["solution_comparison"], catalog=context.catalog)
+    #             # Create an instance of KedroSession
+    #             with KedroSession.create(metadata.package_name) as session:
+    #                 # Load the Kedro project context
+    #                 context = session.load_context()
+    #                 pipelines = find_pipelines()
+    #                 runner = SequentialRunner( )
+    #                 otput_data = runner.run(pipelines["solution_comparison"], catalog=context.catalog)
                 
-                st.write("Done!")
+    #             st.write("Done!")
                 
-            else:
-                st.write(f"Preprocessing for {time} solution data has already been done")
+    #         else:
+    #             st.write(f"Preprocessing for {time} solution data has already been done")
             
-        st.write("Preprocessing for all the scenarios has been completed!")
+    #     st.write("Preprocessing for all the scenarios has been completed!")
         
-    st.markdown("---")
+    # st.markdown("---")
         
     ############################################## LOAD DATA ##############################################
     button3 = st.button("Load data for solution analysis")

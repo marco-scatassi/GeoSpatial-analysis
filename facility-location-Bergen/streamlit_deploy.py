@@ -261,11 +261,11 @@ def stochastic_load_data(session_state, facilities_number, project_path):
             root = r"\app\geospatial-analysis\facility-location-Bergen"
              
             fls_solutions = {}
-            st.write(f"Loading stochastic solution")
-            fls_solutions["stochastic"] = StochasticFacilityLocation.load(fr"/app/geospatial-analysis/facility-location-Bergen/{facilities_number}_locations/stochastic_solution/lshape_solution.pkl")
             st.write(f"Loading deterministic solution")
             fls_solutions["deterministic"] = FacilityLocation.load(rf"/app/geospatial-analysis/facility-location-Bergen/{facilities_number}_locations/deterministic_exact_solutions/light_exact_solution_all_day_free_flow.pkl")
             session_state[f"fls_stochastic_{facilities_number}"] = fls_solutions
+            st.write(f"Loading stochastic solution")
+            fls_solutions["stochastic"] = StochasticFacilityLocation.load(fr"/app/geospatial-analysis/facility-location-Bergen/{facilities_number}_locations/stochastic_solution/lshape_solution.pkl")
         
         st.write("Data has been loaded")
         

@@ -317,7 +317,7 @@ def stochastic_generate_viz(session_state, facilities_number):
             mode='markers',
             marker=dict(
                 color=["red"]*fl_deterministic.n_of_locations_to_choose,
-                size=6,
+                size=8,
             ),
             hovertemplate=f'<br>solution value: {round(fl_deterministic.solution_value/60,2)} minutes<extra></extra>',
             name="deterministic",
@@ -330,7 +330,7 @@ def stochastic_generate_viz(session_state, facilities_number):
             mode='markers',
             marker=dict(
                 color=["blue"]*fl_stochastic.n_of_locations_to_choose,
-                size=6,
+                size=8,
             ),
             hovertemplate=f'<br>solution value: {round(fl_stochastic.solution_value/60,2)} minutes<extra></extra>',
             name="stochastic",

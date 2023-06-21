@@ -10,7 +10,7 @@ PyYAML
 dill
 scikit-learn
 Pyomo~=6.5.0
-mpisppy
+mpi-sppy
 
 # kedro requirements
 black~=22.0

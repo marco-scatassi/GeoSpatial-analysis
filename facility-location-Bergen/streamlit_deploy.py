@@ -262,9 +262,9 @@ def stochastic_load_data(session_state, facilities_number):
              
             fls_solutions = {}
             st.write(f"Loading stochastic solution")
-            fls_solutions["stochastic"] = StochasticFacilityLocation.load(root_path+f"\{facilities_number}_locations\stochastic_solution\lshape_solution.pkl"))
+            fls_solutions["stochastic"] = StochasticFacilityLocation.load(root_path+f"\{facilities_number}_locations\stochastic_solution\lshape_solution.pkl")
             st.write(f"Loading deterministic solution")
-            fls_solutions["deterministic"] = FacilityLocation.load(root_path+f"\{facilities_number}_locations\deterministic_exact_solutions\light_exact_solution_all_day_free_flow.pkl"))
+            fls_solutions["deterministic"] = FacilityLocation.load(root_path+f"\{facilities_number}_locations\deterministic_exact_solutions\light_exact_solution_all_day_free_flow.pkl")
             session_state[f"fls_stochastic_{facilities_number}"] = fls_solutions
         
         st.write("Data has been loaded")

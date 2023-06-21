@@ -7,18 +7,23 @@ if directory_path not in sys.path:
     
 import os
 import yaml
+import pandas as pd
 import time as ptime
 import pickle as pkl
 from PIL import Image
 import streamlit as st
 from pathlib import Path
+import plotly.graph_objects as go
 from kedro.runner import SequentialRunner
 from kedro.pipeline import Pipeline, pipeline
 from kedro.framework.session import KedroSession
 from kedro.framework.project import find_pipelines
 from kedro.framework.startup import bootstrap_project
 from log import print_INFO_message_timestamp, print_INFO_message
-from facility_location import FacilityLocation, FacilityLocationReport
+from facility_location import (
+    FacilityLocation, 
+    FacilityLocationReport,
+    StochasticFacilityLocation)
 
 from retrieve_global_parameters import (
     retrieve_light_solution_path,
@@ -246,7 +251,121 @@ def deterministic_analysis(session_state, TIMES, facilities_number, ratio1, rati
     ############################################## GENERATE VIZ ##############################################    
     deterministic_generate_viz(session_state, TIMES, facilities_number)
 
-# -------------------------------------------- STOCHASTIC ANALYSIS --------------------------------------------
+# -------------------------------------------- STOCHASTIC ANALYSIS ---------------------------------------------
+def stochastic_load_data(session_state, facilities_number):
+    button3 = st.button("Load data for solution analysis")
+    root_path = r"\app\geospatial-analysis\facility-location-Bergen\data\07_model_output"
+    
+    if button3:
+        if f"fls_stochastic_{facilities_number}" not in session_state:
+            root = r"\app\geospatial-analysis\facility-location-Bergen"
+             
+            fls_solutions = {}
+            st.write(f"Loading stochastic solution")
+            fls_solutions["stochastic"] = StochasticFacilityLocation.load(os.path.join(root_path, 
+                                                                                    f"{facilities_number}_locations\stochastic_solution\lshape_solution.pkl"))
+            st.write(f"Loading deterministic solution")
+            fls_solutions["deterministic"] = FacilityLocation.load(os.path.join(root_path, 
+                                                                             f"{facilities_number}_locations\deterministic_exact_solutions\light_exact_solution_all_day_free_flow.pkl"))
+            session_state[f"fls_stochastic_{facilities_number}"] = fls_solutions
+        
+        st.write("Data has been loaded")
+        
+    st.markdown("---")
+
+def stochastic_generate_viz(session_state, facilities_number):
+    button = st.button("Generate vizualizations")
+    
+    if session_state.get(f"fls_stochastic_{facilities_number}") is None:
+        st.write("Please load the data first")
+        return
+    
+    if button:
+        fl_stochastic = session_state[f"fls_stochastic_{facilities_number}"]["stochastic"]
+        fl_deterministic = session_state[f"fls_stochastic_{facilities_number}"]["deterministic"]
+
+        lat_global = fl_deterministic.coordinates.geometry.y
+        lon_global = fl_deterministic.coordinates.geometry.x
+        
+        lat_det = [p.geometry.y for p in fl_deterministic.locations_coordinates]
+        lon_det = [p.geometry.x for p in fl_deterministic.locations_coordinates]
+        
+        if facilities_number == 1:
+            idx = int(pd.Series([k if fl_stochastic.first_stage_solution[k] != 0 else None 
+                 for k in fl_stochastic.first_stage_solution.keys()]).dropna().iloc[0])
+
+            stochastic_locations_coordinates = fl_stochastic.coordinates.loc[idx]
+            
+            lat_sto = [p.y for p in stochastic_locations_coordinates]
+            lon_sto = [p.x for p in stochastic_locations_coordinates]
+        else:
+            lat_sto = [p.geometry.y for p in fl_stochastic.locations_coordinates]
+            lon_sto = [p.geometry.x for p in fl_stochastic.locations_coordinates]
+
+        fig = go.Figure()
+        
+        fig.add_trace(go.Scattermapbox(
+            lat=lat_global,
+            lon=lon_global,
+            mode='markers',
+            marker=dict(
+                color=["grey"]*fl_deterministic.coordinates.shape[0],
+                size=4.5,
+            ),
+            hovertemplate='<extra></extra>',
+            showlegend=False,
+        ))
+
+        fig.add_trace(go.Scattermapbox(
+            lat=lat_det,
+            lon=lon_det,
+            mode='markers',
+            marker=dict(
+                color=["red"]*fl_deterministic.n_of_locations_to_choose,
+                size=6,
+            ),
+            hovertemplate=f'<br>solution value: {round(fl_deterministic.solution_value/60,2)} minutes<extra></extra>',
+            name="deterministic",
+            showlegend=True,
+        ))
+            
+        fig.add_trace(go.Scattermapbox(
+            lat=lat_sto,
+            lon=lon_sto,
+            mode='markers',
+            marker=dict(
+                color=["blue"]*fl_stochastic.n_of_locations_to_choose,
+                size=6,
+            ),
+            hovertemplate=f'<br>solution value: {round(fl_stochastic.solution_value/60,2)} minutes<extra></extra>',
+            name="stochastic",
+            showlegend=True,
+        ))
+
+        fig.update_layout(title="<b>deterministic vs stochastic solution<b>",
+                        mapbox=dict(
+                            style="open-street-map",
+                            center=dict(lat=fl_deterministic.coordinates.geometry.y.mean(), lon=fl_deterministic.coordinates.geometry.x.mean()),
+                            zoom=9.5
+                            ),
+                        title_pad_l=150,
+                        height=800,
+                        width=700,
+                        xaxis_title="time of the day",)
+
+        col1, col2, col3 = st.columns([1,2,1])
+        
+        with col2:
+            st.plotly_chart(fig, use_container_width=False)
+        
+    st.markdown("---")
+
+def stochastic_analysis(session_state, facilities_number):
+    ############################################## LOAD DATA ##############################################
+    stochastic_load_data(session_state, facilities_number)
+    
+    ############################################## GENERATE VIZ ##############################################    
+    stochastic_generate_viz(session_state, facilities_number)
 
 
 if __name__ == '__main__':
@@ -299,3 +418,5 @@ if __name__ == '__main__':
     if analysis == "Deterministic":
         deterministic_analysis(session_state, TIMES, facilities_number, ratio1, ratio2, seed)
     
+    if analysis == "Stochastic":
+        stochastic_analysis(session_state, facilities_number)

@@ -254,7 +254,7 @@ def deterministic_analysis(session_state, TIMES, facilities_number, ratio1, rati
 # -------------------------------------------- STOCHASTIC ANALYSIS ---------------------------------------------
 def stochastic_load_data(session_state, facilities_number):
     button3 = st.button("Load data for solution analysis")
-    root_path = r"\app\geospatial-analysis\facility-location-Bergen\data\07_model_output"
+    root_path = r"\app\geospatial-analysis\facility-location-Bergen\data\07_model_output\"
     
     if button3:
         if f"fls_stochastic_{facilities_number}" not in session_state:
@@ -262,11 +262,9 @@ def stochastic_load_data(session_state, facilities_number):
              
             fls_solutions = {}
             st.write(f"Loading stochastic solution")
-            fls_solutions["stochastic"] = StochasticFacilityLocation.load(os.path.join(root_path, 
-                                                                                    f"{facilities_number}_locations\stochastic_solution\lshape_solution.pkl"))
+            fls_solutions["stochastic"] = StochasticFacilityLocation.load(root_path+f"{facilities_number}_locations\stochastic_solution\lshape_solution.pkl"))
             st.write(f"Loading deterministic solution")
-            fls_solutions["deterministic"] = FacilityLocation.load(os.path.join(root_path, 
-                                                                             f"{facilities_number}_locations\deterministic_exact_solutions\light_exact_solution_all_day_free_flow.pkl"))
+            fls_solutions["deterministic"] = FacilityLocation.load(root_path+f"{facilities_number}_locations\deterministic_exact_solutions\light_exact_solution_all_day_free_flow.pkl"))
             session_state[f"fls_stochastic_{facilities_number}"] = fls_solutions
         
         st.write("Data has been loaded")

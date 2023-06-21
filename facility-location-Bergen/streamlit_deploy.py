@@ -43,6 +43,17 @@ TIMES = ["all_day_free_flow", "all_day", "morning", "midday", "afternoon"]
 
 if __name__ == '__main__':
     st.title("Facility Location dashboard")
+
+    st.subheader("Choose the analysis to perform")
+    
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        analysis = st.radio(
+            "Analysis",
+            ("Deterministic", "Stochastic"),
+            horizontal=False,
+            label_visibility="hidden",)
+    
     st.subheader("Set the parameters for the optimization model")
     
     col1, col2, col3, col4 = st.columns(4)

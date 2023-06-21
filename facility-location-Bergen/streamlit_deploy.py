@@ -252,9 +252,9 @@ def deterministic_analysis(session_state, TIMES, facilities_number, ratio1, rati
     deterministic_generate_viz(session_state, TIMES, facilities_number)
 
 # -------------------------------------------- STOCHASTIC ANALYSIS ---------------------------------------------
-def stochastic_load_data(session_state, facilities_number):
+def stochastic_load_data(session_state, facilities_number, project_path):
     button3 = st.button("Load data for solution analysis")
-    root_path = r"\app\geospatial-analysis\facility-location-Bergen\data\07_model_output"
+    root_path = project_path+r"data/07_model_output/"
     
     if button3:
         if f"fls_stochastic_{facilities_number}" not in session_state:
@@ -262,9 +262,9 @@ def stochastic_load_data(session_state, facilities_number):
              
             fls_solutions = {}
             st.write(f"Loading stochastic solution")
-            fls_solutions["stochastic"] = StochasticFacilityLocation.load(root_path+f"\{facilities_number}_locations\stochastic_solution\lshape_solution.pkl")
+            fls_solutions["stochastic"] = StochasticFacilityLocation.load(root_path+f"{facilities_number}_locations/stochastic_solution/lshape_solution.pkl")
             st.write(f"Loading deterministic solution")
-            fls_solutions["deterministic"] = FacilityLocation.load(root_path+f"\{facilities_number}_locations\deterministic_exact_solutions\light_exact_solution_all_day_free_flow.pkl")
+            fls_solutions["deterministic"] = FacilityLocation.load(root_path+f"{facilities_number}_locations/deterministic_exact_solutions/light_exact_solution_all_day_free_flow.pkl")
             session_state[f"fls_stochastic_{facilities_number}"] = fls_solutions
         
         st.write("Data has been loaded")
@@ -358,9 +358,9 @@ def stochastic_generate_viz(session_state, facilities_number):
         
     st.markdown("---")
 
-def stochastic_analysis(session_state, facilities_number):
+def stochastic_analysis(session_state, facilities_number, project_path):
     ############################################## LOAD DATA ##############################################
-    stochastic_load_data(session_state, facilities_number)
+    stochastic_load_data(session_state, facilities_number, project_path)
     
     ############################################## GENERATE VIZ ##############################################    
     stochastic_generate_viz(session_state, facilities_number)
@@ -417,4 +417,4 @@ if __name__ == '__main__':
         deterministic_analysis(session_state, TIMES, facilities_number, ratio1, ratio2, seed)
     
     if analysis == "Stochastic":
-        stochastic_analysis(session_state, facilities_number)
+        stochastic_analysis(session_state, facilities_number, project_path)

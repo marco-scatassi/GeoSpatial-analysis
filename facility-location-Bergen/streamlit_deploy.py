@@ -41,6 +41,7 @@ metadata = bootstrap_project(project_path)
 
 TIMES = ["all_day_free_flow", "all_day", "morning", "midday", "afternoon"]
 
+# -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------
 def deterministic_load_data(session_state, TIMES, facilities_number):
     button3 = st.button("Load data for solution analysis")
     
@@ -245,6 +246,8 @@ def deterministic_analysis(session_state, TIMES, facilities_number, ratio1, rati
     ############################################## GENERATE VIZ ##############################################    
     deterministic_generate_viz(session_state, TIMES, facilities_number)
 
+# -------------------------------------------- STOCHASTIC ANALYSIS --------------------------------------------
+
 
 if __name__ == '__main__':
     st.title("Facility Location dashboard")
@@ -294,5 +297,5 @@ if __name__ == '__main__':
     st.markdown("---")
     
     if analysis == "Deterministic":
-        deterministic_analysis(facilities_number, ratio1, ratio2, seed)
+        deterministic_analysis(session_state, TIMES, facilities_number, ratio1, ratio2, seed)
     

@@ -258,16 +258,15 @@ def stochastic_load_data(session_state, facilities_number):
     
     if f"fls_stochastic_{facilities_number}" not in session_state:
         fls_solutions = {}
-        fls_solutions["stochastic"] = StochasticFacilityLocation.load(rooth_path+f"\{facilities_number}_locations\stochastic_solution\lshape_solution.pkl"))
-        fls_solutions["deterministic"] = FacilityLocation.load(os.path.join(root_path, 
-                                                                             f"{facilities_number}_locations\deterministic_exact_solutions\light_exact_solution_all_day_free_flow.pkl"))
+        fls_solutions["stochastic"] = StochasticFacilityLocation.load(rooth_path+f"\{facilities_number}_locations\stochastic_solution\lshape_solution.pkl")
+        fls_solutions["deterministic"] = FacilityLocation.load(root_path+f"\{facilities_number}_locations\deterministic_exact_solutions\light_exact_solution_all_day_free_flow.pkl")
         session_state[f"fls_stochastic_{facilities_number}"] = fls_solutions  
 
 def stochastic_load_metrics(session_state):
     root_path = r"\app\geospatial-analysis\facility-location-Bergen\data\07_model_output"
     
     if f"df_metrics" not in session_state:
-        df_metrics = pd.read_csv(rooth_path+f"\stochastic_solution_evaluation_metrics.csv"))
+        df_metrics = pd.read_csv(rooth_path+f"\stochastic_solution_evaluation_metrics.csv")
         new_cols_name = ["n_locations"]
         for col in df_metrics.columns[1:]:
             new_cols_name.append(col+" (min)")    

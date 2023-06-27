@@ -263,8 +263,7 @@ def stochastic_load_data(session_state, facilities_number):
         session_state[f"fls_stochastic_{facilities_number}"] = fls_solutions  
 
 def stochastic_load_metrics(session_state):
-    root_path = r"/app/geospatial-analysis/facility-location-Bergen/src/facility_location_Bergen/data/07_model_output"
-    
+    root_path = r"/app/geospatial-analysis/facility-location-Bergen/data/07_model_output"
     if f"df_metrics" not in session_state:
         df_metrics = pd.read_csv(root_path+f"/stochastic_solution_evaluation_metrics.csv")
         new_cols_name = ["n_locations"]

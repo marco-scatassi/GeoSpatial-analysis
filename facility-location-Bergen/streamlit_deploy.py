@@ -45,6 +45,7 @@ project_path = r"/app/geospatial-analysis/facility-location-Bergen"
 metadata = bootstrap_project(project_path)
 
 TIMES = ["all_day_free_flow", "all_day", "morning", "midday", "afternoon"]
+FACILITIES_NUMBER = [1,2,3]
 
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------
 def deterministic_load_data(session_state, TIMES, facilities_number):
@@ -253,53 +254,64 @@ def deterministic_analysis(session_state, TIMES, facilities_number, ratio1, rati
 
 # -------------------------------------------- STOCHASTIC ANALYSIS ---------------------------------------------
 def stochastic_load_data(session_state, facilities_number):
-    button3 = st.button("Load data for solution analysis")
+    root_path = r"\app\geospatial-analysis\facility-location-Bergen\data\07_model_output"
     
-    if button3:
-        if f"fls_stochastic_{facilities_number}" not in session_state:
-            fls_solutions = {}
-            st.write(f"Loading deterministic solution")
-            fls_solutions["deterministic"] = FacilityLocation.load(rf"/app/geospatial-analysis/facility-location-Bergen/data/07_model_output/{facilities_number}_locations/deterministic_exact_solutions/light_exact_solution_all_day_free_flow.pkl")
-            session_state[f"fls_stochastic_{facilities_number}"] = fls_solutions
-            st.write(f"Loading stochastic solution")
-            fls_solutions["stochastic"] = StochasticFacilityLocation.load(fr"/app/geospatial-analysis/facility-location-Bergen/data/07_model_output/{facilities_number}_locations/stochastic_solution/lshape_solution.pkl")
+    if f"fls_stochastic_{facilities_number}" not in session_state:
+        fls_solutions = {}
+        fls_solutions["stochastic"] = StochasticFacilityLocation.load(os.path.join(root_path, 
+                                                                                    f"{facilities_number}_locations\stochastic_solution\lshape_solution.pkl"))
+        fls_solutions["deterministic"] = FacilityLocation.load(os.path.join(root_path, 
+                                                                             f"{facilities_number}_locations\deterministic_exact_solutions\light_exact_solution_all_day_free_flow.pkl"))
+        session_state[f"fls_stochastic_{facilities_number}"] = fls_solutions  
+
+def stochastic_load_metrics(session_state):
+    root_path = r"\app\geospatial-analysis\facility-location-Bergen\data\07_model_output"
+    
+    if f"df_metrics" not in session_state:
+        df_metrics = pd.read_csv(os.path.join(root_path, 
+                                                     f"stochastic_solution_evaluation_metrics.csv"))
+        new_cols_name = ["n_locations"]
+        for col in df_metrics.columns[1:]:
+            new_cols_name.append(col+" (min)")    
+            try:
+                df_metrics[col] = df_metrics[col]/60
+                df_metrics[col] = df_metrics[col].round(2)
+            except:
+                continue
         
-        st.write("Data has been loaded")
+        df_metrics.columns = new_cols_name
         
-    st.markdown("---")
+        session_state[f"df_metrics"] = df_metrics 
 
 def stochastic_generate_viz(session_state, facilities_number):
-    button = st.button("Generate vizualizations")
-    
     if session_state.get(f"fls_stochastic_{facilities_number}") is None:
         st.write("Please load the data first")
         return
     
-    if button:
-        fl_stochastic = session_state[f"fls_stochastic_{facilities_number}"]["stochastic"]
-        fl_deterministic = session_state[f"fls_stochastic_{facilities_number}"]["deterministic"]
+    fl_stochastic = session_state[f"fls_stochastic_{facilities_number}"]["stochastic"]
+    fl_deterministic = session_state[f"fls_stochastic_{facilities_number}"]["deterministic"]
 
-        lat_global = fl_deterministic.coordinates.geometry.y
-        lon_global = fl_deterministic.coordinates.geometry.x
+    lat_global = fl_deterministic.coordinates.geometry.y
+    lon_global = fl_deterministic.coordinates.geometry.x
         
-        lat_det = [p.geometry.y for p in fl_deterministic.locations_coordinates]
-        lon_det = [p.geometry.x for p in fl_deterministic.locations_coordinates]
+    lat_det = [p.geometry.y for p in fl_deterministic.locations_coordinates]
+    lon_det = [p.geometry.x for p in fl_deterministic.locations_coordinates]
         
-        if facilities_number == 1:
-            idx = int(pd.Series([k if fl_stochastic.first_stage_solution[k] != 0 else None 
-                 for k in fl_stochastic.first_stage_solution.keys()]).dropna().iloc[0])
+    if facilities_number == 1:
+        idx = int(pd.Series([k if fl_stochastic.first_stage_solution[k] != 0 else None 
+                for k in fl_stochastic.first_stage_solution.keys()]).dropna().iloc[0])
 
-            stochastic_locations_coordinates = fl_stochastic.coordinates.loc[idx]
+        stochastic_locations_coordinates = fl_stochastic.coordinates.loc[idx]
             
-            lat_sto = [p.y for p in stochastic_locations_coordinates]
-            lon_sto = [p.x for p in stochastic_locations_coordinates]
-        else:
-            lat_sto = [p.geometry.y for p in fl_stochastic.locations_coordinates]
-            lon_sto = [p.geometry.x for p in fl_stochastic.locations_coordinates]
+        lat_sto = [p.y for p in stochastic_locations_coordinates]
+        lon_sto = [p.x for p in stochastic_locations_coordinates]
+    else:
+        lat_sto = [p.geometry.y for p in fl_stochastic.locations_coordinates]
+        lon_sto = [p.geometry.x for p in fl_stochastic.locations_coordinates]
 
-        fig = go.Figure()
+    fig = go.Figure()
         
-        fig.add_trace(go.Scattermapbox(
+    fig.add_trace(go.Scattermapbox(
             lat=lat_global,
             lon=lon_global,
             mode='markers',
@@ -311,33 +323,33 @@ def stochastic_generate_viz(session_state, facilities_number):
             showlegend=False,
         ))
 
-        fig.add_trace(go.Scattermapbox(
+    fig.add_trace(go.Scattermapbox(
             lat=lat_det,
             lon=lon_det,
             mode='markers',
             marker=dict(
                 color=["red"]*fl_deterministic.n_of_locations_to_choose,
-                size=8,
+                size=6,
             ),
             hovertemplate=f'<br>solution value: {round(fl_deterministic.solution_value/60,2)} minutes<extra></extra>',
             name="deterministic",
             showlegend=True,
         ))
             
-        fig.add_trace(go.Scattermapbox(
+    fig.add_trace(go.Scattermapbox(
             lat=lat_sto,
             lon=lon_sto,
             mode='markers',
             marker=dict(
                 color=["blue"]*fl_stochastic.n_of_locations_to_choose,
-                size=8,
+                size=6,
             ),
             hovertemplate=f'<br>solution value: {round(fl_stochastic.solution_value/60,2)} minutes<extra></extra>',
             name="stochastic",
             showlegend=True,
         ))
 
-        fig.update_layout(title="<b>deterministic vs stochastic solution<b>",
+    fig.update_layout(title="<b>deterministic vs stochastic solution<b>",
                         mapbox=dict(
                             style="open-street-map",
                             center=dict(lat=fl_deterministic.coordinates.geometry.y.mean(), lon=fl_deterministic.coordinates.geometry.x.mean()),
@@ -348,19 +360,50 @@ def stochastic_generate_viz(session_state, facilities_number):
                         width=700,
                         xaxis_title="time of the day",)
 
-        col1, col2, col3 = st.columns([1,2,1])
-        
-        with col2:
-            st.plotly_chart(fig, use_container_width=False)
-        
-    st.markdown("---")
+    return fig
 
-def stochastic_analysis(session_state, facilities_number):
+def stochastic_analysis(session_state):
+    col1, col2, col3, _ = st.columns(4)
+    with col1:
+        button_load = st.button("Load data for solution analysis")
+    with col2:
+        button_viz = st.button("Generate vizualizations")
+    with col3:
+        button_metrics = st.button("Generate metrics")
+        
     ############################################## LOAD DATA ##############################################
-    stochastic_load_data(session_state, facilities_number)
+    if button_load:
+        for facilities_number in FACILITIES_NUMBER:
+                st.write(f"Loading data for {facilities_number} facilities...")
+                stochastic_load_data(session_state, facilities_number)
+        st.write("Loading stochastic solutions metrics...")
+        stochastic_load_metrics(session_state)
+        st.write("Loading for all the scenarios has been completed!")
+    st.markdown("---")
     
     ############################################## GENERATE VIZ ##############################################    
-    stochastic_generate_viz(session_state, facilities_number)
+    if button_viz:
+        col1, col2, col3 = st.columns(3)
+        cols = [col1, col2, col3]
+    
+        for facilities_number in FACILITIES_NUMBER:
+            fig = stochastic_generate_viz(session_state, facilities_number)
+            with cols[facilities_number-1]:
+                st.plotly_chart(fig, use_container_width=True)
+    st.markdown("---")
+
+    ############################################## GENERATE METRICS ##############################################
+    if button_metrics:
+        col1, col2, col3 = st.columns([1,2,1])
+        cols = [col1, col2, col3]
+        if session_state.get(f"df_metrics") is None:
+            with col1:  
+                st.write("Please load the data first")
+        else:
+            with col2:
+                df_metrics = session_state[f"df_metrics"]
+                st.dataframe(df_metrics)
+    st.markdown("---")
 
 
 if __name__ == '__main__':
@@ -380,12 +423,20 @@ if __name__ == '__main__':
     
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.markdown("**Facilities number:**")
-        facilities_number = st.radio(
-        "Facilities number",
-        (1, 2, 3),
-        horizontal=True,
-        label_visibility="hidden",)
+        if analysis == "Deterministic":
+            st.markdown("**Facilities number:**")
+            facilities_number = st.radio(
+            "Facilities number",
+            (1, 2, 3),
+            horizontal=True,
+            label_visibility="hidden",)
+        else:
+            st.markdown("**Facilities number:**")
+            facilities_number = st.radio(
+            "Facilities number",
+            ([1,2,3],),
+            horizontal=True,
+            label_visibility="hidden",)
     
     with col2:
         st.markdown("**Ratio for customers locations:**")
@@ -414,4 +465,4 @@ if __name__ == '__main__':
         deterministic_analysis(session_state, TIMES, facilities_number, ratio1, ratio2, seed)
     
     if analysis == "Stochastic":
-        stochastic_analysis(session_state, facilities_number)
+        stochastic_analysis(session_state)

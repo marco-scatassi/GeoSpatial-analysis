@@ -103,6 +103,9 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
 
 def deterministic_generate_viz(session_state, TIMES, facilities_number):
     button4 = st.button("Generate vizualizations")
+    if f"fls_exact_{facilities_number}" not in session_state:
+        st.write("Load the data first")
+        return 
     
     if button4:
         col1, col2, col3 = st.columns(3)
@@ -282,7 +285,7 @@ def stochastic_load_metrics(session_state):
 def stochastic_generate_viz(session_state, facilities_number):
     if session_state.get(f"fls_stochastic_{facilities_number}") is None:
         st.write("Please load the data first")
-        return
+        return go.Figure()
     
     fl_stochastic = session_state[f"fls_stochastic_{facilities_number}"]["stochastic"]
     fl_deterministic = session_state[f"fls_stochastic_{facilities_number}"]["deterministic"]

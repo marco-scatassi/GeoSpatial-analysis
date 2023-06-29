@@ -16,7 +16,8 @@ Evidently, a zero step can be included: *prevention*.
 
 In this general framework, the issue of selecting the number and the locations of emergency facilities lies both in the *mitigation* and *response* phases especially, when the uncertainty is considered. Indeed, In the context of mitigation, it involves determining the placement of facilities to minimize the detrimental effects of unavoidable emergencies (where should we place the facilities?). On the other hand, the *response* phase regards every course of actions undertaken after the occurrence of an emergency (which demanding point is associate to which serving point?). 
 
-### Emergency facility location problem: a taxonomy
+## Emergency facility location problem
+### A taxonomy
 A first classification can be performed, distinguishing *continuous* and *discrete* models. Specifically:
 - **continuous** model are those in which facilities can be located in any point within the feasibility region;
 - **discrete** model are those in which facilities can be located in a finite subset of pre-selected points within the feasibility region.
@@ -28,10 +29,10 @@ Then, following [2], discrete facility location problems can be divided in the f
 - **median based**, in which the objective is to minimize the weighted average distance between points and the associated facility;
 - other problems.
 
-## Deterministic Formulation 
+### Deterministic Formulation 
 
 
-## Stochastic Formulation 
+### Stochastic Formulation 
 
 
 ### Bibliography

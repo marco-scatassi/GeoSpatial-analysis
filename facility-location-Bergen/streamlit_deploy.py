@@ -57,10 +57,10 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
             progress_bar = st.progress(0, "Loading data...")
             for i, time in enumerate(TIMES):
                 print_INFO_message_timestamp(f"Loading exact solution for: {time}")
-                progress_bar.progress((i+1)*100/len(TIMES), f"Loading exact solution for: {time}")
+                progress_bar.progress((i+1)*1/len(TIMES), f"Loading exact solution for: {time}")
                 path = r"/app/geospatial-analysis/facility-location-Bergen/"+retrieve_light_solution_path(facilities_number, time)
                 fls_exact[time] = FacilityLocation.load(path)
-                ptime.sleep(8)
+                ptime.sleep(5)
             
             session_state[f"fls_exact_{facilities_number}"] = fls_exact
             st.write("Data has been loaded")

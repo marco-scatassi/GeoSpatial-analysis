@@ -252,7 +252,7 @@ def deterministic_analysis(session_state, TIMES, facilities_number, ratio1, rati
     #     st.write("Preprocessing for all the scenarios has been completed!")
             
     # st.markdown("---")
-            
+    
     ############################################## LOAD DATA ##############################################
     deterministic_load_data(session_state, TIMES, facilities_number)
         
@@ -373,6 +373,7 @@ def stochastic_analysis(session_state):
         button_viz = st.button("Generate vizualizations")
     with col3:
         button_metrics = st.button("Generate metrics")
+    st.markdown("---")
         
     ############################################## LOAD DATA ##############################################
     if button_load:

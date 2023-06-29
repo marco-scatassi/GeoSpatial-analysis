@@ -464,11 +464,15 @@ if __name__ == '__main__':
     if section == "Project description":
         with open(project_path+r"/data/09_streamlit_md/Project description.md", "r") as f:
             content = f.read()
-        st.markdown(content)
+        col1, col2, col3 = st.columns([1,2,1])
+        with col2:
+            st.markdown(content)
     elif section == "Theoretical Framework":
         with open(project_path+r"/data/09_streamlit_md/Theoretical framework.md", "r") as f:
             content = f.read()
-        st.markdown(content)
+        col1, col2, col3 = st.columns([1,2,1])
+        with col2:
+            st.markdown(content)
     elif section == "Deterministic models analysis":
         deterministic_analysis(session_state, TIMES, facilities_number, ratio1, ratio2, seed)
     elif section == "Stochastic models analysis":

@@ -417,9 +417,7 @@ if __name__ == '__main__':
     with side_bar:
         st.subheader("Choose the analysis to perform")
         
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            analysis = st.radio(
+        analysis = st.radio(
                 "Analysis",
                 ("Deterministic", "Stochastic"),
                 horizontal=False,
@@ -427,40 +425,35 @@ if __name__ == '__main__':
         
         st.subheader("Set the parameters for the optimization model")
         
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            if analysis == "Deterministic":
-                st.markdown("**Facilities number:**")
-                facilities_number = st.radio(
+        if analysis == "Deterministic":
+            st.markdown("**Facilities number:**")
+            facilities_number = st.radio(
                 "Facilities number",
                 (1, 2, 3),
                 horizontal=True,
                 label_visibility="hidden",)
-            else:
-                st.markdown("**Facilities number:**")
-                facilities_number = st.radio(
+        else:
+            st.markdown("**Facilities number:**")
+            facilities_number = st.radio(
                 "Facilities number",
                 ([1,2,3],),
                 horizontal=True,
                 label_visibility="hidden",)
         
-        with col2:
-            st.markdown("**Ratio for customers locations:**")
-            ratio1 = st.radio(
+        st.markdown("**Ratio for customers locations:**")
+        ratio1 = st.radio(
             "Ratio for customers locations",
             (1/5,),
             label_visibility="hidden")
 
-        with col3:
-            st.markdown("**Ratio for candidate locations:**")
-            ratio2 = st.radio(
+        st.markdown("**Ratio for candidate locations:**")
+        ratio2 = st.radio(
             "Ratio for candidate locations",
             (1/10,),
             label_visibility="hidden")
             
-        with col4:
-            st.markdown("**Seed for reproducibility:**")
-            seed = st.radio(
+        st.markdown("**Seed for reproducibility:**")
+        seed = st.radio(
                 "Seed for reproducibility",
                 (324324,),
                 label_visibility="hidden",)

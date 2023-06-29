@@ -23,7 +23,7 @@ In this general framework, the issue of selecting the number and the locations o
 ## Stochastic Formulation 
 
 
-
+### Bibliography
 [1] R. Z. Farahani, M. M. Lotfi, A. Baghaian, R. Ruiz, and S. Rezapour, ‘Mass casualty management in disaster scene: A systematic review of OR&MS research in humanitarian operations’, _European Journal of Operational Research_, vol. 287, no. 3, pp. 787–819, Dec. 2020, doi: [10.1016/j.ejor.2020.03.005](https://doi.org/10.1016/j.ejor.2020.03.005).
 
 [2] Y. Liu, Y. Yuan, J. Shen, and W. Gao, ‘Emergency response facility location in transportation networks: A literature review’, _Journal of Traffic and Transportation Engineering (English Edition)_, vol. 8, no. 2, pp. 153–169, Apr. 2021, doi: [10.1016/j.jtte.2021.03.001](https://doi.org/10.1016/j.jtte.2021.03.001).

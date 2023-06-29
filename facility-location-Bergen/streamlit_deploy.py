@@ -421,7 +421,7 @@ if __name__ == '__main__':
         section = st.selectbox(
                 "Section selection",
                 ("Project description", "Theoretical Framework", "Deterministic models analysis", "Stochastic models analysis"),
-                label_visibility="collapse",)
+                label_visibility="collapsed",)
         
         st.subheader("Parameters for the optimization model")
         

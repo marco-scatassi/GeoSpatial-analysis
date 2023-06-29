@@ -410,7 +410,7 @@ def stochastic_analysis(session_state):
 
 
 if __name__ == '__main__':
-    side_bar = st.side_bar
+    side_bar = st.sidebar
 
     st.title("Facility Location dashboard")
 

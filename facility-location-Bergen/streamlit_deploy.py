@@ -348,7 +348,7 @@ def stochastic_generate_viz(session_state, facilities_number):
             showlegend=True,
         ))
 
-    fig.update_layout(title=f"<b>deterministic vs stochastic solution</b><br>                   ({facilities_number} locations)",
+    fig.update_layout(title=f"<b>deterministic vs stochastic solution</b><br>                        ({facilities_number} locations)",
                         mapbox=dict(
                             style="open-street-map",
                             center=dict(lat=fl_deterministic.coordinates.geometry.y.mean(), lon=fl_deterministic.coordinates.geometry.x.mean()),

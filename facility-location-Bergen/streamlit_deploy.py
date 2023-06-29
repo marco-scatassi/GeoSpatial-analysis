@@ -460,8 +460,8 @@ if __name__ == '__main__':
                     label_visibility="hidden",)
             
     
-    if analysis == "Deterministic":
+    if section == "Deterministic models analysis":
         deterministic_analysis(session_state, TIMES, facilities_number, ratio1, ratio2, seed)
     
-    if analysis == "Stochastic":
+    if section == "Stochastic models analysis":
         stochastic_analysis(session_state)

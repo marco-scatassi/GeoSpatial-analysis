@@ -50,12 +50,12 @@ FACILITIES_NUMBER = [1,2,3]
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------
 def deterministic_load_data(session_state, TIMES, facilities_number):
     button3 = st.button("Load data for solution analysis")
-    progress_bar = st.progress(0, "Loading data...")
     c = 0
     
     if button3:
         if f"fls_exact_{facilities_number}" not in session_state:
             fls_exact = {}
+            progress_bar = st.progress(0, "Loading data...")
             for i, time in enumerate(TIMES):
                 print_INFO_message_timestamp(f"Loading deterministic solution for: {time}")
                 progress_bar.progress((i+1)*1/len(TIMES), f"Loading exact solution for: {time}")

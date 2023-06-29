@@ -31,7 +31,19 @@ Then, following [2], discrete facility location problems can be divided in the f
 Further classification can be done within each of the 3 previous categories. However, the one adopted in this work is the **p-center location problem**. This formulation as well as its stochastic version will be described in the following sections.
 
 ### Deterministic Formulation 
-
+$$
+\begin{flalign}
+& \min L \\
+& \text { subject to } \\
+& \sum_{j \in N_i} y_{i j}=1, i \in I \\
+& \sum_{j \in J} x_j=p \\
+& \sum_{j \in N_i} d_{i j} y_{i j} \leq L, i \in I \\
+& y_{i j} \leq x_j, i \in I, j \in N_i \\
+& y_{i j} \in\{0,1\}, i \in I, j \in N_i \\
+& x_j \in\{0,1\}, j \in J \\
+& L \geq 0 .
+\end{flalign}
+$$
 
 ### Stochastic Formulation 
 

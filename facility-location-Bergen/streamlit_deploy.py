@@ -414,49 +414,51 @@ if __name__ == '__main__':
     st.markdown("---")
 
     with side_bar:
-        st.subheader("Choose the analysis to perform")
+        st.title("Control Panel")
+
+        st.subheader("Section")
         
-        analysis = st.radio(
-                "Analysis",
-                ("Deterministic", "Stochastic"),
-                horizontal=False,
-                label_visibility="hidden",)
+        section = st.selectbox(
+                "Section selection",
+                ("Project description", "Theoretical Framework", "Deterministic models analysis", "Stochastic models analysis"),
+                label_visibility="collapse",)
         
         st.subheader("Parameters for the optimization model")
         
-        if analysis == "Deterministic":
-            st.markdown("**Facilities number:**")
-            facilities_number = st.radio(
-                "Facilities number",
-                (1, 2, 3),
-                horizontal=True,
-                label_visibility="hidden",)
-        else:
-            st.markdown("**Facilities number:**")
-            facilities_number = st.radio(
-                "Facilities number",
-                ([1,2,3],),
-                horizontal=True,
-                label_visibility="hidden",)
-        
-        st.markdown("**Ratio for customers locations:**")
-        ratio1 = st.radio(
-            "Ratio for customers locations",
-            (1/5,),
-            label_visibility="hidden")
-
-        st.markdown("**Ratio for candidate locations:**")
-        ratio2 = st.radio(
-            "Ratio for candidate locations",
-            (1/10,),
-            label_visibility="hidden")
+        if section == "Deterministic models analysis" or section == "Stochastic models analysis":
+            if section == "Deterministic models analysis":
+                st.markdown("**Facilities number:**")
+                facilities_number = st.radio(
+                    "Facilities number",
+                    (1, 2, 3),
+                    horizontal=True,
+                    label_visibility="hidden",)
+            else:
+                st.markdown("**Facilities number:**")
+                facilities_number = st.radio(
+                    "Facilities number",
+                    ([1,2,3],),
+                    horizontal=True,
+                    label_visibility="hidden",)
             
-        st.markdown("**Seed for reproducibility:**")
-        seed = st.radio(
-                "Seed for reproducibility",
-                (324324,),
-                label_visibility="hidden",)
-        
+            st.markdown("**Ratio for customers locations:**")
+            ratio1 = st.radio(
+                "Ratio for customers locations",
+                (1/5,),
+                label_visibility="hidden")
+
+            st.markdown("**Ratio for candidate locations:**")
+            ratio2 = st.radio(
+                "Ratio for candidate locations",
+                (1/10,),
+                label_visibility="hidden")
+                
+            st.markdown("**Seed for reproducibility:**")
+            seed = st.radio(
+                    "Seed for reproducibility",
+                    (324324,),
+                    label_visibility="hidden",)
+            
     
     if analysis == "Deterministic":
         deterministic_analysis(session_state, TIMES, facilities_number, ratio1, ratio2, seed)

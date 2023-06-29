@@ -429,32 +429,32 @@ if __name__ == '__main__':
                     "Facilities number",
                     (1, 2, 3),
                     horizontal=True,
-                    label_visibility="hidden",)
+                    label_visibility="collapsed",)
             else:
                 st.markdown("**Facilities number:**")
                 facilities_number = st.radio(
                     "Facilities number",
                     ([1,2,3],),
                     horizontal=True,
-                    label_visibility="hidden",)
+                    label_visibility="collapsed",)
             
             st.markdown("**Ratio for customers locations:**")
             ratio1 = st.radio(
                 "Ratio for customers locations",
                 (1/5,),
-                label_visibility="hidden")
+                label_visibility="collapsed")
 
             st.markdown("**Ratio for candidate locations:**")
             ratio2 = st.radio(
                 "Ratio for candidate locations",
                 (1/10,),
-                label_visibility="hidden")
+                label_visibility="collapsed")
                 
             st.markdown("**Seed for reproducibility:**")
             seed = st.radio(
                     "Seed for reproducibility",
                     (324324,),
-                    label_visibility="hidden",)
+                    label_visibility="collapsed",)
             
     if section not in ["Project description", "Theoretical Framework"]:
         st.title("Facility Location dashboard")

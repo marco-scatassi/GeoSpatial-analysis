@@ -1,9 +1,9 @@
 # Theoretical framework
 
 ## Introduction
-In this section, we provide a general description of the emergency facility problem and discuss the reasons why such facilities are crucial. An emergency is “something dangerous or serious, such as an accident, that happens suddenly or unexpectedly and needs fast action in order to avoid harmful results” (https://dictionary.cambridge.org/dictionary/english/emergency). 
+In this section, we provide a general description of the emergency facility problem and discuss the reasons why such facilities are crucial. 
 
-The practice of dealing with emergency situations goes under the name of *emergency management*, and it includes a 4-phase cycle [1] :
+An emergency is “something dangerous or serious, such as an accident, that happens suddenly or unexpectedly and needs fast action in order to avoid harmful results” (https://dictionary.cambridge.org/dictionary/english/emergency). The practice of dealing with emergency situations goes under the name of *emergency management*, and it includes a 4-phase cycle [1] :
 1. mitigation;
 2. preparedness;
 3. response;

@@ -97,7 +97,7 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
             
             session_state[f"dfs_worst_{facilities_number}"] = dfs_worst
 
-    progress_bar = st.progress(1, "Loading data completed!")
+    progress_bar = st.progress(100, "Loading data completed!")
     st.markdown("---")
 
 def deterministic_generate_viz(session_state, TIMES, facilities_number):

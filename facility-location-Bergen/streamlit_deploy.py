@@ -348,13 +348,13 @@ def stochastic_generate_viz(session_state, facilities_number):
             showlegend=True,
         ))
 
-    fig.update_layout(title="<b>deterministic vs stochastic solution<b>",
+    fig.update_layout(title=f"<b>deterministic vs stochastic solution</b><br>       ({facilities_number} locations)",
                         mapbox=dict(
                             style="open-street-map",
                             center=dict(lat=fl_deterministic.coordinates.geometry.y.mean(), lon=fl_deterministic.coordinates.geometry.x.mean()),
                             zoom=9.5
                             ),
-                        title_pad_l=150,
+                        title_pad_l=50,
                         height=800,
                         width=700,
                         xaxis_title="time of the day",)

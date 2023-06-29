@@ -11,8 +11,7 @@ An emergency is “something dangerous or serious, such as an accident, that hap
 
 Evidently, a zero step can be included: *prevention*.
 
-![image](https://github.com/marco-scatassi/GeoSpatial-analysis/assets/96434607/ac0038ed-1ef5-4782-b39e-787404380b0f)
-
+![image](https://github.com/marco-scatassi/GeoSpatial-analysis/assets/96434607/85c72bf8-3036-4793-a3d1-32acc18909e7)
 
 In this general framework, the issue of selecting the number and the locations of emergency facilities lies both in the *mitigation* and *response* phases especially, when the uncertainty is considered. Indeed, In the context of mitigation, it involves determining the placement of facilities to minimize the detrimental effects of unavoidable emergencies (where should we place the facilities?). On the other hand, the *response* phase regards every course of actions undertaken after the occurrence of an emergency (which demanding point is associate to which serving point?). 
 
@@ -29,13 +28,17 @@ Then, following [2], discrete facility location problems can be divided in the f
 - **median based**, in which the objective is to minimize the weighted average distance between points and the associated facility;
 - other problems.
 
+Further classification can be done within each of the 3 previous categories. However, the one adopted in this work is the **p-center location problem**. This formulation as well as its stochastic version will be described in the following sections.
+
 ### Deterministic Formulation 
 
 
 ### Stochastic Formulation 
 
 
-### Bibliography
+
+
+#### Bibliography
 [1] R. Z. Farahani, M. M. Lotfi, A. Baghaian, R. Ruiz, and S. Rezapour, ‘Mass casualty management in disaster scene: A systematic review of OR&MS research in humanitarian operations’, _European Journal of Operational Research_, vol. 287, no. 3, pp. 787–819, Dec. 2020, doi: [10.1016/j.ejor.2020.03.005](https://doi.org/10.1016/j.ejor.2020.03.005).
 
 [2] Y. Liu, Y. Yuan, J. Shen, and W. Gao, ‘Emergency response facility location in transportation networks: A literature review’, _Journal of Traffic and Transportation Engineering (English Edition)_, vol. 8, no. 2, pp. 153–169, Apr. 2021, doi: [10.1016/j.jtte.2021.03.001](https://doi.org/10.1016/j.jtte.2021.03.001).

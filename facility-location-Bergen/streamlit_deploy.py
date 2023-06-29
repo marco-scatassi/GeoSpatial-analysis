@@ -423,9 +423,9 @@ if __name__ == '__main__':
                 ("Project description", "Theoretical Framework", "Deterministic models analysis", "Stochastic models analysis"),
                 label_visibility="collapsed",)
         
-        st.subheader("Parameters for the optimization model")
         
         if section == "Deterministic models analysis" or section == "Stochastic models analysis":
+            st.subheader("Parameters for the optimization model")
             if section == "Deterministic models analysis":
                 st.markdown("**Facilities number:**")
                 facilities_number = st.radio(

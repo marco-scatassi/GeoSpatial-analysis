@@ -410,59 +410,61 @@ def stochastic_analysis(session_state):
 
 
 if __name__ == '__main__':
+    side_bar = st.side_bar
+
     st.title("Facility Location dashboard")
 
-    st.subheader("Choose the analysis to perform")
-    
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        analysis = st.radio(
-            "Analysis",
-            ("Deterministic", "Stochastic"),
-            horizontal=False,
-            label_visibility="hidden",)
-    
-    st.subheader("Set the parameters for the optimization model")
-    
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        if analysis == "Deterministic":
-            st.markdown("**Facilities number:**")
-            facilities_number = st.radio(
-            "Facilities number",
-            (1, 2, 3),
-            horizontal=True,
-            label_visibility="hidden",)
-        else:
-            st.markdown("**Facilities number:**")
-            facilities_number = st.radio(
-            "Facilities number",
-            ([1,2,3],),
-            horizontal=True,
-            label_visibility="hidden",)
-    
-    with col2:
-        st.markdown("**Ratio for customers locations:**")
-        ratio1 = st.radio(
-        "Ratio for customers locations",
-        (1/5,),
-        label_visibility="hidden")
-
-    with col3:
-        st.markdown("**Ratio for candidate locations:**")
-        ratio2 = st.radio(
-        "Ratio for candidate locations",
-        (1/10,),
-        label_visibility="hidden")
+    with side_bar:
+        st.subheader("Choose the analysis to perform")
         
-    with col4:
-        st.markdown("**Seed for reproducibility:**")
-        seed = st.radio(
-            "Seed for reproducibility",
-            (324324,),
-            label_visibility="hidden",)
-      
-    st.markdown("---")
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            analysis = st.radio(
+                "Analysis",
+                ("Deterministic", "Stochastic"),
+                horizontal=False,
+                label_visibility="hidden",)
+        
+        st.subheader("Set the parameters for the optimization model")
+        
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            if analysis == "Deterministic":
+                st.markdown("**Facilities number:**")
+                facilities_number = st.radio(
+                "Facilities number",
+                (1, 2, 3),
+                horizontal=True,
+                label_visibility="hidden",)
+            else:
+                st.markdown("**Facilities number:**")
+                facilities_number = st.radio(
+                "Facilities number",
+                ([1,2,3],),
+                horizontal=True,
+                label_visibility="hidden",)
+        
+        with col2:
+            st.markdown("**Ratio for customers locations:**")
+            ratio1 = st.radio(
+            "Ratio for customers locations",
+            (1/5,),
+            label_visibility="hidden")
+
+        with col3:
+            st.markdown("**Ratio for candidate locations:**")
+            ratio2 = st.radio(
+            "Ratio for candidate locations",
+            (1/10,),
+            label_visibility="hidden")
+            
+        with col4:
+            st.markdown("**Seed for reproducibility:**")
+            seed = st.radio(
+                "Seed for reproducibility",
+                (324324,),
+                label_visibility="hidden",)
+        
     
     if analysis == "Deterministic":
         deterministic_analysis(session_state, TIMES, facilities_number, ratio1, ratio2, seed)

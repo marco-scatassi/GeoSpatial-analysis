@@ -66,7 +66,7 @@ $$
 ### Stochastic Formulation 
 The deterministic formulation is not able to take into account the stochastic nature of **travel time**, that depends on several factors (hour of the day, weather conditions, changes in the road viability). Many methodologies and approaches exist in order to embrace the stochastic nature of the model previously described, such as chance constraint optimization, stochastic programming, robust optimization queuing theory.
 
-The two-stage optimization model has been used in this work. This decision is justified observing that the location of the facilities can be viewed as a first stage decision, that need to be robust with respect to changing scenarios. While, once the uncertainty has been disclosed, it is possible to decide which facility should serve a specific demand point ([6]).
+The two-stage optimization model has been used in this work. This decision is justified observing that the location of the facilities can be viewed as a first stage decision, that need to be robust with respect to changing scenarios. While, once the uncertainty has been disclosed, it is possible to decide which facility should serve a specific demand point [6].
 
 
 #### Bibliography

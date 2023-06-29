@@ -410,9 +410,6 @@ def stochastic_analysis(session_state):
 if __name__ == '__main__':
     side_bar = st.sidebar
 
-    st.title("Facility Location dashboard")
-    st.markdown("---")
-
     with side_bar:
         st.title("Control Panel")
 
@@ -459,6 +456,10 @@ if __name__ == '__main__':
                     (324324,),
                     label_visibility="hidden",)
             
+    if section not in ["Project description", "Theoretical Framework"]:
+        st.title("Facility Location dashboard")
+        st.markdown("---")
+
     if section == "Project description":
         with open(project_path+r"/data/09_streamlit_md/Project description.md", "r") as f:
             st.markdown(f.read())

@@ -14,7 +14,7 @@ Evidently, a zero step can be included: *prevention*.
 ![image](https://github.com/marco-scatassi/GeoSpatial-analysis/assets/96434607/ac0038ed-1ef5-4782-b39e-787404380b0f)
 
 
-In this general framework, the issue of selecting the number and the locations of emergency facilities lies both in the *mitigation* and *response* phase. Especially, when the uncertainty is considered.
+In this general framework, the issue of selecting the number and the locations of emergency facilities lies both in the *mitigation* and *response* phases especially, when the uncertainty is considered. Indeed, In the context of mitigation, it involves determining the placement of facilities to minimize the detrimental effects of unavoidable emergencies (where should we place the facilities?). On the other hand, the *response* phase regards every course of actions undertaken after the occurrence of an emergency (which demanding point is associate to which serving point?). 
 
 ## Deterministic Formulation 
 

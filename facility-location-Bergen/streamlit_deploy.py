@@ -38,7 +38,6 @@ from graphical_analysis import (
     average_travel_time_across_under_different_cases
 )
 
-st.set_page_config(layout = "wide")
 session_state = st.session_state
 
 project_path = r"/app/geospatial-analysis/facility-location-Bergen"
@@ -457,6 +456,7 @@ if __name__ == '__main__':
                     label_visibility="collapsed",)
             
     if section not in ["Project description", "Theoretical Framework"]:
+        st.set_page_config(layout = "wide")
         st.title("Facility Location dashboard")
         st.markdown("---")
 

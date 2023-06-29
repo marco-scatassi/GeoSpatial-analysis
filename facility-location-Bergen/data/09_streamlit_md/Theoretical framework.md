@@ -31,6 +31,9 @@ Then, following [2], discrete facility location problems can be divided in the f
 Further classification can be done within each of the 3 previous categories. However, the one adopted in this work is the **p-center location problem**. This formulation as well as its stochastic version will be described in the following sections.
 
 ### Deterministic Formulation 
+Referring to [5], the **p-center location** problems aim to minimize the maximum distance between demand points and their associated facility. It is assumed that all demand points are covered. A possible formulation for the **p-center problem**, as described in [5], is provided below.
+
+#### Formulation
 $$
 \begin{aligned}
 & \min L \\
@@ -45,6 +48,21 @@ $$
 \end{aligned}
 $$
 
+#### Sets:
+- $I$ : The set of demand points.
+- $J$ : The set of candidate locations.
+- $N_i$ : The set of all candidate locations which can cover demand point $i \in I, N_i=\left\{j \in J: d_{i j} \leq D_i\right\}$.
+
+#### Input parameters:
+- $d_{i j}$ : The travel distance (or time) from demand point $i \in I$ to candidate location $j \in J$.
+- $w_i$ : The demand at point $i \in I$.
+- $D_i$ : The maximum acceptable travel distance or time from demand point $i \in I$ (the cover distance or time).
+- $p$ : The number of candidate locations to be established.
+
+#### Decision variables:
+- $x_j$ : 1, if a facility is established at candidate location $j \in J$; 0 otherwise.
+- $y_{i j}$: 1, if demand point $i$ is assigned to a facility at candidate location $j \in N_i ; 0$ otherwise.
+
 ### Stochastic Formulation 
 
 
@@ -53,9 +71,11 @@ $$
 #### Bibliography
 [1] R. Z. Farahani, M. M. Lotfi, A. Baghaian, R. Ruiz, and S. Rezapour, ‘Mass casualty management in disaster scene: A systematic review of OR&MS research in humanitarian operations’, _European Journal of Operational Research_, vol. 287, no. 3, pp. 787–819, Dec. 2020, doi: [10.1016/j.ejor.2020.03.005](https://doi.org/10.1016/j.ejor.2020.03.005).
 
-[2] Y. Liu, Y. Yuan, J. Shen, and W. Gao, ‘Emergency response facility location in transportation networks: A literature review’, _Journal of Traffic and Transportation Engineering (English Edition)_, vol. 8, no. 2, pp. 153–169, Apr. 2021, doi: [10.1016/j.jtte.2021.03.001](https://doi.org/10.1016/j.jtte.2021.03.001).
+[2] M. S. Daskin, ‘What you should know about location modeling’, _Naval Research Logistics (NRL)_, vol. 55, no. 4, pp. 283–294, 2008, doi: [10.1002/nav.20284](https://doi.org/10.1002/nav.20284).
 
-[3] W. Wang, S. Wu, S. Wang, L. Zhen, and X. Qu, ‘Emergency facility location problems in logistics: Status and perspectives’, _Transportation Research Part E: Logistics and Transportation Review_, vol. 154, p. 102465, Oct. 2021, doi: [10.1016/j.tre.2021.102465](https://doi.org/10.1016/j.tre.2021.102465).
+[3] Y. Liu, Y. Yuan, J. Shen, and W. Gao, ‘Emergency response facility location in transportation networks: A literature review’, _Journal of Traffic and Transportation Engineering (English Edition)_, vol. 8, no. 2, pp. 153–169, Apr. 2021, doi: [10.1016/j.jtte.2021.03.001](https://doi.org/10.1016/j.jtte.2021.03.001).
 
-[4] A. Ahmadi-Javid, P. Seyedi, and S. S. Syam, ‘A survey of healthcare facility location’, _Computers & Operations Research_, vol. 79, pp. 223–263, Mar. 2017, doi: [10.1016/j.cor.2016.05.018](https://doi.org/10.1016/j.cor.2016.05.018).
+[4] W. Wang, S. Wu, S. Wang, L. Zhen, and X. Qu, ‘Emergency facility location problems in logistics: Status and perspectives’, _Transportation Research Part E: Logistics and Transportation Review_, vol. 154, p. 102465, Oct. 2021, doi: [10.1016/j.tre.2021.102465](https://doi.org/10.1016/j.tre.2021.102465).
+
+[5] A. Ahmadi-Javid, P. Seyedi, and S. S. Syam, ‘A survey of healthcare facility location’, _Computers & Operations Research_, vol. 79, pp. 223–263, Mar. 2017, doi: [10.1016/j.cor.2016.05.018](https://doi.org/10.1016/j.cor.2016.05.018).
 

@@ -32,7 +32,7 @@ Further classification can be done within each of the 3 previous categories. How
 
 ### Deterministic Formulation 
 $$
-\begin{flalign}
+\begin{aligned}
 & \min L \\
 & \text { subject to } \\
 & \sum_{j \in N_i} y_{i j}=1, i \in I \\
@@ -42,7 +42,7 @@ $$
 & y_{i j} \in\{0,1\}, i \in I, j \in N_i \\
 & x_j \in\{0,1\}, j \in J \\
 & L \geq 0 .
-\end{flalign}
+\end{aligned}
 $$
 
 ### Stochastic Formulation 

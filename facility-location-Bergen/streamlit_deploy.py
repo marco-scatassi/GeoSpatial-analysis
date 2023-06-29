@@ -261,7 +261,7 @@ def deterministic_analysis(session_state, TIMES, facilities_number, ratio1, rati
 
 # -------------------------------------------- STOCHASTIC ANALYSIS ---------------------------------------------
 def stochastic_load_data(session_state, facilities_number):
-    root_path = r"/app/geospatial-analysis/facility-location-Bergen/data/07_model_output"
+    root_path = project_path+r"/data/07_model_output"
     
     if f"fls_stochastic_{facilities_number}" not in session_state:
         fls_solutions = {}
@@ -270,7 +270,7 @@ def stochastic_load_data(session_state, facilities_number):
         session_state[f"fls_stochastic_{facilities_number}"] = fls_solutions  
 
 def stochastic_load_metrics(session_state):
-    root_path = r"/app/geospatial-analysis/facility-location-Bergen/data/07_model_output"
+    root_path = project_path+r"/data/07_model_output"
     if f"df_metrics" not in session_state:
         df_metrics = pd.read_csv(root_path+f"/stochastic_solution_evaluation_metrics.csv")
         new_cols_name = ["n_locations"]
@@ -459,9 +459,10 @@ if __name__ == '__main__':
                     (324324,),
                     label_visibility="hidden",)
             
-    
-    if section == "Deterministic models analysis":
+    if section == "Project description":
+        with open(project_path+r"/data/09_streamlit_md/Project description.md", "r") as f:
+            st.markdown(f.read())
+    elif section == "Deterministic models analysis":
         deterministic_analysis(session_state, TIMES, facilities_number, ratio1, ratio2, seed)
-    
-    if section == "Stochastic models analysis":
+    elif section == "Stochastic models analysis":
         stochastic_analysis(session_state)

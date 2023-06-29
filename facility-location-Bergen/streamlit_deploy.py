@@ -382,7 +382,6 @@ def stochastic_analysis(session_state):
         progress_bar.progress(2/3, "Loading stochastic solutions metrics...")
         stochastic_load_metrics(session_state)
         progress_bar.progress(3/3, "Loading data completed!")
-    st.markdown("---")
     
     ############################################## GENERATE VIZ ##############################################    
     if button_viz:
@@ -393,7 +392,6 @@ def stochastic_analysis(session_state):
             fig = stochastic_generate_viz(session_state, facilities_number)
             with cols[facilities_number-1]:
                 st.plotly_chart(fig, use_container_width=True)
-    st.markdown("---")
 
     ############################################## GENERATE METRICS ##############################################
     if button_metrics:
@@ -406,13 +404,13 @@ def stochastic_analysis(session_state):
             with col2:
                 df_metrics = session_state[f"df_metrics"]
                 st.dataframe(df_metrics)
-    st.markdown("---")
 
 
 if __name__ == '__main__':
     side_bar = st.sidebar
 
     st.title("Facility Location dashboard")
+    st.markdown("---")
 
     with side_bar:
         st.subheader("Choose the analysis to perform")
@@ -423,7 +421,7 @@ if __name__ == '__main__':
                 horizontal=False,
                 label_visibility="hidden",)
         
-        st.subheader("Set the parameters for the optimization model")
+        st.subheader("Parameters for the optimization model")
         
         if analysis == "Deterministic":
             st.markdown("**Facilities number:**")

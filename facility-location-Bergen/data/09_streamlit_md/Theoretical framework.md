@@ -51,7 +51,7 @@ $$
 #### Sets:
 - $I$ : The set of demand points.
 - $J$ : The set of candidate locations.
-- $N_i$ : The set of all candidate locations which can cover demand point $i \in I, N_i=\left\{j \in J: d_{i j} \leq D_i\right\}$.
+- $N_i$ : The set of all candidate locations which can cover demand point $i \in I, N_i=$ { $j \in J: d_{i j} \leq D_i$ }.
 
 #### Input parameters:
 - $d_{i j}$ : The travel distance (or time) from demand point $i \in I$ to candidate location $j \in J$.

@@ -56,11 +56,11 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
             fls_exact = {}
             progress_bar = st.progress(0, "Loading data...")
             for i, time in enumerate(TIMES):
-                print_INFO_message_timestamp(f"Loading exact solution for: {time}")
-                progress_bar.progress((i+1)*1/len(TIMES), f"Loading exact solution for: {time}")
+                print_INFO_message_timestamp(f"Loading deterministic solution for: {time}")
+                progress_bar.progress((i+1)*100/len(TIMES), f"Loading exact solution for: {time}")
                 path = r"/app/geospatial-analysis/facility-location-Bergen/"+retrieve_light_solution_path(facilities_number, time)
                 fls_exact[time] = FacilityLocation.load(path)
-                ptime.sleep(5)
+                ptime.sleep(8)
             
             session_state[f"fls_exact_{facilities_number}"] = fls_exact
             st.write("Data has been loaded")
@@ -96,8 +96,6 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
                     dfs_worst[key] = pkl.load(f)
             
             session_state[f"dfs_worst_{facilities_number}"] = dfs_worst
-            
-        st.write("Data has been loaded")
 
     st.markdown("---")
 
@@ -372,12 +370,12 @@ def stochastic_analysis(session_state):
         
     ############################################## LOAD DATA ##############################################
     if button_load:
-        for facilities_number in FACILITIES_NUMBER:
-                st.write(f"Loading data for {facilities_number} facilities...")
+        progress_bar = st.progress(1/3, "Loading stochastic solution...")
+        for i, facilities_number in enumerate(FACILITIES_NUMBER):
                 stochastic_load_data(session_state, facilities_number)
-        st.write("Loading stochastic solutions metrics...")
+        progress_bar.progress(2/3, "Loading stochastic solutions metrics...")
         stochastic_load_metrics(session_state)
-        st.write("Loading for all the scenarios has been completed!")
+        progress_bar.progress(3/3, "Loading for all the scenarios has been completed!")
     st.markdown("---")
     
     ############################################## GENERATE VIZ ##############################################    

@@ -64,8 +64,9 @@ $$
 - $y_{i j}$: 1, if demand point $i$ is assigned to a facility at candidate location $j \in N_i ; 0$ otherwise.
 
 ### Stochastic Formulation 
+The deterministic formulation is not able to take into account the stochastic nature of **travel time**, that depends on several factors (hour of the day, weather conditions, changes in the road viability). Many methodologies and approaches exist in order to embrace the stochastic nature of the model previously described, such as chance constraint optimization, stochastic programming, robust optimization queuing theory.
 
-
+The two-stage optimization model has been used in this work. This decision is justified observing that the location of the facilities can be viewed as a first stage decision, that need to be robust with respect to changing scenarios. While, once the uncertainty has been disclosed, it is possible to decide which facility should serve a specific demand point ([6]).
 
 
 #### Bibliography
@@ -79,3 +80,4 @@ $$
 
 [5] A. Ahmadi-Javid, P. Seyedi, and S. S. Syam, ‘A survey of healthcare facility location’, _Computers & Operations Research_, vol. 79, pp. 223–263, Mar. 2017, doi: [10.1016/j.cor.2016.05.018](https://doi.org/10.1016/j.cor.2016.05.018).
 
+[6] P. Beraldi and M. E. Bruni, ‘A probabilistic model applied to emergency service vehicle location’, _European Journal of Operational Research_, vol. 196, no. 1, pp. 323–331, Jul. 2009, doi: [10.1016/j.ejor.2008.02.027](https://doi.org/10.1016/j.ejor.2008.02.027).

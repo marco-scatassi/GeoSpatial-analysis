@@ -54,10 +54,10 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
     if button3:
         if f"fls_exact_{facilities_number}" not in session_state:
             fls_exact = {}
-
-            for time in TIMES:
-                print_INFO_message_timestamp(f"Loading exact solution for {time}")
-                st.write(f"Loading exact solution for {time}")
+            progress_bar = st.progress(0, "Loading data...")
+            for i, time in enumerate(TIMES):
+                print_INFO_message_timestamp(f"Loading exact solution for: {time}")
+                progress_bar.progress((i+1)*100/len(TIMES), f"Loading exact solution for: {time}")
                 path = r"/app/geospatial-analysis/facility-location-Bergen/"+retrieve_light_solution_path(facilities_number, time)
                 fls_exact[time] = FacilityLocation.load(path)
                 ptime.sleep(8)
@@ -348,7 +348,7 @@ def stochastic_generate_viz(session_state, facilities_number):
             showlegend=True,
         ))
 
-    fig.update_layout(title=f"<b>deterministic vs stochastic solution</b><br>                        ({facilities_number} locations)",
+    fig.update_layout(title=f"<b>deterministic vs stochastic solution</b><br>       ({facilities_number} locations)",
                         mapbox=dict(
                             style="open-street-map",
                             center=dict(lat=fl_deterministic.coordinates.geometry.y.mean(), lon=fl_deterministic.coordinates.geometry.x.mean()),

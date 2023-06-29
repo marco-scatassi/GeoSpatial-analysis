@@ -33,7 +33,7 @@ Further classification can be done within each of the 3 previous categories. How
 ### Deterministic Formulation 
 Referring to [5], the **p-center location** problems aim to minimize the maximum distance between demand points and their associated facility. It is assumed that all demand points are covered. A possible formulation for the **p-center problem**, as described in [5], is provided below.
 
-#### Formulation
+##### Formulation
 $$
 \begin{aligned}
 & \min L \\
@@ -48,18 +48,18 @@ $$
 \end{aligned}
 $$
 
-#### Sets:
+##### Sets:
 - $I$ : The set of demand points.
 - $J$ : The set of candidate locations.
 - $N_i$ : The set of all candidate locations which can cover demand point $i \in I, N_i=$ { $j \in J: d_{i j} \leq D_i$ }.
 
-#### Input parameters:
+##### Input parameters:
 - $d_{i j}$ : The travel distance (or time) from demand point $i \in I$ to candidate location $j \in J$.
 - $w_i$ : The demand at point $i \in I$.
 - $D_i$ : The maximum acceptable travel distance or time from demand point $i \in I$ (the cover distance or time).
 - $p$ : The number of candidate locations to be established.
 
-#### Decision variables:
+##### Decision variables:
 - $x_j$ : 1, if a facility is established at candidate location $j \in J$; 0 otherwise.
 - $y_{i j}$: 1, if demand point $i$ is assigned to a facility at candidate location $j \in N_i ; 0$ otherwise.
 

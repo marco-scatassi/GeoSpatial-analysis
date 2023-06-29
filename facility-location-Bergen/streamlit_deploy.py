@@ -375,7 +375,7 @@ def stochastic_analysis(session_state):
                 stochastic_load_data(session_state, facilities_number)
         progress_bar.progress(2/3, "Loading stochastic solutions metrics...")
         stochastic_load_metrics(session_state)
-        progress_bar.progress(3/3, "Loading for all the scenarios has been completed!")
+        progress_bar.progress(3/3, "Loading data for all the models has been completed!")
     st.markdown("---")
     
     ############################################## GENERATE VIZ ##############################################    

@@ -97,6 +97,7 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
             
             session_state[f"dfs_worst_{facilities_number}"] = dfs_worst
 
+    progress_bar = st.progress(1, "Loading data completed!")
     st.markdown("---")
 
 def deterministic_generate_viz(session_state, TIMES, facilities_number):
@@ -375,7 +376,7 @@ def stochastic_analysis(session_state):
                 stochastic_load_data(session_state, facilities_number)
         progress_bar.progress(2/3, "Loading stochastic solutions metrics...")
         stochastic_load_metrics(session_state)
-        progress_bar.progress(3/3, "Loading data for all the models has been completed!")
+        progress_bar.progress(3/3, "Loading data completed!")
     st.markdown("---")
     
     ############################################## GENERATE VIZ ##############################################    

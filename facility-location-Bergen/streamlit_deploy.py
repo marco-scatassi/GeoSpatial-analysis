@@ -50,6 +50,7 @@ FACILITIES_NUMBER = [1,2,3]
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------
 def deterministic_load_data(session_state, TIMES, facilities_number):
     button3 = st.button("Load data for solution analysis")
+    c = 0
     
     if button3:
         if f"fls_exact_{facilities_number}" not in session_state:
@@ -63,7 +64,7 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
                 ptime.sleep(8)
             
             session_state[f"fls_exact_{facilities_number}"] = fls_exact
-            st.write("Data has been loaded")
+        c += 1
         
         if f"dfs_{facilities_number}" not in session_state:
             root = rf"/app/geospatial-analysis/facility-location-Bergen/data/08_reporting/{facilities_number}_locations"
@@ -80,6 +81,7 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
                     dfs[key] = pkl.load(f)
             
             session_state[f"dfs_{facilities_number}"] = dfs
+        c += 1
             
         if f"dfs_worst_{facilities_number}" not in session_state:
             root = rf"/app/geospatial-analysis/facility-location-Bergen/data/08_reporting/{facilities_number}_locations"
@@ -96,8 +98,11 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
                     dfs_worst[key] = pkl.load(f)
             
             session_state[f"dfs_worst_{facilities_number}"] = dfs_worst
+        c+=1
 
-    progress_bar = st.progress(100, "Loading data completed!")
+        if c == 3:
+            progress_bar = st.progress(100, "Loading data completed!")
+
     st.markdown("---")
 
 def deterministic_generate_viz(session_state, TIMES, facilities_number):

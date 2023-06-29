@@ -13,7 +13,8 @@ The practice of dealing with emergency situations goes under the name of *emerge
 
 Evidently, a zero step can be included: *prevention*.
 
-![[Pasted image 20230629134149.png]]
+![image](https://github.com/marco-scatassi/GeoSpatial-analysis/assets/96434607/ac0038ed-1ef5-4782-b39e-787404380b0f)
+
 
 In this general framework, the issue of selecting the number and the locations of emergency facilities lies both in the *mitigation* and *response* phase. Especially, when the uncertainty is considered.
 

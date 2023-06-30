@@ -69,7 +69,8 @@ The two-stage optimization model has been used in this work. This decision is ju
 
 Specifically, the deterministic model can be reformulated as follows:
 
-$$\begin{aligned}
+$$
+\begin{aligned}
 & \min L \\
 & \text { subject to } \\
 & \sum_{j \in N_i} y_{i j}^k=1, i \in I, k\in{K}\\
@@ -79,7 +80,8 @@ $$\begin{aligned}
 & y_{i j}^k \in\{0,1\}, i \in I, j \in N_i, k\in K \\
 & x_j \in\{0,1\}, j \in J \\
 & L \geq 0 .
-\end{aligned}$$
+\end{aligned}
+$$
 
 #### Sets:
 - $I$ : The set of demand points.

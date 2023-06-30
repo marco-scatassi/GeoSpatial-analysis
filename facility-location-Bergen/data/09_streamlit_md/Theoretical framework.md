@@ -48,26 +48,58 @@ $$
 \end{aligned}
 $$
 
-##### Sets:
+#### Sets:
 - $I$ : The set of demand points.
 - $J$ : The set of candidate locations.
-- $N_i$ : The set of all candidate locations which can cover demand point $i \in I, N_i=$ { $j \in J: d_{i j} \leq D_i$ }.
+- $N_i$ : The set of all candidate locations which can cover demand point $i \in I, N_i=\{j \in J: d_{i j} \leq D_i\}$.
 
-##### Input parameters:
-- $d_{i j}$ : The travel distance (or time) from demand point $i \in I$ to candidate location $j \in J$.
-- $w_i$ : The demand at point $i \in I$.
-- $D_i$ : The maximum acceptable travel distance or time from demand point $i \in I$ (the cover distance or time).
+#### Input parameters:
+- $d_{i j}$ : The **travel time** from demand point $i \in I$ to candidate location $j \in J$.
+- $D_i$ : The maximum acceptable **travel time** from demand point $i \in I$ (the cover distance or time).
 - $p$ : The number of candidate locations to be established.
 
-##### Decision variables:
+#### Decision variables:
 - $x_j$ : 1, if a facility is established at candidate location $j \in J$; 0 otherwise.
 - $y_{i j}$: 1, if demand point $i$ is assigned to a facility at candidate location $j \in N_i ; 0$ otherwise.
 
+#### Observation 
+The formulation adopted in this work assumes $D_i = +\infty$. Therefore, no constraints on the maximum required time are imposed. This allows to enlarge the feasible region.
+
 ### Stochastic Formulation 
-The deterministic formulation is not able to take into account the stochastic nature of **travel time**, that depends on several factors (hour of the day, weather conditions, changes in the road viability). Many methodologies and approaches exist in order to embrace the stochastic nature of the model previously described, such as chance constraint optimization, stochastic programming, robust optimization queuing theory.
+The deterministic formulation is not able to take into account the stochastic nature of **travel time**, that depends on several factors (hour of the day, weather conditions, changes in the road viability, …). Many methodologies and approaches exist in order to embrace the stochastic nature of the model previously described, such as chance constraint optimization, stochastic programming, robust optimization, queuing theory.
 
 The two-stage optimization model has been used in this work. This decision is justified observing that the location of the facilities can be viewed as a first stage decision, that need to be robust with respect to changing scenarios. While, once the uncertainty has been disclosed, it is possible to decide which facility should serve a specific demand point [6].
 
+Specifically, the deterministic model can be reformulated as follows:
+
+$$\begin{equation}
+\begin{aligned}
+& \min L \\
+& \text { subject to } \\
+& \sum_{j \in N_i} y_{i j}^k=1, i \in I, k\in{K}\\
+& \sum_{j \in J} x_j=p \\
+& \sum_{j \in N_i} d_{i j}^k y_{i j}^k \leq L, i \in I, k\in K \\
+& y_{i j}^k \leq x_j, i \in I, j \in N_i, k\in K \\
+& y_{i j}^k \in\{0,1\}, i \in I, j \in N_i, k\in K \\
+& x_j \in\{0,1\}, j \in J \\
+& L \geq 0 .
+\end{aligned}
+\end{equation}$$
+
+#### Sets:
+- $I$ : The set of demand points.
+- $J$ : The set of candidate locations.
+- $K$: The set of possible scenarios.
+- $N_i$ : The set of all candidate locations which can cover demand point $i \in I, N_i=\{j \in J, k\in K: d_{i j}^k \leq D_i\}$.
+
+#### Input parameters:
+- $d_{i j}^k$ : The **travel time** from demand point $i \in I$ to candidate location $j \in J$ in the $k$-th scenario.
+- $D_i$ : The maximum acceptable **travel time** from demand point $i \in I$ (the cover distance or time).
+- $p$ : The number of candidate locations to be established.
+
+#### Decision variables:
+- $x_j$ : 1, if a facility is established at candidate location $j \in J$; 0 otherwise.
+- $y_{i j}^k$: 1, if demand point $i$ is assigned to a facility at candidate location $j \in N_i$ in the $k$-th scenario; $0$ otherwise.
 
 #### Bibliography
 [1] R. Z. Farahani, M. M. Lotfi, A. Baghaian, R. Ruiz, and S. Rezapour, ‘Mass casualty management in disaster scene: A systematic review of OR&MS research in humanitarian operations’, _European Journal of Operational Research_, vol. 287, no. 3, pp. 787–819, Dec. 2020, doi: [10.1016/j.ejor.2020.03.005](https://doi.org/10.1016/j.ejor.2020.03.005).

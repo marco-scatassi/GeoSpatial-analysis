@@ -62,9 +62,6 @@ $$
 - $x_j$ : 1, if a facility is established at candidate location $j \in J$; 0 otherwise.
 - $y_{i j}$: 1, if demand point $i$ is assigned to a facility at candidate location $j \in N_i ; 0$ otherwise.
 
-#### Observation 
-The formulation adopted in this work assumes $D_i = +\infty$. Therefore, no constraints on the maximum required time are imposed. This allows to enlarge the feasible region.
-
 ### Stochastic Formulation 
 The deterministic formulation is not able to take into account the stochastic nature of **travel time**, that depends on several factors (hour of the day, weather conditions, changes in the road viability, …). Many methodologies and approaches exist in order to embrace the stochastic nature of the model previously described, such as chance constraint optimization, stochastic programming, robust optimization, queuing theory.
 
@@ -100,6 +97,9 @@ $$\begin{equation}
 #### Decision variables:
 - $x_j$ : 1, if a facility is established at candidate location $j \in J$; 0 otherwise.
 - $y_{i j}^k$: 1, if demand point $i$ is assigned to a facility at candidate location $j \in N_i$ in the $k$-th scenario; $0$ otherwise.
+
+### Observation 
+The formulation adopted in this work assumes $D_i = +\infty$. This allows every solution to be feasible, and it's motivated by the absence of a specific requirement.
 
 #### Bibliography
 [1] R. Z. Farahani, M. M. Lotfi, A. Baghaian, R. Ruiz, and S. Rezapour, ‘Mass casualty management in disaster scene: A systematic review of OR&MS research in humanitarian operations’, _European Journal of Operational Research_, vol. 287, no. 3, pp. 787–819, Dec. 2020, doi: [10.1016/j.ejor.2020.03.005](https://doi.org/10.1016/j.ejor.2020.03.005).

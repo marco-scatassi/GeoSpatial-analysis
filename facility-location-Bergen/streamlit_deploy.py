@@ -113,20 +113,18 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
         return 
     
     if button4:
-        col1, col2, col3 = st.columns(3)
+        col1, col2 = st.columns([1.8,1])
         
         dfs = session_state[f"dfs_{facilities_number}"]
         dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
         session_state[f"df_min_{facilities_number}"] = compute_min_distance_df(dfs, dfs_worst)
         
-        with col2:
-            temp_path = rf"/app/geospatial-analysis/facility-location-Bergen/data/00_temp/graphical_keys_solutions_comparison_{facilities_number}.png"
+        with col1:
             fls_exact = session_state[f"fls_exact_{facilities_number}"]
-            report_exact = FacilityLocationReport(fls_exact)
-            fig = report_exact.graphical_keys_solutions_comparison()
-            fig.savefig(temp_path)
-            fig_png = Image.open(temp_path)
-            st.image(fig_png, width=600, caption="Graphical comparison of the solutions")
+            fig = facilities_on_map([fl for fl in fls_exact.values()], 
+                                    extra_text=[time for time in fls_exact.keys()],
+                                    title_pad_l=300)
+            st.plotly_chart(fig, use_container_width=True)
 
         
         col1, col2 = st.columns(2)
@@ -291,81 +289,14 @@ def stochastic_generate_viz(session_state, facilities_number):
     if session_state.get(f"fls_stochastic_{facilities_number}") is None:
         st.write("Please load the data first")
         return go.Figure()
+
     
     fl_stochastic = session_state[f"fls_stochastic_{facilities_number}"]["stochastic"]
     fl_deterministic = session_state[f"fls_stochastic_{facilities_number}"]["deterministic"]
-
-    lat_global = fl_deterministic.coordinates.geometry.y
-    lon_global = fl_deterministic.coordinates.geometry.x
-        
-    lat_det = [p.geometry.y for p in fl_deterministic.locations_coordinates]
-    lon_det = [p.geometry.x for p in fl_deterministic.locations_coordinates]
-        
-    if facilities_number == 1:
-        idx = int(pd.Series([k if fl_stochastic.first_stage_solution[k] != 0 else None 
-                for k in fl_stochastic.first_stage_solution.keys()]).dropna().iloc[0])
-
-        stochastic_locations_coordinates = fl_stochastic.coordinates.loc[idx]
-            
-        lat_sto = [p.y for p in stochastic_locations_coordinates]
-        lon_sto = [p.x for p in stochastic_locations_coordinates]
-    else:
-        lat_sto = [p.geometry.y for p in fl_stochastic.locations_coordinates]
-        lon_sto = [p.geometry.x for p in fl_stochastic.locations_coordinates]
-
-    fig = go.Figure()
-        
-    fig.add_trace(go.Scattermapbox(
-            lat=lat_global,
-            lon=lon_global,
-            mode='markers',
-            marker=dict(
-                color=["grey"]*fl_deterministic.coordinates.shape[0],
-                size=4.5,
-            ),
-            hovertemplate='<extra></extra>',
-            showlegend=False,
-        ))
-
-    fig.add_trace(go.Scattermapbox(
-            lat=lat_det,
-            lon=lon_det,
-            mode='markers',
-            marker=dict(
-                color=["red"]*fl_deterministic.n_of_locations_to_choose,
-                size=6,
-            ),
-            hovertemplate=f'<br>solution value: {round(fl_deterministic.solution_value/60,2)} minutes<extra></extra>',
-            name="deterministic",
-            showlegend=True,
-        ))
-            
-    fig.add_trace(go.Scattermapbox(
-            lat=lat_sto,
-            lon=lon_sto,
-            mode='markers',
-            marker=dict(
-                color=["blue"]*fl_stochastic.n_of_locations_to_choose,
-                size=6,
-            ),
-            hovertemplate=f'<br>solution value: {round(fl_stochastic.solution_value/60,2)} minutes<extra></extra>',
-            name="stochastic",
-            showlegend=True,
-        ))
-
-    fig.update_layout(title=f"<b>deterministic vs stochastic solution</b><br>                      ({facilities_number} locations)",
-                        mapbox=dict(
-                            style="open-street-map",
-                            center=dict(lat=fl_deterministic.coordinates.geometry.y.mean(), lon=fl_deterministic.coordinates.geometry.x.mean()),
-                            zoom=9.5
-                            ),
-                        title_pad_l=50,
-                        height=800,
-                        width=700,
-                        xaxis_title="time of the day",)
-
-    return fig
-
+    fls = [fl_stochastic, fl_deterministic]
+    
+    return facilities_on_map(fls)
+    
 def stochastic_analysis(session_state):
     col1, col2, col3, _ = st.columns(4)
     with col1:

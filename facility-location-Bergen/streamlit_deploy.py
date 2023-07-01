@@ -30,8 +30,9 @@ from retrieve_global_parameters import (
     retrieve_solution_vs_scenario_path,
 )
 
-from graphical_analysis import (
+from src.facility_location_Bergen.custome_modules.graphical_analysis import (
     compute_rel_diff,
+    facilities_on_map,
     compute_min_distance_df,
     objective_function_value_under_different_cases,
     travel_times_distribution_under_different_cases,

@@ -131,7 +131,7 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
             content = f.read()
 
         with col2:
-            st.markdown("#")
+            st.write("<br>" * 2)
             st.markdown(content)
         
         col1, col2 = st.columns(2)

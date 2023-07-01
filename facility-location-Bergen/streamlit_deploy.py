@@ -127,7 +127,7 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
                                     title_pad_l=200)
             st.plotly_chart(fig, use_container_width=True)
 
-        with open(project_path+r"/data/09_streamlit_md/Deterministic_results/1 facilities.md", "r") as f:
+        with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities.md", "r") as f:
             content = f.read()
 
         with col2:

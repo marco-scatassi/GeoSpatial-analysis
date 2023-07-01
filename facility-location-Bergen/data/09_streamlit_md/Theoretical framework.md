@@ -31,7 +31,7 @@ Then, following [2], discrete facility location problems can be divided in the f
 Further classification can be done within each of the 3 previous categories. However, the one adopted in this work is the **p-center location problem**. This formulation as well as its stochastic version will be described in the following sections.
 
 ### Deterministic Formulation 
-Referring to [5], the **p-center location** problems aim to minimize the maximum distance between demand points and their associated facility. It is assumed that all demand points are covered.
+Referring to [5], the **p-center location** problems aim to **minimize the maximum distance** among demand points and their associated facility. It is assumed that all demand points are covered. 
 
 This model, that is well known in literature, is particularly suitable to approach **emergency response** facility location problems. As already mentioned, an **emergency** is an event that occurs suddenly, unexpectedly and that requires an immediate intervention. This means that wherever an emergency event is originated, the **response time** should be as low as possible. The presence of some demand hardly reachable points represents a potential critical situation and should be avoided. Therefore, the **p-center** model is a valid solution able to take into account those aspects.
 

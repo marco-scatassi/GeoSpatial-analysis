@@ -4,6 +4,106 @@ import plotly.graph_objects as go
 from sklearn.utils import resample
 from plotly.subplots import make_subplots
 
+def facilities_on_map(fls, extra_text=None, title_pad_l=50):
+    mapping = {}
+    if extra_text is None:
+        extra_text = [""]*len(fls)
+        
+    for i in range(len(fls)):
+        if "StochasticFacilityLocation" in str(type(fls[i])):
+            mapping[f"stochastic_{extra_text[i]}_{fls[i].n_of_locations_to_choose}"] = fls[i]
+            print(mapping)
+        else:
+            mapping[f"deterministic_{extra_text[i]}_{fls[i].n_of_locations_to_choose}"] = fls[i]
+    
+    lats = {}
+    lons = {}
+    
+    lat_global = fls[0].coordinates.geometry.y
+    lon_global = fls[0].coordinates.geometry.x
+        
+    for k, fl in mapping.items():
+        if "deterministic" in k:
+            lats[k] = [p.geometry.y for p in fl.locations_coordinates]
+            lons[k] = [p.geometry.x for p in fl.locations_coordinates]
+        elif "stochastic" in k:
+            if fl.n_of_locations_to_choose == 1:
+                idx = int(pd.Series([k2 if fl.first_stage_solution[k2] != 0 else None 
+                        for k2 in fl.first_stage_solution.keys()]).dropna().iloc[0])
+
+                stochastic_locations_coordinates = fl.coordinates.loc[idx]
+                    
+                lats[k] = [p.y for p in stochastic_locations_coordinates]
+                lons[k] = [p.x for p in stochastic_locations_coordinates]
+            else:
+                lats[k] = [p.geometry.y for p in fl.locations_coordinates]
+                lons[k] = [p.geometry.x for p in fl.locations_coordinates]
+    fig = go.Figure()
+        
+    fig.add_trace(go.Scattermapbox(
+            lat=lat_global,
+            lon=lon_global,
+            mode='markers',
+            marker=dict(
+                color=["grey"]*fls[0].coordinates.shape[0],
+                size=4.5,
+            ),
+            hovertemplate='<extra></extra>',
+            showlegend=False,
+        ))
+    
+    is_s = False
+    for k in mapping.keys():
+        if "stochastic" in k:
+            is_s = True
+    colors = ["red", "blue", "green", "orange", "purple", "yellow", "pink", "brown", "black", "grey"]
+    colors_mapping = {k: colors[i] for i, k in enumerate(mapping.keys())}
+    for k, fl in mapping.items():
+        c=colors_mapping[k]
+        if not is_s:
+            n=k[len("deterministic")+1:]
+        else:
+            n=k
+        
+        fig.add_trace(go.Scattermapbox(
+                lat=lats[k],
+                lon=lons[k],
+                mode='markers',
+                marker=dict(
+                    color=[c]*fl.n_of_locations_to_choose,
+                    size=7,
+                ),
+                hovertemplate=f'<br>solution value: {round(fl.solution_value/60,2)} minutes<extra></extra>',
+                name=n,
+                showlegend=True,
+            ))
+
+    if is_s:
+        title = "deterministic and stochastic solution comparison"
+    else:
+        title = "deterministic solution comparison"
+        
+    fig.update_layout(title=f"<b>{title}</b><br>             number of facilities: "+str(fls[0].n_of_locations_to_choose),
+                        mapbox=dict(
+                            style="open-street-map",
+                            center=dict(lat=fls[0].coordinates.geometry.y.mean(), lon=fls[0].coordinates.geometry.x.mean()),
+                            zoom=9
+                            ),
+                        legend=dict(
+                            orientation='h',  # Set the orientation to 'h' for horizontal
+                            yanchor='bottom',  # Anchor the legend to the bottom
+                            y=-0.1,  # Adjust the y position to place the legend below the figure
+                            xanchor='left',  # Anchor the legend to the left
+                            x=0  # Adjust the x position if necessary
+                        ),
+                        title_pad_l=title_pad_l,
+                        height=700,
+                        width=500,
+                        xaxis_title="time of the day",)
+
+    return fig
+
+
 def get_minimum_distances(df):
     return df.groupby("target").min().reset_index()
 

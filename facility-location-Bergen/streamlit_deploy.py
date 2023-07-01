@@ -114,7 +114,7 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
         return 
     
     if button4:
-        col1, col2 = st.columns([1.8,1])
+        col1, col2 = st.columns([1.5,1])
         
         dfs = session_state[f"dfs_{facilities_number}"]
         dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
@@ -124,7 +124,7 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
             fls_exact = session_state[f"fls_exact_{facilities_number}"]
             fig = facilities_on_map([fl for fl in fls_exact.values()], 
                                     extra_text=[time for time in fls_exact.keys()],
-                                    title_pad_l=300)
+                                    title_pad_l=200)
             st.plotly_chart(fig, use_container_width=True)
 
         
@@ -297,7 +297,7 @@ def stochastic_generate_viz(session_state, facilities_number):
     fls = [fl_stochastic, fl_deterministic]
     
     return facilities_on_map(fls)
-    
+
 def stochastic_analysis(session_state):
     col1, col2, col3, _ = st.columns(4)
     with col1:

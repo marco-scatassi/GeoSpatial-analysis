@@ -109,11 +109,12 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
 
 def deterministic_generate_viz(session_state, TIMES, facilities_number):
     button4 = st.button("Generate vizualizations")
-    if f"fls_exact_{facilities_number}" not in session_state:
-        st.write("Load the data first")
-        return 
     
     if button4:
+        if f"fls_exact_{facilities_number}" not in session_state:
+        st.write("Load the data first")
+        return 
+        
         col1, col2 = st.columns([1.5,1])
         
         dfs = session_state[f"dfs_{facilities_number}"]
@@ -138,6 +139,8 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
             st.write("")
             st.markdown(content)
         
+
+
         col1, col2 = st.columns(2)
         with col1:
             fls_exact = session_state[f"fls_exact_{facilities_number}"]

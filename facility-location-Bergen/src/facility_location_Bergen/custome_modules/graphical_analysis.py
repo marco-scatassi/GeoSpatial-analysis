@@ -4,6 +4,14 @@ import plotly.graph_objects as go
 from sklearn.utils import resample
 from plotly.subplots import make_subplots
 
+def rand_jitter(list):
+    scale_factor = max(list) - min(list)
+    if scale_factor != 0:
+        stdev = 0.01 * (scale_factor)
+    else:
+        stdev = 0.0008
+    return list + np.random.randn(len(list)) * stdev
+
 def facilities_on_map(fls, extra_text=None, title_pad_l=50):
     mapping = {}
     if extra_text is None:
@@ -58,6 +66,7 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
             is_s = True
     colors = ["red", "blue", "green", "orange", "purple", "yellow", "pink", "brown", "black", "grey"]
     colors_mapping = {k: colors[i] for i, k in enumerate(mapping.keys())}
+    size = 8
     for k, fl in mapping.items():
         c=colors_mapping[k]
         if not is_s:
@@ -66,12 +75,12 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
             n=k
         
         fig.add_trace(go.Scattermapbox(
-                lat=lats[k],
-                lon=lons[k],
+                lat=rand_jitter(lats[k]),
+                lon=rand_jitter(lons[k]),
                 mode='markers',
                 marker=dict(
                     color=[c]*fl.n_of_locations_to_choose,
-                    size=7,
+                    size=size,
                 ),
                 hovertemplate=f'<br>solution value: {round(fl.solution_value/60,2)} minutes<extra></extra>',
                 name=n,

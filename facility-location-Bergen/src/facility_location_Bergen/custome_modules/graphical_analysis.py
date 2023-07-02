@@ -9,7 +9,7 @@ def rand_jitter(list):
     if scale_factor != 0:
         stdev = 0.01 * (scale_factor)
     else:
-        stdev = 0.000
+        stdev = 0.0002
     return list + np.random.randn(len(list)) * stdev
 
 def facilities_on_map(fls, extra_text=None, title_pad_l=50):

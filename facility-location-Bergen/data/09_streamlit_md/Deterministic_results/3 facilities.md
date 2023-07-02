@@ -1,6 +1,0 @@
-The map on then left show the optimal solution for the **deterministic** facility location problem when the number of facilities to be selected is $p = 3$. The same problem was solved individually for 5 different scenarios which differ in the distance matrix $(d_{i,j}), i\in I, j\in J$, specifically:
-- **all day free flow**, $(d_{i,j})$ is the ideal time needed to travel from the location $i$ to the location $j$, i.e. the time that would be measured when none traffic congestion is present.
-- **all day**, $(d_{i,j})$ is the average time, w.r.t all data collected, needed to travel from the location $i$ to the location $j$.
-- **morning**, $(d_{i,j})$ is the average time, w.r.t. morning data collected, needed to travel from the location $i$ to the location $j$.
-- **midday**, $(d_{i,j})$ is the average time, w.r.t. midday data collected, needed to travel from the location $i$ to the location $j$.
-- **afternoon**, $(d_{i,j})$ is the average time, w.r.t. afternoon data collected, needed to travel from the location $i$ to the location $j$.

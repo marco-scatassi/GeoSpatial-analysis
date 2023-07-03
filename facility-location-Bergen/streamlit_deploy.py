@@ -131,6 +131,7 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
         st.write("")
         st.write("")
         st.write("")
+        st.write("")
         st.markdown(content)
         
     with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/underTheMap.md", "r") as f:

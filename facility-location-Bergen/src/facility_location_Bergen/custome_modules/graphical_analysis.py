@@ -139,7 +139,7 @@ def objective_function_value_under_different_cases(a, b, b_worst):
     
     fig = make_subplots(rows=1, cols=1,)
     fig.update_layout(title="<b>Outsample evaluation of free flow solution<b>",
-                        title_pad_l=225,
+                        title_pad_l=175,
                         height=500,
                         width=1200,
                         yaxis_title="time (minutes)")

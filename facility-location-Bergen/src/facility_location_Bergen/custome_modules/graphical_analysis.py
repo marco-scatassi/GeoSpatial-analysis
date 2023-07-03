@@ -144,8 +144,6 @@ def objective_function_value_under_different_cases(a, b, b_worst):
                         width=1200,
                         yaxis_title="time (minutes)")
 
-    fig.update_yaxes(range=[0, 100])
-
     fig.add_trace(go.Bar(y=plot_data,
                         x=["op sol all_day", "ff sol in all_day scenario", "ff sol in all_day worst scenario", 
                            "op sol morning", "ff sol in morning", "ff sol in morning worst scenario",

@@ -162,7 +162,10 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
         with col2:
             with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBySideWithFirstBarplot.md", "r") as f:
                 content = f.read()
-
+                
+            st.write("")
+            st.write("")
+            st.write("")
             st.markdown(content)
 
         col1, col2 = st.columns(2)

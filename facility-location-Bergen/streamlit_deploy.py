@@ -51,140 +51,133 @@ FACILITIES_NUMBER = [1,2,3]
 
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------
 def deterministic_load_data(session_state, TIMES, facilities_number):
-    button3 = st.button("Load data for solution analysis")
     c = 0
     
-    if button3:
-        progress_bar = st.progress(0, "Loading data...")
-        if f"fls_exact_{facilities_number}" not in session_state:
-            fls_exact = {}
-            for i, time in enumerate(TIMES):
-                print_INFO_message_timestamp(f"Loading deterministic solution for: {time}")
-                progress_bar.progress((i+1)*1/len(TIMES), f"Loading exact solution for: {time}")
-                path = r"/app/geospatial-analysis/facility-location-Bergen/"+retrieve_light_solution_path(facilities_number, time)
-                fls_exact[time] = FacilityLocation.load(path)
+    progress_bar = st.progress(0, "Loading data...")
+    if f"fls_exact_{facilities_number}" not in session_state:
+        fls_exact = {}
+        for i, time in enumerate(TIMES):
+            print_INFO_message_timestamp(f"Loading deterministic solution for: {time}")
+            progress_bar.progress((i+1)*1/len(TIMES), f"Loading exact solution for: {time}")
+            path = r"/app/geospatial-analysis/facility-location-Bergen/"+retrieve_light_solution_path(facilities_number, time)
+            fls_exact[time] = FacilityLocation.load(path)
             
-            session_state[f"fls_exact_{facilities_number}"] = fls_exact
-        c += 1
+        session_state[f"fls_exact_{facilities_number}"] = fls_exact
+    c += 1
         
-        if f"dfs_{facilities_number}" not in session_state:
-            root = rf"/app/geospatial-analysis/facility-location-Bergen/data/08_reporting/{facilities_number}_locations"
-            paths = [p for p in os.listdir(root) if ("solution_vs_scenario" in p) and ("worst" not in p)]
+    if f"dfs_{facilities_number}" not in session_state:
+        root = rf"/app/geospatial-analysis/facility-location-Bergen/data/08_reporting/{facilities_number}_locations"
+        paths = [p for p in os.listdir(root) if ("solution_vs_scenario" in p) and ("worst" not in p)]
             
-            dfs = {}
+        dfs = {}
 
-            for path in paths:
-                with open(os.path.join(root, path), "rb") as f:
-                    key = tuple(path.removesuffix(".pkl").split("_")[-2:])
-                    if key[0] == "day":
-                        key = tuple(["all_day", key[1]])
+        for path in paths:
+            with open(os.path.join(root, path), "rb") as f:
+                key = tuple(path.removesuffix(".pkl").split("_")[-2:])
+                if key[0] == "day":
+                    key = tuple(["all_day", key[1]])
                         
-                    dfs[key] = pkl.load(f)
+                dfs[key] = pkl.load(f)
             
-            session_state[f"dfs_{facilities_number}"] = dfs
-        c += 1
+        session_state[f"dfs_{facilities_number}"] = dfs
+    c += 1
             
-        if f"dfs_worst_{facilities_number}" not in session_state:
-            root = rf"/app/geospatial-analysis/facility-location-Bergen/data/08_reporting/{facilities_number}_locations"
-            paths_worst = [p for p in os.listdir(root) if ("solution_vs_scenario" in p) and ("worst" in p)]
+    if f"dfs_worst_{facilities_number}" not in session_state:
+        root = rf"/app/geospatial-analysis/facility-location-Bergen/data/08_reporting/{facilities_number}_locations"
+        paths_worst = [p for p in os.listdir(root) if ("solution_vs_scenario" in p) and ("worst" in p)]
             
-            dfs_worst = {}
+        dfs_worst = {}
 
-            for path in paths_worst:
-                with open(os.path.join(root, path), "rb") as f:
-                    key = tuple(path.removesuffix(".pkl").split("_")[-3:-1])
-                    if key[0] == "day":
-                        key = tuple(["all_day", key[1]])
+        for path in paths_worst:
+            with open(os.path.join(root, path), "rb") as f:
+                key = tuple(path.removesuffix(".pkl").split("_")[-3:-1])
+                if key[0] == "day":
+                    key = tuple(["all_day", key[1]])
                         
-                    dfs_worst[key] = pkl.load(f)
+                dfs_worst[key] = pkl.load(f)
             
-            session_state[f"dfs_worst_{facilities_number}"] = dfs_worst
-        c+=1
+        session_state[f"dfs_worst_{facilities_number}"] = dfs_worst
+    c+=1
 
-        if c == 3:
-            progress_bar.progress(100, "Loading data completed!")
+    if c == 3:
+        progress_bar.progress(100, "Loading data completed!")
 
-    st.markdown("---")
 
 def deterministic_generate_viz(session_state, TIMES, facilities_number):
-    button4 = st.button("Generate vizualizations")
-    
-    if button4:
-        if f"fls_exact_{facilities_number}" not in session_state:
-            st.write("Load the data first")
-            return 
+    if f"fls_exact_{facilities_number}" not in session_state:
+        st.write("Load the data first")
+        return 
 
-        col1, col2 = st.columns([1.5,1])
+    col1, col2 = st.columns([1.5,1])
         
-        dfs = session_state[f"dfs_{facilities_number}"]
-        dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
-        session_state[f"df_min_{facilities_number}"] = compute_min_distance_df(dfs, dfs_worst)
+    dfs = session_state[f"dfs_{facilities_number}"]
+    dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
+    session_state[f"df_min_{facilities_number}"] = compute_min_distance_df(dfs, dfs_worst)
         
-        with col1:
-            fls_exact = session_state[f"fls_exact_{facilities_number}"]
-            fig = facilities_on_map([fl for fl in fls_exact.values()], 
+    with col1:
+        fls_exact = session_state[f"fls_exact_{facilities_number}"]
+        fig = facilities_on_map([fl for fl in fls_exact.values()], 
                                     extra_text=[time for time in fls_exact.keys()],
                                     title_pad_l=200)
-            st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True)
 
-        with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBysideWithMap.md", "r") as f:
-            content = f.read()
+    with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBysideWithMap.md", "r") as f:
+        content = f.read()
 
-        with col2:
-            st.write("")
-            st.write("")
-            st.write("")
-            st.write("")
-            st.write("")
-            st.write("")
-            st.markdown(content)
+    with col2:
+        st.write("")
+        st.write("")
+        st.write("")
+        st.write("")
+        st.write("")
+        st.write("")
+        st.markdown(content)
         
-        with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/underTheMap.md", "r") as f:
+    with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/underTheMap.md", "r") as f:
+        content = f.read()
+
+    st.markdown(content)
+
+    col1, col2 = st.columns(2)
+    with col1:
+        fls_exact = session_state[f"fls_exact_{facilities_number}"]
+        dfs = session_state[f"dfs_{facilities_number}"]
+        dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
+            
+        a = list(range(len(TIMES)-1))
+        b = list(range(len(TIMES)-1))
+        b_worst = list(range(len(TIMES)-1))
+        for i, time in enumerate(TIMES[1:]):
+            a[i], b[i], b_worst[i] = compute_rel_diff(fls_exact, dfs, dfs_worst, time)
+
+        fig = objective_function_value_under_different_cases(a, b, b_worst)
+        st.plotly_chart(fig, use_container_width=True)
+
+    with col2:
+        with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBySideWithFirstBarplot.md", "r") as f:
             content = f.read()
 
+        st.write("")
+        st.write("")
+        st.write("")
+        st.write("")
+        st.write("")
         st.markdown(content)
 
-        col1, col2 = st.columns(2)
-        with col1:
-            fls_exact = session_state[f"fls_exact_{facilities_number}"]
-            dfs = session_state[f"dfs_{facilities_number}"]
-            dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
-            
-            a = list(range(len(TIMES)-1))
-            b = list(range(len(TIMES)-1))
-            b_worst = list(range(len(TIMES)-1))
-            for i, time in enumerate(TIMES[1:]):
-                a[i], b[i], b_worst[i] = compute_rel_diff(fls_exact, dfs, dfs_worst, time)
-
-            fig = objective_function_value_under_different_cases(a, b, b_worst)
-            st.plotly_chart(fig, use_container_width=True)
-
-        with col2:
-            with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBySideWithFirstBarplot.md", "r") as f:
-                content = f.read()
-
-            st.write("")
-            st.write("")
-            st.write("")
-            st.write("")
-            st.write("")
-            st.markdown(content)
-
-        col1, col2 = st.columns(2)
-        with col2:
-            df_min = session_state[f"df_min_{facilities_number}"]
-            fig = average_travel_time_across_under_different_cases(df_min)
-            st.plotly_chart(fig, use_container_width=True)
-        
-        
-        
+    col1, col2 = st.columns(2)
+    with col2:
         df_min = session_state[f"df_min_{facilities_number}"]
-            
-        fig = travel_times_distribution_under_different_cases(df_min)
+        fig = average_travel_time_across_under_different_cases(df_min)
         st.plotly_chart(fig, use_container_width=True)
         
-    st.markdown("---")
-
+        
+        
+    df_min = session_state[f"df_min_{facilities_number}"]
+            
+    fig = travel_times_distribution_under_different_cases(df_min)
+    st.plotly_chart(fig, use_container_width=True)
+        
+    
 def deterministic_analysis(session_state, TIMES, facilities_number, ratio1, ratio2, seed):
     ############################################## RUN THE MODEL ##############################################
     # button1 = st.button("Run the model")
@@ -282,11 +275,20 @@ def deterministic_analysis(session_state, TIMES, facilities_number, ratio1, rati
             
     # st.markdown("---")
     
+    col1, col2, _, _ = st.columns(4)
+    with col1:
+        button_load = st.button("Load data for solution analysis")
+    with col2:
+        button_viz = st.button("Generate vizualizations")
+    st.markdown("---")
+
     ############################################## LOAD DATA ##############################################
-    deterministic_load_data(session_state, TIMES, facilities_number)
+    if button_load:
+        deterministic_load_data(session_state, TIMES, facilities_number)
         
     ############################################## GENERATE VIZ ##############################################    
-    deterministic_generate_viz(session_state, TIMES, facilities_number)
+    if button_viz:
+        deterministic_generate_viz(session_state, TIMES, facilities_number)
 
 # -------------------------------------------- STOCHASTIC ANALYSIS ---------------------------------------------
 def stochastic_load_data(session_state, facilities_number):

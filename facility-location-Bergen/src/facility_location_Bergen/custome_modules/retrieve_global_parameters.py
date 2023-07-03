@@ -102,7 +102,7 @@ def retrieve_solution_path(facilities_number, time):
     return path
 
 def retrieve_light_solution_path(facilities_number, time):
-    path = f"data/07_model_output/{facilities_number}_locations/deterministic_exact_solutions/light_exact_solution_{time}.pkl"  
+    path = f"data/07_model_output/{facilities_number}_locations/deterministic_exact_solutions/super_light_exact_solution_{time}.pkl"  
     return path
     
 def retrieve_solution_vs_scenario_path(

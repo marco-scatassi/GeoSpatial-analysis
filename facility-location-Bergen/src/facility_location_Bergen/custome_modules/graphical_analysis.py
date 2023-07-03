@@ -7,9 +7,9 @@ from plotly.subplots import make_subplots
 def rand_jitter(list):
     scale_factor = max(list) - min(list)
     if scale_factor != 0:
-        stdev = 0.0001 * (scale_factor)
+        stdev = 0.0005 * (scale_factor)
     else:
-        stdev = 0.0002
+        stdev = 0.0003
     return list + np.random.randn(len(list)) * stdev
 
 def facilities_on_map(fls, extra_text=None, title_pad_l=50):

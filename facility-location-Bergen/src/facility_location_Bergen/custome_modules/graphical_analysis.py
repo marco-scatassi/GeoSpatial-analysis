@@ -142,7 +142,7 @@ def objective_function_value_under_different_cases(a, b, b_worst):
                         title_pad_l=225,
                         height=500,
                         width=1200,
-                        yaxis_title="relative difference [%]")
+                        yaxis_title="time (minutes)")
 
     fig.update_yaxes(range=[0, 100])
 

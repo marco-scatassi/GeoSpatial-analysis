@@ -125,28 +125,35 @@ def compute_rel_diff(fls_exact, dfs, dfs_worst, time):
     b = df_min.sort_values(by="travel_time", ascending=False).iloc[0].travel_time
     b_worst = df_worst_min.sort_values(by="travel_time", ascending=False).iloc[0].travel_time
 
-    rel_difference = round(abs(a-b)/a * 100,3)
-    rel_difference_worst = round(abs(a-b_worst)/a * 100,3)
-    return rel_difference, rel_difference_worst
+    return a, b, b_worst
 
 
-def objective_function_value_under_different_cases(rel_diffs, rel_diffs_worst):
-    fig = make_subplots(rows=1, cols=2,)
-    fig.update_layout(title="<b>Relative difference between the exact solution and the free flow approximation<b>",
-                        title_pad_l=150,
+def objective_function_value_under_different_cases(a, b, b_worst):
+    
+    plot_data = []
+    
+    for i in range(len(a)):
+        plot_data.append(a[i])
+        plot_data.append(b[i])
+        plot_data.append(b_worst[i])
+    
+    fig = make_subplots(rows=1, cols=1,)
+    fig.update_layout(title="<b>Outsample evaluation of free flow solution<b>",
+                        title_pad_l=225,
                         height=500,
                         width=1200,
                         yaxis_title="relative difference [%]")
 
     fig.update_yaxes(range=[0, 100])
 
-    fig.add_trace(go.Bar(y=rel_diffs, 
-                        name="average scenario",
-                        x=["all_day", "morning", "midday", "afternoon"],), row=1, col=1)
-
-    fig.add_trace(go.Bar(y=rel_diffs_worst,
-                            name="average worst scenario",
-                            x=["all_day", "morning", "midday", "afternoon"],), row=1, col=2)
+    fig.add_trace(go.Bar(y=plot_data,
+                        x=["op sol all_day", "ff sol in all_day scenario", "ff sol in all_day worst scenario", 
+                           "op sol morning", "ff sol in morning", "ff sol in morning worst scenario",
+                           "op sol midday", "ff sol in midday", "ff sol in midday worst scenario",
+                           "op sol afternoon", "ff sol in afternoon", "ff sol in afternoon worst scenario"],
+                        marker=dict(
+                            color=["lightblue", "blue", "navy"]*len(plot_data),
+                            )), row=1, col=1)
     
     return fig
 

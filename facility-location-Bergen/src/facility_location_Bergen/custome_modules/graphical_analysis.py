@@ -64,7 +64,7 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
     for k in mapping.keys():
         if "stochastic" in k:
             is_s = True
-    colors = ["red", "yellow", "blue", "orange", "green", "purple", "pink", "brown", "black", "grey"]
+    colors = ["red", "black", "blue", "orange", "green", "purple", "pink", "brown", "black", "grey"]
     colors_mapping = {k: colors[i] for i, k in enumerate(mapping.keys())}
     size = 8
     for k, fl in mapping.items():

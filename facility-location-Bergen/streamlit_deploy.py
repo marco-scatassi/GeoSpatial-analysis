@@ -164,15 +164,28 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
         st.write("")
         st.write("")
         st.write("")
+        st.write("")
         st.markdown(content)
 
     col1, col2 = st.columns(2)
+    with coll:
+        with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBySideWithSecondBarplot.md", "r") as f:
+            content = f.read()
+
+        st.write("")
+        st.write("")
+        st.write("")
+        st.write("")
+        st.write("")
+        st.write("")
+        st.markdown(content)
+
     with col2:
         fig = outsample_evaluation_relative_differences(a, b, b_worst)
         st.plotly_chart(fig, use_container_width=True)
 
     col1, col2 = st.columns(2)
-    with col2:
+    with col1:
         df_min = session_state[f"df_min_{facilities_number}"]
         fig = average_travel_time_across_under_different_cases(df_min)
         st.plotly_chart(fig, use_container_width=True)

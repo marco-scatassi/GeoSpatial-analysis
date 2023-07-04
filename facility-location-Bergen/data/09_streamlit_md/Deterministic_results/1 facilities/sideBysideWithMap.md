@@ -5,4 +5,4 @@ The map on then left show the optimal solution for the **deterministic** facilit
 - **midday**, $(d_{i,j})$ is the average time, w.r.t. midday data collected, needed to travel from the location $i$ to the location $j$.
 - **afternoon**, $(d_{i,j})$ is the average time, w.r.t. afternoon data collected, needed to travel from the location $i$ to the location $j$.
 
-**HOW THE POINT MOVE IN DIFFERENT SCENARIOS IS KINDA WEIRD AND DATA COLLECTED NEED TO BE ANALYSED MORE IN DETAILS**
+**HOW THE POINTS MOVE IN DIFFERENT SCENARIOS IS KINDA WEIRD AND DATA COLLECTED NEED TO BE ANALYSED MORE IN DETAILS**

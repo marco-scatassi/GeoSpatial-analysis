@@ -155,6 +155,37 @@ def objective_function_value_under_different_cases(a, b, b_worst):
     
     return fig
 
+def outsample_evaluation_relative_differences(a, b, b_worst):
+    rel_diffs = [round(abs(a_-b_)/a_ * 100,3) for a_, b_ in zip(a,b)]
+    rel_diffs_worst = [round(abs(a_-b_)/a_ * 100,3) for a_, b_ in zip(a,b_worst)]
+    
+    fig = make_subplots(rows=1, cols=1,)
+    fig.update_layout(title="<b>Outsample evaluation, relative differences<b>",
+                  title_pad_l=75,
+                  height=500,
+                  width=600,
+                  yaxis_title="relative difference [%]")
+
+    fig.update_yaxes(range=[0, 100])
+
+    fig.add_trace(go.Bar(y=rel_diffs, 
+                     name="average scenario",
+                     marker=dict(color=["blue"]*len(rel_diffs)),
+                     x=["all_day", "morning", "midday", "afternoon"],), row=1, col=1)
+
+    fig.add_trace(go.Bar(y=rel_diffs_worst,
+                     name="average worst scenario",
+                     marker=dict(color=["navy"]*len(rel_diffs_worst)),
+                     x=["all_day", "morning", "midday", "afternoon"],), row=1, col=1)
+
+    fig.update_layout(legend=dict(
+                            orientation='h',  # Set the orientation to 'h' for horizontal
+                            yanchor='bottom',  # Anchor the legend to the bottom
+                            y=1.02,  # Adjust the y position to place the legend below the figure
+                            xanchor='left',  # Anchor the legend to the left
+                            x=0  # Adjust the x position if necessary
+                        ),)
+    return fig
 
 def compute_min_distance_df(dfs, dfs_worst):
     dfs_min_list = []

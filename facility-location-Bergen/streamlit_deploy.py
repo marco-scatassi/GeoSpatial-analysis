@@ -167,7 +167,7 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
 
     col1, col2 = st.columns(2)
     with col2:
-        fig = outsample_evaluation_relative_differences(a, b, b_worst):
+        fig = outsample_evaluation_relative_differences(a, b, b_worst)
         st.plotly_chart(fig, use_container_width=True)
 
     col1, col2 = st.columns(2)

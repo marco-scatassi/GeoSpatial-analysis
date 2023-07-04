@@ -36,7 +36,8 @@ from src.facility_location_Bergen.custome_modules.graphical_analysis import (
     compute_min_distance_df,
     objective_function_value_under_different_cases,
     travel_times_distribution_under_different_cases,
-    average_travel_time_across_under_different_cases
+    average_travel_time_across_under_different_cases,
+    outsample_evaluation_relative_differences
 )
 
 

@@ -161,7 +161,7 @@ def outsample_evaluation_relative_differences(a, b, b_worst):
     
     fig = make_subplots(rows=1, cols=1,)
     fig.update_layout(title="<b>Outsample evaluation, relative differences<b>",
-                  title_pad_l=150,
+                  title_pad_l=200,
                   height=500,
                   width=600,
                   yaxis_title="relative difference [%]")

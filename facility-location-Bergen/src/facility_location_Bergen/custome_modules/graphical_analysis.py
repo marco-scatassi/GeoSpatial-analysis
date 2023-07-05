@@ -210,10 +210,9 @@ def visualize_longest_paths(dfs, average_graphs):
     
     return map
         
-
 def compute_rel_diff(fls_exact, dfs, dfs_worst, time):
-    df_min = get_minimum_distances(dfs[(time, "weight")])
-    df_worst_min = get_minimum_distances(dfs_worst[(time, "weight")])
+    df_min = get_minimum_distances(dfs[("all-day-free-flow", time.replace("_", "-"), "weight")])
+    df_worst_min = get_minimum_distances(dfs_worst[("all-day-free-flow", time.replace("_","-"), "weight")])
 
     a = round(fls_exact[time].solution_value/60, 3)
 
@@ -221,7 +220,6 @@ def compute_rel_diff(fls_exact, dfs, dfs_worst, time):
     b_worst = df_worst_min.sort_values(by="travel_time", ascending=False).iloc[0].travel_time
 
     return a, b, b_worst
-
 
 def objective_function_value_under_different_cases(a, b, b_worst):
     
@@ -339,7 +337,6 @@ def travel_times_distribution_under_different_cases(df_min):
                                 showlegend=show_legend[-1]))
         
     return fig
-
 
 def compute_CI(df_min):
     mean_ci = pd.DataFrame({"mean": None, "lower_bound": None, "upper_bound": None}, 

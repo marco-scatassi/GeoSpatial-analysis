@@ -84,7 +84,6 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
                 dfs[key] = pkl.load(f)
             
         session_state[f"dfs_{facilities_number}"] = dfs
-        st.write(dfs.keys())
     c += 1
             
     if f"dfs_worst_{facilities_number}" not in session_state:
@@ -131,6 +130,10 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
         
     dfs = session_state[f"dfs_{facilities_number}"]
     dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
+
+    for key in dfs.keys():
+        st.write(key)
+
     session_state[f"df_min_{facilities_number}"] = compute_min_distance_df(dfs, dfs_worst)
         
     with col1:

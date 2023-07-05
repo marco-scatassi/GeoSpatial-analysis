@@ -14,6 +14,7 @@ from PIL import Image
 import streamlit as st
 from pathlib import Path
 import plotly.graph_objects as go
+from streamlit_folium import st_folium
 from kedro.runner import SequentialRunner
 from kedro.pipeline import Pipeline, pipeline
 from kedro.framework.session import KedroSession
@@ -34,6 +35,7 @@ from src.facility_location_Bergen.custome_modules.graphical_analysis import (
     compute_rel_diff,
     facilities_on_map,
     compute_min_distance_df,
+    visualize_longest_paths,
     objective_function_value_under_different_cases,
     travel_times_distribution_under_different_cases,
     average_travel_time_across_under_different_cases,
@@ -156,6 +158,7 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
     col1, col2 = st.columns([1,1.5])
     with col2:
         dfs = session_state[f"dfs_{facilities_number}"]
+        average_graphs = session_state[f"average_graphs_{facilities_number}"]
         root = project_path+rf"/data/08_reporting/{facilities_number}_locations"
         paths = [p for p in os.listdir(root) if ("solution_vs_scenario" in p) and ("worst" not in p)]
     
@@ -166,7 +169,8 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
                         replace("all_day", "all-day").
                         removesuffix(".pkl").split("_")[-3:])] = dfs[k]
         
-
+        map = visualize_longest_paths(dfs2, average_graphs)
+        st_folium(map)
 
     col1, col2 = st.columns(2)
     with col1:

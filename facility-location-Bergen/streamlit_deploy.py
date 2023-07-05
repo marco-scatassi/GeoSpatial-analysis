@@ -213,6 +213,16 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
         st.markdown(content)
 
     with col2:
+        fls_exact = session_state[f"fls_exact_{facilities_number}"]
+        dfs = session_state[f"dfs_{facilities_number}"]
+        dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
+            
+        a = list(range(len(TIMES)-1))
+        b = list(range(len(TIMES)-1))
+        b_worst = list(range(len(TIMES)-1))
+        for i, time in enumerate(TIMES[1:]):
+            a[i], b[i], b_worst[i] = compute_rel_diff(fls_exact, dfs, dfs_worst, time)
+            
         fig = outsample_evaluation_relative_differences(a, b, b_worst)
         st.plotly_chart(fig, use_container_width=True)
 

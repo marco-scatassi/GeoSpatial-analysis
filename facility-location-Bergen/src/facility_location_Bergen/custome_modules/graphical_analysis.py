@@ -287,13 +287,13 @@ def compute_min_distance_df(dfs, dfs_worst):
     dfs_min_worst_list = []
     
     for time in ["all_day", "morning", "midday", "afternoon"]:
-        df_min = get_minimum_distances(dfs[(time, "weight")])
-        df_min_worst = get_minimum_distances(dfs_worst[(time, "weight")])
+        df_min = get_minimum_distances(dfs[('all-day-free-flow', time, "weight")])
+        df_min_worst = get_minimum_distances(dfs_worst[('all-day-free-flow', time, "weight")])
 
         dfs_min_list.append(df_min)
         dfs_min_worst_list.append(df_min_worst)
     
-    df_min = get_minimum_distances(dfs[("all_day", "weight2")])[["target", "travel_time"]]
+    df_min = get_minimum_distances(dfs[('all-day-free-flow', "all_day", "weight2")])[["target", "travel_time"]]
     
     for df, name in zip(dfs_min_list+
                         dfs_min_worst_list, 

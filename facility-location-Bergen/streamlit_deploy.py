@@ -14,6 +14,7 @@ from PIL import Image
 import streamlit as st
 from pathlib import Path
 import plotly.graph_objects as go
+from streamlit_folium import st_folium
 from kedro.runner import SequentialRunner
 from kedro.pipeline import Pipeline, pipeline
 from kedro.framework.session import KedroSession
@@ -34,6 +35,7 @@ from src.facility_location_Bergen.custome_modules.graphical_analysis import (
     compute_rel_diff,
     facilities_on_map,
     compute_min_distance_df,
+    visualize_longest_paths,
     objective_function_value_under_different_cases,
     travel_times_distribution_under_different_cases,
     average_travel_time_across_under_different_cases,
@@ -60,14 +62,14 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
         for i, time in enumerate(TIMES):
             print_INFO_message_timestamp(f"Loading deterministic solution for: {time}")
             progress_bar.progress((i+1)*1/len(TIMES), f"Loading exact solution for: {time}")
-            path = r"/app/geospatial-analysis/facility-location-Bergen/"+retrieve_light_solution_path(facilities_number, time)
+            path = project_path+r"/"+retrieve_light_solution_path(facilities_number, time)
             fls_exact[time] = FacilityLocation.load(path)
             
         session_state[f"fls_exact_{facilities_number}"] = fls_exact
     c += 1
         
     if f"dfs_{facilities_number}" not in session_state:
-        root = rf"/app/geospatial-analysis/facility-location-Bergen/data/08_reporting/{facilities_number}_locations"
+        root = project_path+rf"/data/08_reporting/{facilities_number}_locations"
         paths = [p for p in os.listdir(root) if ("solution_vs_scenario" in p) and ("worst" not in p)]
             
         dfs = {}
@@ -84,7 +86,7 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
     c += 1
             
     if f"dfs_worst_{facilities_number}" not in session_state:
-        root = rf"/app/geospatial-analysis/facility-location-Bergen/data/08_reporting/{facilities_number}_locations"
+        root = project_path+rf"/data/08_reporting/{facilities_number}_locations"
         paths_worst = [p for p in os.listdir(root) if ("solution_vs_scenario" in p) and ("worst" in p)]
             
         dfs_worst = {}
@@ -100,7 +102,20 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
         session_state[f"dfs_worst_{facilities_number}"] = dfs_worst
     c+=1
 
-    if c == 3:
+    if f"average_graphs_{facilities_number}" not in session_state:
+        root = project_path+rf"/data/03_primary"
+        
+        average_graphs = {}
+        for time in TIMES[1:]:
+            path = root+rf"/average_graph_{time}.pkl"
+            with open(path, "rb") as f:
+                average_graphs[time] = pkl.load(f)
+
+        session_state[f"average_graphs_{facilities_number}"] = average_graphs
+
+    c+=1
+
+    if c == 4:
         progress_bar.progress(100, "Loading data completed!")
 
 
@@ -139,6 +154,23 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
         content = f.read()
 
     st.markdown(content)
+
+    col1, col2 = st.columns([1,1.5])
+    with col2:
+        dfs = session_state[f"dfs_{facilities_number}"]
+        average_graphs = session_state[f"average_graphs_{facilities_number}"]
+        root = project_path+rf"/data/08_reporting/{facilities_number}_locations"
+        paths = [p for p in os.listdir(root) if ("solution_vs_scenario" in p) and ("worst" not in p)]
+    
+        dfs2 = {}
+        for path, k in zip(paths, dfs.keys()):
+            dfs2[tuple(path.
+                        replace("all_day_free_flow", "all-day-free-flow").
+                        replace("all_day", "all-day").
+                        removesuffix(".pkl").split("_")[-3:])] = dfs[k]
+        
+        map = visualize_longest_paths(dfs2, average_graphs)
+        st_folium(map)
 
     col1, col2 = st.columns(2)
     with col1:
@@ -181,6 +213,16 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
         st.markdown(content)
 
     with col2:
+        fls_exact = session_state[f"fls_exact_{facilities_number}"]
+        dfs = session_state[f"dfs_{facilities_number}"]
+        dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
+            
+        a = list(range(len(TIMES)-1))
+        b = list(range(len(TIMES)-1))
+        b_worst = list(range(len(TIMES)-1))
+        for i, time in enumerate(TIMES[1:]):
+            a[i], b[i], b_worst[i] = compute_rel_diff(fls_exact, dfs, dfs_worst, time)
+            
         fig = outsample_evaluation_relative_differences(a, b, b_worst)
         st.plotly_chart(fig, use_container_width=True)
 

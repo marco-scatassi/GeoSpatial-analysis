@@ -166,8 +166,7 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
         root = project_path+rf"/data/08_reporting/{facilities_number}_locations"
         paths = [p for p in os.listdir(root) if ("solution_vs_scenario" in p) and ("worst" not in p)]
         
-        #map = visualize_longest_paths(dfs,  average_graphs)
-        map = folium.Map()
+        map = visualize_longest_paths(dfs,  average_graphs)
         st_data = st_folium(map)
 
     col1, col2 = st.columns(2)

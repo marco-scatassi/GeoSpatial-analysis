@@ -131,9 +131,6 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
     dfs = session_state[f"dfs_{facilities_number}"]
     dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
 
-    for key in dfs.keys():
-        st.write(key)
-
     session_state[f"df_min_{facilities_number}"] = compute_min_distance_df(dfs, dfs_worst)
         
     with col1:

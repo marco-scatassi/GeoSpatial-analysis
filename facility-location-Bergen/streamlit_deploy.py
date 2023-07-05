@@ -84,6 +84,7 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
                 dfs[key] = pkl.load(f)
             
         session_state[f"dfs_{facilities_number}"] = dfs
+        print(dfs.keys())
     c += 1
             
     if f"dfs_worst_{facilities_number}" not in session_state:

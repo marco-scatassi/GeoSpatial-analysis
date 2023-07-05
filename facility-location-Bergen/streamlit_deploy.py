@@ -166,7 +166,7 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
         paths = [p for p in os.listdir(root) if ("solution_vs_scenario" in p) and ("worst" not in p)]
         
         map = visualize_longest_paths(dfs,  average_graphs)
-        #st_folium(map)
+        st_data = st_folium(map)
 
     col1, col2 = st.columns(2)
     with col1:

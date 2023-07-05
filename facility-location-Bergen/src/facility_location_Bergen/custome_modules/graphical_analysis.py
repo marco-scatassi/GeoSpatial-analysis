@@ -79,7 +79,7 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
             is_s = True
     colors = ["red", "black", "blue", "orange", "green", "purple", "pink", "brown", "black", "grey"]
     colors_mapping = {k: colors[i] for i, k in enumerate(mapping.keys())}
-    size = 8
+    size = 10
     for k, fl in mapping.items():
         c=colors_mapping[k]
         if not is_s:

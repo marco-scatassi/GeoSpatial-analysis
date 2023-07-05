@@ -1,5 +1,7 @@
+import folium
 import numpy as np
 import pandas as pd
+import networkx as nx
 import plotly.graph_objects as go
 from sklearn.utils import resample
 from plotly.subplots import make_subplots
@@ -11,6 +13,17 @@ def rand_jitter(list):
     else:
         stdev = 0.0003
     return list + np.random.randn(len(list)) * stdev
+
+def get_travel_time(solution_path, graph, weight):
+    travel_time = 0
+    for i in range(len(solution_path)-1):
+        sp = solution_path[i]
+        ep = solution_path[i+1]
+        travel_time += graph.get_edge_data(sp, ep)[weight]
+    return travel_time
+
+def get_minimum_distances(df):
+    return df.groupby("target").min().reset_index()
 
 def facilities_on_map(fls, extra_text=None, title_pad_l=50):
     mapping = {}
@@ -112,9 +125,91 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
 
     return fig
 
+def visualize_longest_paths(dfs, average_graphs):
+    # ------------------------------ prepare the data ----------------------------------#
+    dfs_min = {}
+    for key, df in dfs.items():
+        dfs_min[key] = get_minimum_distances(df).sort_values(by="travel_time", ascending=False)
+    
+    sources = {}
+    destinations = {}
+    solution_paths = {}
 
-def get_minimum_distances(df):
-    return df.groupby("target").min().reset_index()
+    for key, df in dfs_min.items():
+        try:
+            if key[0] == key[1] or (key[0] == "all-day-free-flow" and key[1] == "all-day" and key[2] == "weight2"):
+                sources[key] = df.iloc[0]["source"]
+                destinations[key] = df.iloc[0]["target"]
+                solution_paths[key] = nx.dijkstra_path(G=average_graphs[key[1].replace("-", "_")],
+                                                    source=sources[key],
+                                                    target=destinations[key],
+                                                    weight=key[2])
+            else:
+                continue
+        except:
+            print("Skipping: ", key[0])
+        
+    travel_time = {}
+    for key in solution_paths.keys():
+        travel_time[key] = {}
+        for time in ['all_day_free_flow', 'all_day', 'morning', 'midday', 'afternoon']:
+            if key[0].replace("-", "_") == time:
+                if time == "all_day_free_flow":
+                    travel_time[key][time] = nx.dijkstra_path_length(G=average_graphs["all_day"], source=sources[key], target=destinations[key], weight=key[2])
+                else:
+                    # print(key[0].replace("-", "_"), time)
+                    travel_time[key][time] = nx.dijkstra_path_length(G=average_graphs[time], source=sources[key], target=destinations[key], weight=key[2])
+            else:
+                if time == "all_day_free_flow":
+                    travel_time[key][time] = get_travel_time(solution_paths[key], average_graphs["all_day"], "weight2")
+                else:
+                    travel_time[key][time] = get_travel_time(solution_paths[key], average_graphs[time], "weight")
+            minutes = int(travel_time[key][time]/60)
+            seconds = int(travel_time[key][time]%60)
+            travel_time[key][time] = str(minutes) + " min" + " " + str(seconds) + " sec"
+    
+    #----------------------------------- design the map --------------------------------#
+    center_pt = [60.41, 5.32415]
+    color_mapping = {
+        "all-day-free-flow":"red",
+        "all-day":"black",
+        "morning":"blue",
+        "midday":"orange",
+        "afternoon":"green",
+    }
+    map = folium.Map(location=center_pt, tiles="OpenStreetMap", zoom_start=9.5)
+
+    tooltip_targets = {}
+    for key in solution_paths.keys():
+        target = solution_paths[key][-1]
+        if target not in tooltip_targets.keys():
+            tooltip_targets[target] = f"<b>Farthest location for:</b>" 
+        
+        tooltip_targets[target] += f"<br>- {key[0].upper()}"
+
+    for key in solution_paths.keys():
+        tooltip_source =f"<b>{key[0].upper()}</b><br>(opt locations)<br><br>"+"<br>- ".join(["<b>Travel time</b>:"]+[rf"{time}: " + travel_time[key][time] for time in 
+                                ['all_day_free_flow', 'all_day', 'morning', 'midday', 'afternoon']])
+
+        start_marker = folium.Marker(location=(solution_paths[key][0][1]+np.random.normal(0, 0.0003, 1),
+                                            solution_paths[key][0][0]+np.random.normal(0, 0.0003, 1)),
+                    icon=folium.Icon(color=color_mapping[key[0]], prefix='fa',icon='car'),
+                    tooltip=tooltip_source)
+        start_marker.add_to(map)
+        
+        folium.Marker(location=(solution_paths[key][-1][1], solution_paths[key][-1][0]),
+                    tooltip=tooltip_targets[solution_paths[key][-1]],
+                    icon=folium.Icon(color='gray', prefix='fa',icon='crosshairs'),).add_to(map)
+
+        path = folium.PolyLine(locations=[(node[1], node[0]) for node in solution_paths[key]], 
+                        color=color_mapping[key[0]],
+                        tooltip=key[0],
+                        weight=2,)
+
+        path.add_to(map)
+    
+    return map
+        
 
 def compute_rel_diff(fls_exact, dfs, dfs_worst, time):
     df_min = get_minimum_distances(dfs[(time, "weight")])

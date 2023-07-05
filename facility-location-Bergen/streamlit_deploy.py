@@ -76,9 +76,10 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
 
         for path in paths:
             with open(os.path.join(root, path), "rb") as f:
-                key = tuple(path.removesuffix(".pkl").split("_")[-2:])
-                if key[0] == "day":
-                    key = tuple(["all_day", key[1]])
+                key = tuple(path.
+                        replace("all_day_free_flow", "all-day-free-flow").
+                        replace("all_day", "all-day").
+                        removesuffix(".pkl").split("_")[-3:])
                         
                 dfs[key] = pkl.load(f)
             
@@ -93,9 +94,10 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
 
         for path in paths_worst:
             with open(os.path.join(root, path), "rb") as f:
-                key = tuple(path.removesuffix(".pkl").split("_")[-3:-1])
-                if key[0] == "day":
-                    key = tuple(["all_day", key[1]])
+                key =   tuple(path.
+                        replace("all_day_free_flow", "all-day-free-flow").
+                        replace("all_day", "all-day").
+                        removesuffix(".pkl").split("_")[-4:-1])
                         
                 dfs_worst[key] = pkl.load(f)
             
@@ -161,15 +163,8 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
         average_graphs = session_state[f"average_graphs_{facilities_number}"]
         root = project_path+rf"/data/08_reporting/{facilities_number}_locations"
         paths = [p for p in os.listdir(root) if ("solution_vs_scenario" in p) and ("worst" not in p)]
-    
-        dfs2 = {}
-        for path, k in zip(paths, dfs.keys()):
-            dfs2[tuple(path.
-                        replace("all_day_free_flow", "all-day-free-flow").
-                        replace("all_day", "all-day").
-                        removesuffix(".pkl").split("_")[-3:])] = dfs[k]
         
-        map = visualize_longest_paths(dfs2, average_graphs)
+        map = visualize_longest_paths(dfs,  average_graphs)
         st_folium(map)
 
     col1, col2 = st.columns(2)
@@ -222,7 +217,7 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
         b_worst = list(range(len(TIMES)-1))
         for i, time in enumerate(TIMES[1:]):
             a[i], b[i], b_worst[i] = compute_rel_diff(fls_exact, dfs, dfs_worst, time)
-            
+
         fig = outsample_evaluation_relative_differences(a, b, b_worst)
         st.plotly_chart(fig, use_container_width=True)
 

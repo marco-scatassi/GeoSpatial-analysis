@@ -133,7 +133,7 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
             ))
 
         for lon, lat in zip(rand_jitter(lons[k]), rand_jitter(lats[k])):
-            b = control_polygon(lon, lat, width=0.14, height= 0.12) #The width and height of a location pin 
+            b = control_polygon(lon, lat, width=0.014, height= 0.012) #The width and height of a location pin 
                                                                     # are chosen by trial and error
             bez = BezierCv(b, nr=30)
             geojd['features'].append({ "type": "Feature",

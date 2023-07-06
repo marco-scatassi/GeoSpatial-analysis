@@ -173,7 +173,7 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
     #------------------ FREE FLOW SOLUTION UNDER DIFFERENT SCENARIOS COMPARISON ------------------
     #------------------ OBJ FUNCTION VALUE -------------
     col1, col2 = st.columns(2)
-    if f"rel_diff_barplot_{facilities_number}" not in session_state:
+    if f"abs_diff_barplot_{facilities_number}" not in session_state:
         fls_exact = session_state[f"fls_exact_{facilities_number}"]
         dfs = session_state[f"dfs_{facilities_number}"]
         dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
@@ -182,10 +182,10 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
         b_worst = list(range(len(TIMES)-1))
         for i, time in enumerate(TIMES[1:]):
             a[i], b[i], b_worst[i] = compute_rel_diff(fls_exact, dfs, dfs_worst, time)
-        session_state[f"rel_diff_barplot_{facilities_number}"] = (a,b,b_worst)
+        session_state[f"abs_diff_barplot_{facilities_number}"] = (a,b,b_worst)
 
     with col1:
-        (a,b,b_worst) = session_state[f"rel_diff_barplot_{facilities_number}"]
+        (a,b,b_worst) = session_state[f"abs_diff_barplot_{facilities_number}"]
         fig = objective_function_value_under_different_cases(a, b, b_worst)
         st.plotly_chart(fig, use_container_width=True)
 
@@ -206,18 +206,9 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
         for i in range(6):
             st.write("")
         st.markdown(content)
- 
-    with col2:
-        fls_exact = session_state[f"fls_exact_{facilities_number}"]
-        dfs = session_state[f"dfs_{facilities_number}"]
-        dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
-            
-        a = list(range(len(TIMES)-1))
-        b = list(range(len(TIMES)-1))
-        b_worst = list(range(len(TIMES)-1))
-        for i, time in enumerate(TIMES[1:]):
-            a[i], b[i], b_worst[i] = compute_rel_diff(fls_exact, dfs, dfs_worst, time)
-
+    
+    with col2:    
+        (a,b,b_worst) = session_state[f"abs_diff_barplot_{facilities_number}"]
         fig = outsample_evaluation_relative_differences(a, b, b_worst)
         st.plotly_chart(fig, use_container_width=True)
 

@@ -77,7 +77,7 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
     for k in mapping.keys():
         if "stochastic" in k:
             is_s = True
-    colors = ["red", "black", "blue", "orange", "green", "purple", "pink", "brown", "black", "grey"]
+    colors = ["red", "black", "blue", "purple", "green", "orange", "pink", "brown", "black", "grey"]
     colors_mapping = {k: colors[i] for i, k in enumerate(mapping.keys())}
     size = 10
     for k, fl in mapping.items():
@@ -174,7 +174,7 @@ def visualize_longest_paths(dfs, average_graphs):
         "all-day-free-flow":"red",
         "all-day":"black",
         "morning":"blue",
-        "midday":"orange",
+        "midday":"purple",
         "afternoon":"green",
     }
     map = folium.Map(location=center_pt, tiles="OpenStreetMap", zoom_start=9.5)

@@ -177,7 +177,7 @@ def visualize_longest_paths(dfs, average_graphs):
         "midday":"purple",
         "afternoon":"green",
     }
-    map = folium.Map(location=center_pt, tiles="OpenStreetMap", zoom_start=9.5)
+    map = folium.Map(location=center_pt, tiles="OpenStreetMap", zoom_start=10)
 
     tooltip_targets = {}
     for key in solution_paths.keys():

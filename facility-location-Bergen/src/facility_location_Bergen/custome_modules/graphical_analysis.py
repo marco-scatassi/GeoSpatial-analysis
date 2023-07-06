@@ -109,7 +109,7 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
             is_s = True
     colors = ["red", "black", "blue", "purple", "green", "orange", "pink", "brown", "black", "grey"]
     colors_mapping = {k: colors[i] for i, k in enumerate(mapping.keys())}
-    
+    layers = []
     size = 10
     for k, fl in mapping.items():
         c=colors_mapping[k]
@@ -142,15 +142,14 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
                                     "geometry": {"type": "Polygon",
                                                     "coordinates": bez }})
                                 
-        layers=[dict(sourcetype='geojson',
+        layers.append(dict(sourcetype='geojson',
                             source=geojd,
                             below=' ', 
                             type='fill',   
                             color = c,
                             opacity=0.9
-            )]
+            ))
 
-        fig.update_layout(mapbox_layers =layers)
 
     if is_s:
         title = "deterministic and stochastic solution comparison"
@@ -161,7 +160,7 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
                         mapbox=dict(
                             style="open-street-map",
                             center=dict(lat=fls[0].coordinates.geometry.y.mean(), lon=fls[0].coordinates.geometry.x.mean()),
-                            #layers=layers,
+                            layers=layers,
                             zoom=9
                             ),
                         legend=dict(

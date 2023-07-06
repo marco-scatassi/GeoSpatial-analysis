@@ -207,7 +207,6 @@ def visualize_longest_paths(dfs, average_graphs):
                         weight=2,)
 
         path.add_to(map)
-        map = folium.Map()
     
     return map
         

@@ -39,6 +39,21 @@ def BezierCv(b, nr=30):# compute nr points on the Bezier curve of control points
     return [[deCasteljau(b, t[k]) for k in range(nr)]] #the points on a Bezier curve define here the coordinates
                                                        #of a Polygon in a geojson type dict
 
+class InvalidInputError(Exception):
+    pass
+
+def deCasteljau(b, t): #de Casteljau algorithm to evaluste a point on a Bezier curve
+    #b a list of 4 2-lists
+    #t a number in [0,1]
+    #returns the point on the Bezier curve, corresponding to t
+    N = len(b) 
+    if N != 4 :
+        raise InvalidInputError("Here the  control polygon must have 4 points")
+    a = np.copy(b) 
+    for r in range(1, N): 
+        a[:N-r,:] = (1-t) * a[:N-r,:] + t * a[1:N-r+1,:]# convex combinations in step r                               
+    return tuple(a[0,:])
+
 def facilities_on_map(fls, extra_text=None, title_pad_l=50):
     mapping = {}
     if extra_text is None:

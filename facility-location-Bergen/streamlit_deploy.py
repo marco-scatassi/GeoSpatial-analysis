@@ -158,16 +158,15 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
     st.markdown(content)
 
     #---------------------------------- MAP LONGEST PATH -------------------------------------
-    if facilities_number == 1:
-        col1, col2 = st.columns([1.5,1])
-        if f"map_longest_paths_{facilities_number}" not in session_state:
-            dfs = session_state[f"dfs_{facilities_number}"]
-            average_graphs = session_state[f"average_graphs_{facilities_number}"]
-            map = visualize_longest_paths(dfs, average_graphs)
-            session_state[f"map_longest_paths_{facilities_number}"] = map
+    col1, col2 = st.columns([1.5,1])
+    if f"map_longest_paths_{facilities_number}" not in session_state:
+        dfs = session_state[f"dfs_{facilities_number}"]
+        average_graphs = session_state[f"average_graphs_{facilities_number}"]
+        map = visualize_longest_paths(dfs, average_graphs)
+        session_state[f"map_longest_paths_{facilities_number}"] = map
         
-        with col1:
-            st_folium(
+    with col1:
+        st_folium(
                 session_state[f"map_longest_paths_{facilities_number}"],
                 returned_objects=[],
                 width=800)

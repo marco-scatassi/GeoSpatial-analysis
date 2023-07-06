@@ -165,10 +165,10 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
         map = visualize_longest_paths(dfs, average_graphs)
         session_state[f"map_longest_paths_{facilities_number}"] = map
     
-    with col2:
+    with col1:
         st_data = st_folium(
             session_state[f"map_longest_paths_{facilities_number}"],
-            width=750)
+            width=800)
 
     #------------------ FREE FLOW SOLUTION UNDER DIFFERENT SCENARIOS COMPARISON ------------------
     #------------------ OBJ FUNCTION VALUE -------------

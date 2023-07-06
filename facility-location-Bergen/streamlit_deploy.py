@@ -131,27 +131,25 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
         
     dfs = session_state[f"dfs_{facilities_number}"]
     dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
-
     session_state[f"df_min_{facilities_number}"] = compute_min_distance_df(dfs, dfs_worst)
-        
-    with col1:
+
+    if f"facilities_on_map_{facilities_number}" not in session_state:
         fls_exact = session_state[f"fls_exact_{facilities_number}"]
         fig = facilities_on_map([fl for fl in fls_exact.values()], 
                                     extra_text=[time for time in fls_exact.keys()],
                                     title_pad_l=200)
-        st.plotly_chart(fig, use_container_width=True)
+        session_state[f"facilities_on_map_{facilities_number}"] = fig
+        
+    with col1:
+        st.plotly_chart(session_state[f"facilities_on_map_{facilities_number}"], 
+                        use_container_width=True)
 
     with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBysideWithMap.md", "r") as f:
         content = f.read()
 
     with col2:
-        st.write("")
-        st.write("")
-        st.write("")
-        st.write("")
-        st.write("")
-        st.write("")
-        st.write("")
+        for i in range(7):
+            st.write("")
         st.markdown(content)
         
     with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/underTheMap.md", "r") as f:
@@ -167,7 +165,9 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
         session_state[f"map_longest_paths_{facilities_number}"] = map
     
     with col2:
-        st_data = st_folium(session_state[f"map_longest_paths_{facilities_number}"])
+        st_data = st_folium(
+            session_state[f"map_longest_paths_{facilities_number}"],
+            width = 700)
 
     col1, col2 = st.columns(2)
     with col1:
@@ -188,12 +188,8 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
         with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBySideWithFirstBarplot.md", "r") as f:
             content = f.read()
 
-        st.write("")
-        st.write("")
-        st.write("")
-        st.write("")
-        st.write("")
-        st.write("")
+        for i in range(6):
+            st.write("")
         st.markdown(content)
 
     col1, col2 = st.columns(2)
@@ -201,12 +197,8 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
         with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBySideWithSecondBarplot.md", "r") as f:
             content = f.read()
 
-        st.write("")
-        st.write("")
-        st.write("")
-        st.write("")
-        st.write("")
-        st.write("")
+        for i in range(6):
+            st.write("")
         st.markdown(content)
 
     with col2:

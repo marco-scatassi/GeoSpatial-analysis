@@ -166,8 +166,9 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
         session_state[f"map_longest_paths_{facilities_number}"] = map
     
     with col1:
-        st_data = st_folium(
+        st_folium(
             session_state[f"map_longest_paths_{facilities_number}"],
+            returned_objects=[]
             width=800)
 
     #------------------ FREE FLOW SOLUTION UNDER DIFFERENT SCENARIOS COMPARISON ------------------

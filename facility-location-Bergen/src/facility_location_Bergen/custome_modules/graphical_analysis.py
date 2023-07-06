@@ -23,7 +23,10 @@ def get_travel_time(solution_path, graph, weight):
     return travel_time
 
 def get_minimum_distances(df):
-    return df.groupby("target").min().reset_index()
+    return df.groupby("target").\
+                                apply(lambda x: x.sort_values(by="travel_time", ascending=True).iloc[0]).\
+                                drop("target", axis=1).\
+                                reset_index()
 
 def control_polygon(lon, lat,  width, height):
     # defines the bezier control points for a location pin

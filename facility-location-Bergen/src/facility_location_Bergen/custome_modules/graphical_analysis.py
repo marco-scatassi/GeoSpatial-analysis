@@ -19,7 +19,11 @@ def get_travel_time(solution_path, graph, weight):
     for i in range(len(solution_path)-1):
         sp = solution_path[i]
         ep = solution_path[i+1]
-        travel_time += graph.get_edge_data(sp, ep)[weight]
+        try:
+            travel_time += graph.get_edge_data(sp, ep)[weight]
+        except:
+            print(graph.get_edge_data(sp, ep))
+            travel_time += graph.get_edge_data(sp, ep)["weight"]
     return travel_time
 
 def get_minimum_distances(df):

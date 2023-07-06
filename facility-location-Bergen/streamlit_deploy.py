@@ -127,8 +127,8 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
         st.write("Load the data first")
         return 
 
+    #------------------------------- FACILITIES ON MAP ---------------------------------------
     col1, col2 = st.columns([1.5,1])
-        
     dfs = session_state[f"dfs_{facilities_number}"]
     dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
     session_state[f"df_min_{facilities_number}"] = compute_min_distance_df(dfs, dfs_worst)
@@ -157,7 +157,8 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
 
     st.markdown(content)
 
-    col1, col2 = st.columns([1,1.5])
+    #---------------------------------- MAP LONGEST PATH -------------------------------------
+    col1, col2 = st.columns([1.5,1])
     if f"map_longest_paths_{facilities_number}" not in session_state:
         dfs = session_state[f"dfs_{facilities_number}"]
         average_graphs = session_state[f"average_graphs_{facilities_number}"]
@@ -167,20 +168,24 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
     with col2:
         st_data = st_folium(
             session_state[f"map_longest_paths_{facilities_number}"],
-            width = 700)
+            use_container_width=True)
 
+    #------------------ FREE FLOW SOLUTION UNDER DIFFERENT SCENARIOS COMPARISON ------------------
+    #------------------ OBJ FUNCTION VALUE -------------
     col1, col2 = st.columns(2)
-    with col1:
+    if f"rel_diff_barplot_{facilities_number}" not in session_state:
         fls_exact = session_state[f"fls_exact_{facilities_number}"]
         dfs = session_state[f"dfs_{facilities_number}"]
         dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
-            
         a = list(range(len(TIMES)-1))
         b = list(range(len(TIMES)-1))
         b_worst = list(range(len(TIMES)-1))
         for i, time in enumerate(TIMES[1:]):
             a[i], b[i], b_worst[i] = compute_rel_diff(fls_exact, dfs, dfs_worst, time)
+        session_state[f"rel_diff_barplot_{facilities_number}"] = (a,b,b_worst)
 
+    with col1:
+        (a,b,b_worst) = session_state[f"rel_diff_barplot_{facilities_number}"]
         fig = objective_function_value_under_different_cases(a, b, b_worst)
         st.plotly_chart(fig, use_container_width=True)
 
@@ -191,7 +196,8 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
         for i in range(6):
             st.write("")
         st.markdown(content)
-
+    
+    #------------------ RELATIVE DIFFERENCES ------------  
     col1, col2 = st.columns(2)
     with col1:
         with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBySideWithSecondBarplot.md", "r") as f:
@@ -200,7 +206,7 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
         for i in range(6):
             st.write("")
         st.markdown(content)
-
+ 
     with col2:
         fls_exact = session_state[f"fls_exact_{facilities_number}"]
         dfs = session_state[f"dfs_{facilities_number}"]
@@ -215,11 +221,16 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
         fig = outsample_evaluation_relative_differences(a, b, b_worst)
         st.plotly_chart(fig, use_container_width=True)
 
+    #------------------------------------ DISTRIBUTION ANALYSIS ---------------------------------------
     col1, col2 = st.columns(2)
-    with col1:
+    if f"distribution_violin_plot_{facilities_number}" not in session_state:
         df_min = session_state[f"df_min_{facilities_number}"]
         fig = average_travel_time_across_under_different_cases(df_min)
-        st.plotly_chart(fig, use_container_width=True)
+        session_state[f"distribution_violin_plot_{facilities_number}"] = fig
+
+    with col1:
+        st.plotly_chart(session_state[f"distribution_violin_plot_{facilities_number}"], 
+        use_container_width=True)
         
         
         

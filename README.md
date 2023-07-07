@@ -3,4 +3,3 @@ This project aims to solve the **Emergency Facility Location Problem** using bot
 
 The project is organized in a modular and reproducible way using the **Kedro** framework (https://kedro.org/). Kedro provides a standard project structure, allowing for easy navigation and understanding of the project's components.
 
-A streamlit web app with a **non complete** summary of results and theoretical background can be found at this [link](https://marco-scatass-facility-location-bergenstreamlit-deploy-egtgap.streamlit.app)

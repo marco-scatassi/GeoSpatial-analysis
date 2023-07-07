@@ -64,12 +64,13 @@ def build_graph(gdf_average):
             p1 = toExtremePoints(line)[-1]
             t0 = tuple([p0.coords.xy[0][0], p0.coords.xy[1][0]])
             t1 = tuple([p1.coords.xy[0][0], p1.coords.xy[1][0]])
-            # if the road is closed, set the weight to a very high number
+            # if the road is closed, set the weight to 
             if speed == 0:
                 G.add_edge(
                     t0,
                     t1,
                     weight=100000,
+                    weight2=lengths[i] / free_flow_speed,
                     speed=speed,
                     free_flow_speed=free_flow_speed,
                     description=description,
@@ -108,6 +109,7 @@ def connect_graph_components(G, CC):
                     predecessor = list(predecessor)[0]
 
                 speed1 = cc[predecessor][node[0]]["speed"]
+                free_flow_speed1 = cc[predecessor][node[0]]["free_flow_speed"]
 
                 # print the nearest node
                 print_INFO_message(f"predecessor of {node[0]} is {predecessor}")
@@ -121,12 +123,15 @@ def connect_graph_components(G, CC):
                     successor = list(successor)[0]
 
                 speed2 = cc[node[1]][successor]["speed"]
+                free_flow_speed2 = cc[node[1]][successor]["free_flow_speed"]
 
                 # print the nearest node
                 print_INFO_message(f"successor of {node[1]} is {successor}")
 
         avg_speed = (speed1 + speed2) / 2
+        free_flow_avg_speed = (free_flow_speed1 + free_flow_speed2) / 2
         weight = node[2]["distance"] / avg_speed
+        weight2 = node[2]["distance"] / free_flow_avg_speed
         print_INFO_message(f"average speed is {avg_speed}")
         print_INFO_message(f"weight is {weight}")
 
@@ -134,7 +139,9 @@ def connect_graph_components(G, CC):
             node[0],
             node[1],
             weight=weight,
+            weight2=weight2,
             speed=avg_speed,
+            free_flow_speed=free_flow_avg_speed,
             distance=node[2]["distance"],
         )
         print_INFO_message(f"added edge between {node[0]} and {node[1]}")

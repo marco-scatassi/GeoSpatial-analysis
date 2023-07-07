@@ -92,21 +92,26 @@ def solution_vs_scenario(data, is_created=False):
             for i in range(len(ff_solutions_location))
         }
 
+        coordinates = [(x,y) for x,y in zip(fls_exact_solution.coordinates.geometry.x, fls_exact_solution.coordinates.geometry.y)]
+        
         for i, node in enumerate(average_graph):
             if i % 500 == 0:
                 print_INFO_message(f"{i} out of {len(average_graph.nodes)}")
 
-            keys = list(temporal_distances.keys())
-            
-            for k in keys:
-                temporal_distances[k].append(
-                    (
-                        node,
-                        nx.dijkstra_path_length(
-                            G=average_graph, source=k, target=node, weight=weight
-                        ),
+            if node in coordinates:
+                keys = list(temporal_distances.keys())
+                
+                for k in keys:
+                    temporal_distances[k].append(
+                        (
+                            node,
+                            nx.dijkstra_path_length(
+                                G=average_graph, source=k, target=node, weight=weight
+                            ),
+                        )
                     )
-                )
+                else:
+                    continue
 
         # create a dataframe with the distance from the exact solution to all the other nodes in the graph
         d = {"source": [], "target": [], "travel_time": []}

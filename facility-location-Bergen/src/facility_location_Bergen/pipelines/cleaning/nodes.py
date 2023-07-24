@@ -25,7 +25,7 @@ def verify_cleaning_already_done(day, trigger_from_ingestion=False):
     is_done = False
 
     if trigger_from_ingestion:
-        file_path = f"data/02_intermediate/is_done_cleaning_{day}.pkl"
+        file_path = f"data/02_intermediate/is_done_cleaning_{day}_2.pkl"
         if os.path.exists(file_path):
             with open(file_path, "rb") as file:
                 is_done = pickle.load(file)

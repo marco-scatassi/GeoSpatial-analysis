@@ -104,7 +104,7 @@ def verify_process_gdf_already_done(date: dict, trigger: bool):
     already_done = False
     if trigger:
         # verify if the file already exists
-        saving_path = retrieve_gdf_path(date, processed=True)
+        saving_path = retrieve_gdf_path(date, processed=True, subSegment=False)
         if os.path.exists(saving_path):
             already_done = True
 
@@ -339,12 +339,12 @@ def process_gdf(date, already_done):
     if not already_done:
         # read gdf
         gdf_path = retrieve_gdf_path(date)
-        gdf = pd.read_pickle(gdf_path)
+        gdf_ = pd.read_pickle(gdf_path)
         # process gdf
-        gdf_ = sub_segment_extraction(gdf)
+        # gdf_ = sub_segment_extraction(gdf_)
         gdf_ = process_closed_roads(gdf_)
         # save gdf
-        saving_path = retrieve_gdf_path(date, processed=True)
+        saving_path = retrieve_gdf_path(date, processed=True, subSegment=False)
         dataset = PickleDataSet(filepath=saving_path)
         dataset.save(gdf_)
 

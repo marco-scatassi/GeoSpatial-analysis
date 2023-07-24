@@ -37,22 +37,27 @@ def retrieve_raw_data_root_dir():
     return conf_params["raw_data_root_dir"]
 
 
-def retrieve_gdf_path(date: dict, processed=False):
+def retrieve_gdf_path(date: dict, processed=False, subSegment=False):
     if type(date) == str:
         dt = date
     else:
         dt = date["day"]
 
     # define saving paths
-    if processed:
+    if processed and subSegment:
+        saving_path = f"data/03_primary/{dt}_processed_subSegment.geojson"
+    elif processed and not subSegment:
         saving_path = f"data/03_primary/{dt}_processed.geojson"
     else:
         saving_path = f"data/03_primary/{dt}.geojson"
     return saving_path
 
 
-def retrieve_gdf_average_path(time):
-    saving_path = f"data/03_primary/average_{time}.geojson"
+def retrieve_gdf_average_path(time, subSegment=False):
+    if subSegment:
+        saving_path = f"data/03_primary/average_{time}_subSegment.geojson"
+    else:
+        saving_path = f"data/03_primary/average_{time}.geojson"
     return saving_path
 
 
@@ -61,8 +66,11 @@ def retrieve_gdf_worst_average_path(time):
     return saving_path
 
 
-def retrieve_average_graph_path(time):
-    saving_path = f"data/03_primary/average_graph_{time}.pkl"
+def retrieve_average_graph_path(time, connected=True):
+    if connected:
+        saving_path = f"data/03_primary/average_graph_{time}_connected.pkl"
+    else:
+        saving_path = f"data/03_primary/average_graph_{time}_original.pkl"
     return saving_path
 
 

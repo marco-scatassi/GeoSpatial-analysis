@@ -142,41 +142,46 @@ def connect_graph_components(G, CC):
             weight2=weight2,
             speed=avg_speed,
             free_flow_speed=free_flow_avg_speed,
-            distance=node[2]["distance"],
         )
         print_INFO_message(f"added edge between {node[0]} and {node[1]}")
     return G
 
 
-def build_average_graph(time):
+def build_average_graph(params):
     finished = False
+    time = params["time"]
+    connect = params["connected"]
+    saving_path = retrieve_average_graph_path(time, connected=connect)
+    dataset = PickleDataSet(saving_path)
 
     with open(retrieve_gdf_average_path(time), "rb") as f:
         average_gdf = pickle.load(f)
 
+    print_INFO_message_timestamp("building average graph")
     G = build_graph(average_gdf)
-    CC = build_strongly_cc(G)
+    
+    if connect:
+        CC = build_strongly_cc(G)
 
-    print_INFO_message_timestamp("strongly connected components")
-    print_INFO_message(f"{nx.number_strongly_connected_components(G)}")
+        print_INFO_message_timestamp("strongly connected components")
+        print_INFO_message(f"{nx.number_strongly_connected_components(G)}")
 
-    print_INFO_message_timestamp("nodes number of the largest 4 components")
-    print_INFO_message(f"{[c.number_of_nodes() for c in CC[:4]]}")
+        print_INFO_message_timestamp("nodes number of the largest 4 components")
+        print_INFO_message(f"{[c.number_of_nodes() for c in CC[:4]]}")
 
-    G_connected = connect_graph_components(G, CC)
-    CC_connected = build_strongly_cc(G_connected)
+        G_connected = connect_graph_components(G, CC)
+        CC_connected = build_strongly_cc(G_connected)
 
-    print_INFO_message_timestamp("strongly connected components")
-    print_INFO_message(f"{nx.number_strongly_connected_components(G_connected)}")
+        print_INFO_message_timestamp("strongly connected components")
+        print_INFO_message(f"{nx.number_strongly_connected_components(G_connected)}")
 
-    print_INFO_message_timestamp("nodes number of the largest 4 components")
-    print_INFO_message(f"{[c.number_of_nodes() for c in CC_connected[:4]]}")
+        print_INFO_message_timestamp("nodes number of the largest 4 components")
+        print_INFO_message(f"{[c.number_of_nodes() for c in CC_connected[:4]]}")
 
-    connected_graph = CC_connected[0]
-
-    saving_path = retrieve_average_graph_path(time)
-    dataset = PickleDataSet(saving_path)
-    dataset.save(connected_graph)
+        connected_graph = CC_connected[0]
+        dataset.save(connected_graph)
+    else:
+        dataset.save(G)
     finished = True
 
     return finished
@@ -184,11 +189,17 @@ def build_average_graph(time):
 
 ##################################################################### STEP 2 #####################################################################
 # ---------------------------------------------- update_data_catalog ---------------------------------------
-def update_data_catalog(time, trigger):
+def update_data_catalog(params, trigger):
     finished = False
+    time = params["time"]
+    connect = params["connected"]
+    if connect:
+        extra = "_connected"
+    else:
+        extra = "_original"
     if trigger:
         catalog_path = retrieve_catalog_path()
-        graph_path = retrieve_average_graph_path(time)
+        graph_path = retrieve_average_graph_path(time, connected=connect)
 
         with open(catalog_path, "r+") as f:
             contents = f.read()
@@ -199,7 +210,7 @@ def update_data_catalog(time, trigger):
                         contents,
                         "\n    ".join(
                             [
-                                f"build_average_graphs.{time}.average_graph.{time}:",
+                                f"build_average_graphs.{time}.average_graph.{time}.{extra}:",
                                 f"type: pickle.PickleDataSet",
                                 f"filepath: {graph_path}",
                             ]

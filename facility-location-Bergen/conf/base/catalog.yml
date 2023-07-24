@@ -638,3 +638,159 @@ build_average_graphs.midday.average_graph.midday:
 build_average_graphs.morning.average_graph.morning:
     type: pickle.PickleDataSet
     filepath: data/03_primary/average_graph_morning.pkl
+build_average_graphs.all_day.average_graph.all_day._original:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/average_graph_all_day_original.pkl
+build_average_graphs.afternoon.average_graph.afternoon._original:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/average_graph_afternoon_original.pkl
+build_average_graphs.midday.average_graph.midday._original:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/average_graph_midday_original.pkl
+build_average_graphs.morning.average_graph.morning._original:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/average_graph_morning_original.pkl
+convert_to_gdf.20_04_2023.gdf.20_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/20_04_2023.geojson
+convert_to_gdf.20_04_2023.gdf_processed.20_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/20_04_2023_processed_subSegment.geojson
+convert_to_gdf.21_04_2023.gdf.21_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/21_04_2023.geojson
+convert_to_gdf.21_04_2023.gdf_processed.21_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/21_04_2023_processed_subSegment.geojson
+convert_to_gdf.22_04_2023.gdf.22_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/22_04_2023.geojson
+convert_to_gdf.22_04_2023.gdf_processed.22_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/22_04_2023_processed_subSegment.geojson
+convert_to_gdf.23_04_2023.gdf.23_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/23_04_2023.geojson
+convert_to_gdf.23_04_2023.gdf_processed.23_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/23_04_2023_processed_subSegment.geojson
+convert_to_gdf.24_04_2023.gdf.24_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/24_04_2023.geojson
+convert_to_gdf.24_04_2023.gdf_processed.24_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/24_04_2023_processed_subSegment.geojson
+convert_to_gdf.25_04_2023.gdf.25_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/25_04_2023.geojson
+convert_to_gdf.25_04_2023.gdf_processed.25_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/25_04_2023_processed_subSegment.geojson
+convert_to_gdf.26_04_2023.gdf.26_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/26_04_2023.geojson
+convert_to_gdf.26_04_2023.gdf_processed.26_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/26_04_2023_processed_subSegment.geojson
+convert_to_gdf.27_04_2023.gdf.27_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/27_04_2023.geojson
+convert_to_gdf.27_04_2023.gdf_processed.27_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/27_04_2023_processed_subSegment.geojson
+convert_to_gdf.28_04_2023.gdf.28_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/28_04_2023.geojson
+convert_to_gdf.28_04_2023.gdf_processed.28_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/28_04_2023_processed_subSegment.geojson
+convert_to_gdf.29_04_2023.gdf.29_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/29_04_2023.geojson
+convert_to_gdf.29_04_2023.gdf_processed.29_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/29_04_2023_processed_subSegment.geojson
+convert_to_gdf.30_04_2023.gdf.30_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/30_04_2023.geojson
+convert_to_gdf.30_04_2023.gdf_processed.30_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/30_04_2023_processed_subSegment.geojson
+convert_to_gdf.20_04_2023.gdf.20_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/20_04_2023.geojson
+convert_to_gdf.20_04_2023.gdf_processed.20_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/20_04_2023_processed.geojson
+convert_to_gdf.21_04_2023.gdf.21_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/21_04_2023.geojson
+convert_to_gdf.21_04_2023.gdf_processed.21_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/21_04_2023_processed.geojson
+convert_to_gdf.22_04_2023.gdf.22_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/22_04_2023.geojson
+convert_to_gdf.22_04_2023.gdf_processed.22_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/22_04_2023_processed.geojson
+convert_to_gdf.23_04_2023.gdf.23_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/23_04_2023.geojson
+convert_to_gdf.23_04_2023.gdf_processed.23_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/23_04_2023_processed.geojson
+convert_to_gdf.24_04_2023.gdf.24_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/24_04_2023.geojson
+convert_to_gdf.24_04_2023.gdf_processed.24_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/24_04_2023_processed.geojson
+convert_to_gdf.25_04_2023.gdf.25_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/25_04_2023.geojson
+convert_to_gdf.25_04_2023.gdf_processed.25_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/25_04_2023_processed.geojson
+convert_to_gdf.26_04_2023.gdf.26_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/26_04_2023.geojson
+convert_to_gdf.26_04_2023.gdf_processed.26_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/26_04_2023_processed.geojson
+convert_to_gdf.27_04_2023.gdf.27_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/27_04_2023.geojson
+convert_to_gdf.27_04_2023.gdf_processed.27_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/27_04_2023_processed.geojson
+convert_to_gdf.28_04_2023.gdf.28_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/28_04_2023.geojson
+convert_to_gdf.28_04_2023.gdf_processed.28_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/28_04_2023_processed.geojson
+convert_to_gdf.29_04_2023.gdf.29_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/29_04_2023.geojson
+convert_to_gdf.29_04_2023.gdf_processed.29_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/29_04_2023_processed.geojson
+convert_to_gdf.30_04_2023.gdf.30_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/30_04_2023.geojson
+convert_to_gdf.30_04_2023.gdf_processed.30_04_2023:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/30_04_2023_processed.geojson
+build_average_graphs.afternoon.average_graph.afternoon._original:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/average_graph_afternoon_original.pkl
+build_average_graphs.all_day.average_graph.all_day._original:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/average_graph_all_day_original.pkl
+build_average_graphs.midday.average_graph.midday._original:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/average_graph_midday_original.pkl
+build_average_graphs.morning.average_graph.morning._original:
+    type: pickle.PickleDataSet
+    filepath: data/03_primary/average_graph_morning_original.pkl

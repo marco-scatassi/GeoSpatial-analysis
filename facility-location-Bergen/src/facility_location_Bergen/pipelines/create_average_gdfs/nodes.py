@@ -147,7 +147,7 @@ def create_average_gdfs(days):
     gdfs = []
     for day in days:
         try:
-            gdf_path = retrieve_gdf_path(day, processed=True)
+            gdf_path = retrieve_gdf_path(day, processed=True, subSegment=False)
         except:
             raise ValueError(f"Could not retrieve gdf_path for day {day}")
 

@@ -6,44 +6,46 @@ if directory_path not in sys.path:
     sys.path.append(directory_path)
     
 import os
-import yaml
+import pickle as pkl
+import random
+import time as ptime
+from copy import deepcopy
+from pathlib import Path
+
 import folium
 import pandas as pd
-import time as ptime
-import pickle as pkl
-from PIL import Image
-import streamlit as st
-from pathlib import Path
 import plotly.graph_objects as go
-from streamlit_folium import st_folium
-from kedro.runner import SequentialRunner
-from kedro.pipeline import Pipeline, pipeline
-from kedro.framework.session import KedroSession
-from kedro.framework.project import find_pipelines
-from kedro.framework.startup import bootstrap_project
-from log import print_INFO_message_timestamp, print_INFO_message
+import streamlit as st
+import yaml
 from facility_location import (
-    FacilityLocation, 
+    FacilityLocation,
     FacilityLocationReport,
-    StochasticFacilityLocation)
-
+    StochasticFacilityLocation,
+)
+from graph_manipulation import *
+from kedro.framework.project import find_pipelines
+from kedro.framework.session import KedroSession
+from kedro.framework.startup import bootstrap_project
+from kedro.pipeline import Pipeline, pipeline
+from kedro.runner import SequentialRunner
+from log import print_INFO_message, print_INFO_message_timestamp
+from PIL import Image
 from retrieve_global_parameters import (
     retrieve_average_graph_path,
     retrieve_light_solution_path,
     retrieve_solution_vs_scenario_path,
 )
-
 from src.facility_location_Bergen.custome_modules.graphical_analysis import (
+    average_travel_time_across_under_different_cases,
+    compute_min_distance_df,
     compute_rel_diff,
     facilities_on_map,
-    compute_min_distance_df,
-    visualize_longest_paths,
     objective_function_value_under_different_cases,
+    outsample_evaluation_relative_differences,
     travel_times_distribution_under_different_cases,
-    average_travel_time_across_under_different_cases,
-    outsample_evaluation_relative_differences
+    visualize_longest_paths,
 )
-
+from streamlit_folium import st_folium
 
 st.set_page_config(layout = "wide")
 session_state = st.session_state
@@ -54,6 +56,81 @@ metadata = bootstrap_project(project_path)
 TIMES = ["all_day_free_flow", "all_day", "morning", "midday", "afternoon"]
 FACILITIES_NUMBER = [1,2,3]
 
+LOG_FILE_PATH = r"\\Pund\Stab$\guest801951\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\logs\split_roads.log"
+LOG_FILE_PATH2 = r"\\Pund\Stab$\guest801951\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\logs\split_roads_changes.log"
+HTML_IMG_PATH = r"\\Pund\Stab$\guest801951\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\logs\img_split_roads.html"
+
+GRAPH_MANIPULATION_SEED=5487654
+# --------------------------------------------- GRAPH MANIPULATION ----------------------------------------------
+def graph_manipulation_load_data(session_state, TIMES):
+    progress_bar = st.progress(0, "Loading data...")
+
+    if f"average_graphs" not in session_state:
+        average_graphs = {}
+        for i, time in enumerate(TIMES):
+            progress_bar.progress((i+1)*1/len(TIMES), f"Loading average graph for: {time}")
+            if time == "all_day_free_flow":
+                continue
+            path = project_path+"/"+retrieve_average_graph_path(time, connected=True)
+            with open(path, "rb") as f:
+                average_graphs[time] = pkl.load(f)
+
+        session_state[f"average_graphs"] = average_graphs
+
+    progress_bar.progress(100, "Loading data completed!")
+
+def graph_manipulation_process(session_state, TIMES, 
+                               LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED):
+    F = deepcopy(session_state[f"average_graphs"]["all_day"])
+    nodes = list(F.nodes())
+    seed = random.seed(GRAPH_MANIPULATION_SEED)
+    if "history_changes" not in session_state:
+        session_state["history_changes"] = {}
+    history_changes = session_state["history_changes"]
+    
+    print_INFO_message_timestamp("Splitting two way roads")
+    for i in range(10):
+        if i == 0:
+            clear_log_file = True
+        else:
+            clear_log_file = False
+            
+        origin = random.choice(nodes)
+        print_INFO_message(f"iteration:{i}, origin: {origin}")
+        split_two_way_roads(F, 
+                            origin=origin, 
+                            count_max=10, 
+                            clear_log_file=clear_log_file,
+                            log_file_path=LOG_FILE_PATH,
+                            log_file_path2=LOG_FILE_PATH2, 
+                            img_path=HTML_IMG_PATH,
+                            history_changes=history_changes)
+    
+def graph_manipulation(session_state, TIMES):
+    col1, col2, _, _ = st.columns(4)
+    with col1:
+        button_load = st.button("Load data for graph manipulation")
+    with col2:
+        button_manipulation = st.button("Start graph manipulation process")
+    st.markdown("---")
+    
+    ############################################## LOAD DATA ##############################################
+    if button_load:
+        graph_manipulation_load_data(session_state, TIMES)
+    
+    ############################################## GENERATE VIZ ##############################################    
+    if button_manipulation:
+        text_col, img_col = st.columns(2)
+        with open(HTML_IMG_PATH, "r", encoding="utf-8") as f:
+            html_img = f.read()
+            
+        with img_col:
+            st.components.v1.html(html_img, height=500, scrolling=True)
+        
+        with text_col:
+            graph_manipulation_process(session_state, TIMES, 
+                                   LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED)
+        
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------
 def deterministic_load_data(session_state, TIMES, facilities_number):
     c = 0
@@ -106,7 +183,7 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
         session_state[f"dfs_worst_{facilities_number}"] = dfs_worst
     c+=1
 
-    if f"average_graphs_{facilities_number}" not in session_state:
+    if f"average_graphs" not in session_state:
         
         average_graphs = {}
         for time in TIMES[1:]:
@@ -114,7 +191,7 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
             with open(path, "rb") as f:
                 average_graphs[time] = pkl.load(f)
 
-        session_state[f"average_graphs_{facilities_number}"] = average_graphs
+        session_state[f"average_graphs"] = average_graphs
 
     c+=1
 
@@ -161,7 +238,7 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
     col1, col2 = st.columns([1.5,1])
     if f"map_longest_paths_{facilities_number}" not in session_state:
         dfs = session_state[f"dfs_{facilities_number}"]
-        average_graphs = session_state[f"average_graphs_{facilities_number}"]
+        average_graphs = session_state[f"average_graphs"]
         map = visualize_longest_paths(dfs, average_graphs)
         session_state[f"map_longest_paths_{facilities_number}"] = map
         
@@ -440,7 +517,11 @@ if __name__ == '__main__':
         
         section = st.selectbox(
                 "Section selection",
-                ("Project description", "Theoretical Framework", "Deterministic models analysis", "Stochastic models analysis"),
+                ("Project description", 
+                 "Theoretical Framework", 
+                 "Graph manipulation",
+                 "Deterministic models analysis", 
+                 "Stochastic models analysis"),
                 label_visibility="collapsed",)
         
         
@@ -495,6 +576,8 @@ if __name__ == '__main__':
         col1, col2, col3 = st.columns([1,2.5,1])
         with col2:
             st.markdown(content)
+    elif section == "Graph manipulation":
+        graph_manipulation(session_state, TIMES)
     elif section == "Deterministic models analysis":
         deterministic_analysis(session_state, TIMES, facilities_number, ratio1, ratio2, seed)
     elif section == "Stochastic models analysis":

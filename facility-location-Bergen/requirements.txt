@@ -10,6 +10,9 @@ PyYAML
 dill
 scikit-learn
 Pyomo~=6.5.0
+mpi4py
+mpi-sppy
+networkx
 
 # kedro requirements
 black~=22.0

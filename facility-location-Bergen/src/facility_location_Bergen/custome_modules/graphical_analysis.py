@@ -6,6 +6,57 @@ import plotly.graph_objects as go
 from sklearn.utils import resample
 from plotly.subplots import make_subplots
 
+def rand_jitter(list):
+    scale_factor = max(list) - min(list)
+    if scale_factor != 0:
+        stdev = 0.001 * (scale_factor)
+    else:
+        stdev = 0.0003
+    return list + np.random.randn(len(list)) * stdev
+
+def get_travel_time(solution_path, graph, weight):
+    travel_time = 0
+    for i in range(len(solution_path)-1):
+        sp = solution_path[i]
+        ep = solution_path[i+1]
+        travel_time += graph.get_edge_data(sp, ep)[weight]
+    return travel_time
+
+def get_minimum_distances(df):
+    return df.groupby("target").\
+                                apply(lambda x: x.sort_values(by="travel_time", ascending=True).iloc[0]).\
+                                drop("target", axis=1).\
+                                reset_index()
+
+def control_polygon(lon, lat,  width, height):
+    # defines the bezier control points for a location pin
+    # width is the width of region bounded by the B curve, between the points where the tangents are vertical
+    # height is the height of curve between the first control point and intersection point with the vertical through it
+    return  [[lon, lat], 
+             [lon - np.sqrt(3)*width, lat + 4*height/3], 
+             [lon + np.sqrt(3)*width, lat + 4*height/3], 
+             [lon, lat] ]
+
+def BezierCv(b, nr=30):# compute nr points on the Bezier curve of control points in list bom
+    t = np.linspace(0, 1, nr)
+    return [[deCasteljau(b, t[k]) for k in range(nr)]] #the points on a Bezier curve define here the coordinates
+                                                       #of a Polygon in a geojson type dict
+
+class InvalidInputError(Exception):
+    pass
+
+def deCasteljau(b, t): #de Casteljau algorithm to evaluste a point on a Bezier curve
+    #b a list of 4 2-lists
+    #t a number in [0,1]
+    #returns the point on the Bezier curve, corresponding to t
+    N = len(b) 
+    if N != 4 :
+        raise InvalidInputError("Here the  control polygon must have 4 points")
+    a = np.copy(b) 
+    for r in range(1, N): 
+        a[:N-r,:] = (1-t) * a[:N-r,:] + t * a[1:N-r+1,:]# convex combinations in step r                               
+    return tuple(a[0,:])
+
 def facilities_on_map(fls, extra_text=None, title_pad_l=50):
     mapping = {}
     if extra_text is None:
@@ -23,6 +74,7 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
     
     lat_global = fls[0].coordinates.geometry.y
     lon_global = fls[0].coordinates.geometry.x
+
         
     for k, fl in mapping.items():
         if "deterministic" in k:
@@ -58,8 +110,10 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
     for k in mapping.keys():
         if "stochastic" in k:
             is_s = True
-    colors = ["red", "blue", "green", "orange", "purple", "yellow", "pink", "brown", "black", "grey"]
+    colors = ["red", "black", "blue", "purple", "green", "orange", "pink", "brown", "black", "grey"]
     colors_mapping = {k: colors[i] for i, k in enumerate(mapping.keys())}
+    layers = []
+    size = 10
     for k, fl in mapping.items():
         c=colors_mapping[k]
         if not is_s:
@@ -68,17 +122,37 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
             n=k
         
         fig.add_trace(go.Scattermapbox(
-                lat=lats[k],
-                lon=lons[k],
+                lat=rand_jitter(lats[k]),
+                lon=rand_jitter(lons[k]),
                 mode='markers',
                 marker=dict(
                     color=[c]*fl.n_of_locations_to_choose,
-                    size=7,
+                    size=size,
                 ),
                 hovertemplate=f'<br>solution value: {round(fl.solution_value/60,2)} minutes<extra></extra>',
                 name=n,
                 showlegend=True,
             ))
+
+        geojd = {"type": "FeatureCollection"}
+        geojd['features'] = []
+        for lon, lat in zip(rand_jitter(lons[k]), rand_jitter(lats[k])):
+            b = control_polygon(lon, lat, width=0.028, height= 0.020) #The width and height of a location pin 
+                                                                    # are chosen by trial and error
+            bez = BezierCv(b, nr=30)
+
+            geojd['features'].append({ "type": "Feature",
+                                    "geometry": {"type": "Polygon",
+                                                    "coordinates": bez }})
+                                
+        layers.append(dict(sourcetype='geojson',
+                            source=geojd,
+                            below=' ', 
+                            type='fill',   
+                            color = c,
+                            opacity=0.9
+            ))
+
 
     if is_s:
         title = "deterministic and stochastic solution comparison"
@@ -89,6 +163,7 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
                         mapbox=dict(
                             style="open-street-map",
                             center=dict(lat=fls[0].coordinates.geometry.y.mean(), lon=fls[0].coordinates.geometry.x.mean()),
+                            layers=layers,
                             zoom=9
                             ),
                         legend=dict(
@@ -104,17 +179,6 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
                         xaxis_title="time of the day",)
 
     return fig
-
-def get_minimum_distances(df):
-    return df.groupby("target").min().reset_index()
-
-def get_travel_time(solution_path, graph, weight):
-    travel_time = 0
-    for i in range(len(solution_path)-1):
-        sp = solution_path[i]
-        ep = solution_path[i+1]
-        travel_time += graph.get_edge_data(sp, ep)[weight]
-    return travel_time
 
 def visualize_longest_paths(dfs, average_graphs):
     # ------------------------------ prepare the data ----------------------------------#
@@ -165,10 +229,10 @@ def visualize_longest_paths(dfs, average_graphs):
         "all-day-free-flow":"red",
         "all-day":"black",
         "morning":"blue",
-        "midday":"orange",
+        "midday":"purple",
         "afternoon":"green",
     }
-    map = folium.Map(location=center_pt, tiles="OpenStreetMap", zoom_start=9.5)
+    map = folium.Map(location=center_pt, tiles="OpenStreetMap", zoom_start=11)
 
     tooltip_targets = {}
     for key in solution_paths.keys():
@@ -202,8 +266,8 @@ def visualize_longest_paths(dfs, average_graphs):
     return map
         
 def compute_rel_diff(fls_exact, dfs, dfs_worst, time):
-    df_min = get_minimum_distances(dfs[(time, "weight")])
-    df_worst_min = get_minimum_distances(dfs_worst[(time, "weight")])
+    df_min = get_minimum_distances(dfs[("all-day-free-flow", time.replace("_", "-"), "weight")])
+    df_worst_min = get_minimum_distances(dfs_worst[("all-day-free-flow", time.replace("_","-"), "weight")])
 
     a = round(fls_exact[time].solution_value/60, 3)
 
@@ -213,6 +277,7 @@ def compute_rel_diff(fls_exact, dfs, dfs_worst, time):
     return a, b, b_worst
 
 def objective_function_value_under_different_cases(a, b, b_worst):
+    
     plot_data = []
     
     for i in range(len(a)):
@@ -222,12 +287,10 @@ def objective_function_value_under_different_cases(a, b, b_worst):
     
     fig = make_subplots(rows=1, cols=1,)
     fig.update_layout(title="<b>Outsample evaluation of free flow solution<b>",
-                        title_pad_l=225,
+                        title_pad_l=175,
                         height=500,
                         width=1200,
-                        yaxis_title="times (minutes)")
-
-    fig.update_yaxes(range=[0, 100])
+                        yaxis_title="time (minutes)")
 
     fig.add_trace(go.Bar(y=plot_data,
                         x=["op sol all_day", "ff sol in all_day scenario", "ff sol in all_day worst scenario", 
@@ -240,19 +303,50 @@ def objective_function_value_under_different_cases(a, b, b_worst):
     
     return fig
 
+def outsample_evaluation_relative_differences(a, b, b_worst):
+    rel_diffs = [round(abs(a_-b_)/a_ * 100,3) for a_, b_ in zip(a,b)]
+    rel_diffs_worst = [round(abs(a_-b_)/a_ * 100,3) for a_, b_ in zip(a,b_worst)]
+    
+    fig = make_subplots(rows=1, cols=1,)
+    fig.update_layout(title="<b>Outsample evaluation, relative differences<b>",
+                  title_pad_l=200,
+                  height=500,
+                  width=600,
+                  yaxis_title="relative difference [%]")
+
+    fig.update_yaxes(range=[0, 100])
+
+    fig.add_trace(go.Bar(y=rel_diffs, 
+                     name="average scenario",
+                     marker=dict(color=["blue"]*len(rel_diffs)),
+                     x=["all_day", "morning", "midday", "afternoon"],), row=1, col=1)
+
+    fig.add_trace(go.Bar(y=rel_diffs_worst,
+                     name="average worst scenario",
+                     marker=dict(color=["navy"]*len(rel_diffs_worst)),
+                     x=["all_day", "morning", "midday", "afternoon"],), row=1, col=1)
+
+    fig.update_layout(legend=dict(
+                            orientation='h',  # Set the orientation to 'h' for horizontal
+                            yanchor='bottom',  # Anchor the legend to the bottom
+                            y=1.02,  # Adjust the y position to place the legend below the figure
+                            xanchor='left',  # Anchor the legend to the left
+                            x=0  # Adjust the x position if necessary
+                        ),)
+    return fig
 
 def compute_min_distance_df(dfs, dfs_worst):
     dfs_min_list = []
     dfs_min_worst_list = []
     
     for time in ["all_day", "morning", "midday", "afternoon"]:
-        df_min = get_minimum_distances(dfs[(time, "weight")])
-        df_min_worst = get_minimum_distances(dfs_worst[(time, "weight")])
+        df_min = get_minimum_distances(dfs[('all-day-free-flow', time.replace("_","-"), "weight")])
+        df_min_worst = get_minimum_distances(dfs_worst[('all-day-free-flow', time.replace("_","-"), "weight")])
 
         dfs_min_list.append(df_min)
         dfs_min_worst_list.append(df_min_worst)
     
-    df_min = get_minimum_distances(dfs[("all_day", "weight2")])[["target", "travel_time"]]
+    df_min = get_minimum_distances(dfs[('all-day-free-flow', "all-day", "weight2")])[["target", "travel_time"]]
     
     for df, name in zip(dfs_min_list+
                         dfs_min_worst_list, 
@@ -298,7 +392,6 @@ def travel_times_distribution_under_different_cases(df_min):
                                 showlegend=show_legend[-1]))
         
     return fig
-
 
 def compute_CI(df_min):
     mean_ci = pd.DataFrame({"mean": None, "lower_bound": None, "upper_bound": None}, 

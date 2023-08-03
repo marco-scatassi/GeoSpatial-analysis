@@ -99,12 +99,12 @@ def graph_manipulation_process(session_state, TIMES,
         print_INFO_message(f"iteration:{i}, origin: {origin}")
         split_two_way_roads(F, 
                             origin=origin, 
+                            session_state=session_state,
                             count_max=10, 
                             clear_log_file=clear_log_file,
                             log_file_path=LOG_FILE_PATH,
                             log_file_path2=LOG_FILE_PATH2, 
-                            img_path=HTML_IMG_PATH,
-                            history_changes=history_changes)
+                            img_path=HTML_IMG_PATH,)
     
 def graph_manipulation(session_state, TIMES):
     col1, col2, _, _ = st.columns(4)
@@ -120,12 +120,14 @@ def graph_manipulation(session_state, TIMES):
     
     ############################################## GENERATE VIZ ##############################################    
     if button_manipulation:
+        if "average_graphs" not in session_state:
+            return st.error("Please load data first!", icon="🚨")
         text_col, img_col = st.columns(2)
         with open(HTML_IMG_PATH, "r", encoding="utf-8") as f:
             html_img = f.read()
             
         with img_col:
-            st.components.v1.html(html_img, height=500, scrolling=True)
+            st.components.v1.html(html_img, height=600, scrolling=True)
         
         with text_col:
             graph_manipulation_process(session_state, TIMES, 
@@ -198,11 +200,9 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
     if c == 4:
         progress_bar.progress(100, "Loading data completed!")
 
-
 def deterministic_generate_viz(session_state, TIMES, facilities_number):
     if f"fls_exact_{facilities_number}" not in session_state:
-        st.write("Load the data first")
-        return 
+        return st.error("Please load data first!", icon="🚨")
 
     #------------------------------- FACILITIES ON MAP ---------------------------------------
     col1, col2 = st.columns([1.5,1])
@@ -313,7 +313,6 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
     fig = travel_times_distribution_under_different_cases(df_min)
     st.plotly_chart(fig, use_container_width=True)
         
-    
 def deterministic_analysis(session_state, TIMES, facilities_number, ratio1, ratio2, seed):
     ############################################## RUN THE MODEL ##############################################
     # button1 = st.button("Run the model")
@@ -454,11 +453,10 @@ def stochastic_load_metrics(session_state):
         session_state[f"df_metrics"] = df_metrics 
 
 def stochastic_generate_viz(session_state, facilities_number):
-    if session_state.get(f"fls_stochastic_{facilities_number}") is None:
-        st.write("Please load the data first")
+    if f"fls_stochastic_{facilities_number}" not in session_state:
+        st.error("Please load data first!", icon="🚨")
         return go.Figure()
 
-    
     fl_stochastic = session_state[f"fls_stochastic_{facilities_number}"]["stochastic"]
     fl_deterministic = session_state[f"fls_stochastic_{facilities_number}"]["deterministic"]
     fls = [fl_stochastic, fl_deterministic]
@@ -469,6 +467,7 @@ def stochastic_analysis(session_state):
     col1, col2, col3, _ = st.columns(4)
     with col1:
         button_load = st.button("Load data for solution analysis")
+    
     with col2:
         button_viz = st.button("Generate vizualizations")
     with col3:
@@ -500,7 +499,7 @@ def stochastic_analysis(session_state):
         cols = [col1, col2, col3]
         if session_state.get(f"df_metrics") is None:
             with col1:  
-                st.write("Please load the data first")
+                st.error("Please load data first!", icon="🚨")
         else:
             with col2:
                 df_metrics = session_state[f"df_metrics"]
@@ -570,15 +569,19 @@ if __name__ == '__main__':
         col1, col2, col3 = st.columns([1,2.5,1])
         with col2:
             st.markdown(content)
+            
     elif section == "Theoretical Framework":
         with open(project_path+r"/data/09_streamlit_md/Theoretical framework.md", "r", encoding="utf-8") as f:
             content = f.read()
         col1, col2, col3 = st.columns([1,2.5,1])
         with col2:
             st.markdown(content)
+            
     elif section == "Graph manipulation":
         graph_manipulation(session_state, TIMES)
+        
     elif section == "Deterministic models analysis":
         deterministic_analysis(session_state, TIMES, facilities_number, ratio1, ratio2, seed)
+        
     elif section == "Stochastic models analysis":
         stochastic_analysis(session_state)

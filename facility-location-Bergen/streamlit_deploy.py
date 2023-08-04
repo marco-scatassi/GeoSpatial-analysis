@@ -21,18 +21,18 @@ from kedro.pipeline import Pipeline, pipeline
 from kedro.framework.session import KedroSession
 from kedro.framework.project import find_pipelines
 from kedro.framework.startup import bootstrap_project
-from src.facility_location_Bergen.custome_modules.log import print_INFO_message_timestamp, print_INFO_message
-from src.facility_location_Bergen.custome_modules.facility_location import (
+from log import print_INFO_message_timestamp, print_INFO_message
+from facility_location import (
     FacilityLocation, 
     FacilityLocationReport,
     StochasticFacilityLocation)
 
-from src.facility_location_Bergen.custome_modules.retrieve_global_parameters import (
+from retrieve_global_parameters import (
     retrieve_light_solution_path,
     retrieve_solution_vs_scenario_path,
 )
 
-from src.facility_location_Bergen.custome_modules.graphical_analysis import (
+from graphical_analysis import (
     compute_rel_diff,
     facilities_on_map,
     compute_min_distance_df,

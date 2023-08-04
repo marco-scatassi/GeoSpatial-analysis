@@ -53,6 +53,86 @@ metadata = bootstrap_project(project_path)
 TIMES = ["all_day_free_flow", "all_day", "morning", "midday", "afternoon"]
 FACILITIES_NUMBER = [1,2,3]
 
+LOG_FILE_PATH = r"/mount/src/GeoSpatial-analysis/facility-location-Bergen/logs/split_roads.log"
+LOG_FILE_PATH2 = r"/mount/src/GeoSpatial-analysis/facility-location-Bergen/logs/split_roads_changes.log"
+HTML_IMG_PATH = r"/mount/src/GeoSpatial-analysis/facility-location-Bergen/logs/img_split_roads.html"
+
+GRAPH_MANIPULATION_SEED=5487654
+# --------------------------------------------- GRAPH MANIPULATION ----------------------------------------------
+def graph_manipulation_load_data(session_state, TIMES):
+    progress_bar = st.progress(0, "Loading data...")
+
+    if f"average_graphs" not in session_state:
+        average_graphs = {}
+        for i, time in enumerate(TIMES):
+            progress_bar.progress((i+1)*1/len(TIMES), f"Loading average graph for: {time}")
+            if time == "all_day_free_flow":
+                continue
+            path = project_path+"/"+retrieve_average_graph_path(time, connected=True)
+            with open(path, "rb") as f:
+                average_graphs[time] = pkl.load(f)
+
+        session_state[f"average_graphs"] = average_graphs
+
+    progress_bar.progress(100, "Loading data completed!")
+
+def graph_manipulation_process(session_state, TIMES, 
+                               LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED):
+    F = deepcopy(session_state[f"average_graphs"]["all_day"])
+    nodes = list(F.nodes())
+    seed = random.seed(GRAPH_MANIPULATION_SEED)
+    if "history_changes" not in session_state:
+        session_state["history_changes"] = {}
+    history_changes = session_state["history_changes"]
+    
+    print_INFO_message_timestamp("Splitting two way roads")
+    for i in range(10):
+        if i == 0:
+            clear_log_file = True
+        else:
+            clear_log_file = False
+            
+        origin = random.choice(nodes)
+        print_INFO_message(f"iteration:{i}, origin: {origin}")
+        split_two_way_roads(F, 
+                            origin=origin, 
+                            session_state=session_state,
+                            count_max=10, 
+                            clear_log_file=clear_log_file,
+                            log_file_path=LOG_FILE_PATH,
+                            log_file_path2=LOG_FILE_PATH2, 
+                            img_path=HTML_IMG_PATH,)
+    
+def graph_manipulation(session_state, TIMES):
+    col1, col2, _, _ = st.columns(4)
+    with col1:
+        button_load = st.button("Load data for graph manipulation")
+    with col2:
+        button_manipulation = st.button("Start graph manipulation process")
+    st.markdown("---")
+    
+    ############################################## LOAD DATA ##############################################
+    if button_load:
+        graph_manipulation_load_data(session_state, TIMES)
+    
+    ############################################## GENERATE VIZ ##############################################    
+    if button_manipulation:
+        if "average_graphs" not in session_state:
+            return st.error("Please load data first!", icon="🚨")
+        text_col, img_col = st.columns(2)
+        with open(HTML_IMG_PATH, "r", encoding="utf-8") as f:
+            html_img = f.read()
+            
+        with img_col:
+            st.components.v1.html(html_img, height=600)
+        
+        with text_col:
+            graph_manipulation_process(session_state, TIMES, 
+                                   LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED)
+   
+
+
+
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------
 def deterministic_load_data(session_state, TIMES, facilities_number):
     c = 0
@@ -435,7 +515,11 @@ if __name__ == '__main__':
         
         section = st.selectbox(
                 "Section selection",
-                ("Project description", "Theoretical Framework", "Deterministic models analysis", "Stochastic models analysis"),
+                ("Project description", 
+                 "Theoretical Framework", 
+                 "Graph manipulation",
+                 "Deterministic models analysis", 
+                 "Stochastic models analysis"),
                 label_visibility="collapsed",)
         
         
@@ -484,13 +568,19 @@ if __name__ == '__main__':
         col1, col2, col3 = st.columns([1,2.5,1])
         with col2:
             st.markdown(content)
+            
     elif section == "Theoretical Framework":
-        with open(project_path+r"/data/09_streamlit_md/Theoretical framework.md", "r") as f:
+        with open(project_path+r"/data/09_streamlit_md/Theoretical framework.md", "r", encoding="utf-8") as f:
             content = f.read()
         col1, col2, col3 = st.columns([1,2.5,1])
         with col2:
             st.markdown(content)
+            
+    elif section == "Graph manipulation":
+        graph_manipulation(session_state, TIMES)
+        
     elif section == "Deterministic models analysis":
         deterministic_analysis(session_state, TIMES, facilities_number, ratio1, ratio2, seed)
+        
     elif section == "Stochastic models analysis":
         stochastic_analysis(session_state)

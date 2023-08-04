@@ -219,7 +219,7 @@ def split_the_node_input(node, G, node_mapping, session_state, log_file_path2, m
 
                 stay = False
                       
-def add_and_deleted_edges(G, node, session_state, node_mapping, log_file_path):
+def add_and_deleted_edges_input(G, node, session_state, node_mapping, log_file_path):
     stay = True
     node_mapping_r = {v: k for k, v in node_mapping.items()}
     edge_list = [None]
@@ -332,7 +332,7 @@ def split_two_way_roads(G, origin, session_state,
                             if session_state[node]['split_the_node']:
                                 split_the_node_func(G, session_state, node, node_mapping)
                                 node_mapping, node_class = node_mapping_log(G, node) 
-                                fig = img_log(G, [node], node_mapping, node_class)
+                                fig = img_log(G, [node, new_edge[0]], node_mapping, node_class)
                                 fig.write_html(img_path, full_html=True, auto_open=False)
                             
                         else:
@@ -344,13 +344,8 @@ def split_two_way_roads(G, origin, session_state,
                                 for e in session_state[node]['edges_to_delete']:
                                     G.remove_edge(e[0], e[1])
                         else:
-                            add_and_deleted_edges(G, node, session_state, node_mapping, log_file_path2)
-                        
-
-                            fig = img_log(G, [node], node_mapping, node_class)
-                            fig.write_html(img_path, full_html=True, auto_open=False)
-                            input("press enter to continue")
-
+                            add_and_deleted_edges_input(G, node, session_state, node_mapping, log_file_path2)
+                    
                     break
 
         split_two_way_roads(G, node, session_state,

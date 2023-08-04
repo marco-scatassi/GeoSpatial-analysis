@@ -357,7 +357,7 @@ def split_two_way_roads(G, origin, history_changes,
                             
                         break
 
-            split_two_way_roads(G, node, history_changes,
+            return split_two_way_roads(G, node, history_changes,
                                 split_the_node_form, add_and_delete_form, 
                                 session_state_container,
                                 stop_and_save,
@@ -369,6 +369,6 @@ def split_two_way_roads(G, origin, history_changes,
                                 )
 
     else:
-        return 
+        return True
         
     

@@ -81,7 +81,8 @@ def graph_manipulation_load_data(session_state, TIMES):
     progress_bar.progress(100, "Loading data completed!")
 
 def graph_manipulation_process(session_state, TIMES, 
-                               LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED):
+                               LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED,
+                               split_the_node_form, add_and_delete_form, session_state_container, stop_and_save_button):
     F = deepcopy(session_state[f"average_graphs"]["all_day"])
     nodes = list(F.nodes())
     seed = random.seed(GRAPH_MANIPULATION_SEED)
@@ -100,12 +101,17 @@ def graph_manipulation_process(session_state, TIMES,
         print_INFO_message(f"iteration:{i}, origin: {origin}")
         split_two_way_roads(F, 
                             origin=origin, 
-                            session_state=session_state,
+                            history_changes=history_changes,
+                            split_the_node_form=split_the_node_form,
+                            add_and_delete_form=add_and_delete_form,
+                            session_state_container=session_state_container,
+                            stop_and_save=stop_and_save_button,
                             count_max=10, 
                             clear_log_file=clear_log_file,
                             log_file_path=LOG_FILE_PATH,
                             log_file_path2=LOG_FILE_PATH2, 
-                            img_path=HTML_IMG_PATH,)
+                            img_path=HTML_IMG_PATH,
+                            )
     
 def graph_manipulation(session_state, TIMES):
     col1, col2, _, _ = st.columns(4)
@@ -129,12 +135,22 @@ def graph_manipulation(session_state, TIMES):
             
         with img_col:
             st.components.v1.html(html_img, height=600)
-        
+            _, button_col, _ = st.columns(3)
+            with button_col:
+                stop_and_save_button = st.button("Stop and save changes")
+            
         with text_col:
-            graph_manipulation_process(session_state, TIMES, 
-                                   LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED)
-   
-
+            split_the_node_form = st.form(f"split the node form")
+            add_and_delete_form = st.form(f"add and delete edges for node form")
+            session_state_container = st.empty()
+        
+        final_message = graph_manipulation_process(session_state, TIMES, 
+                                   LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED,
+                                   split_the_node_form, add_and_delete_form, 
+                                   session_state_container, 
+                                   stop_and_save_button)
+        
+        st.success("Saving the graph", icon="📝")
 
 
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------

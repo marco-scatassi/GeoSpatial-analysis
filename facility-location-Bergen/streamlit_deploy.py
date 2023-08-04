@@ -6,42 +6,46 @@ if directory_path not in sys.path:
     sys.path.append(directory_path)
     
 import os
-import yaml
+import pickle as pkl
+import random
+import time as ptime
+from copy import deepcopy
+from pathlib import Path
+
 import folium
 import pandas as pd
-import time as ptime
-import pickle as pkl
-from PIL import Image
-import streamlit as st
-from pathlib import Path
 import plotly.graph_objects as go
-from streamlit_folium import st_folium
-from kedro.runner import SequentialRunner
-from kedro.pipeline import Pipeline, pipeline
-from kedro.framework.session import KedroSession
-from kedro.framework.project import find_pipelines
-from kedro.framework.startup import bootstrap_project
-from log import print_INFO_message_timestamp, print_INFO_message
+import streamlit as st
+import yaml
 from facility_location import (
-    FacilityLocation, 
+    FacilityLocation,
     FacilityLocationReport,
-    StochasticFacilityLocation)
-
+    StochasticFacilityLocation,
+)
+from graph_manipulation import *
+from kedro.framework.project import find_pipelines
+from kedro.framework.session import KedroSession
+from kedro.framework.startup import bootstrap_project
+from kedro.pipeline import Pipeline, pipeline
+from kedro.runner import SequentialRunner
+from log import print_INFO_message, print_INFO_message_timestamp
+from PIL import Image
 from retrieve_global_parameters import (
+    retrieve_average_graph_path,
     retrieve_light_solution_path,
     retrieve_solution_vs_scenario_path,
 )
-
-from graphical_analysis import (
+from src.facility_location_Bergen.custome_modules.graphical_analysis import (
+    average_travel_time_across_under_different_cases,
+    compute_min_distance_df,
     compute_rel_diff,
     facilities_on_map,
-    compute_min_distance_df,
-    visualize_longest_paths,
     objective_function_value_under_different_cases,
+    outsample_evaluation_relative_differences,
     travel_times_distribution_under_different_cases,
-    average_travel_time_across_under_different_cases,
-    outsample_evaluation_relative_differences
+    visualize_longest_paths,
 )
+from streamlit_folium import st_folium
 
 
 st.set_page_config(layout = "wide")

@@ -328,11 +328,11 @@ def split_two_way_roads(G, origin, session_state,
                         if node in session_state.keys() and ("split_the_node" in session_state[node].keys() 
                                 and "selected_predecessor" in session_state[node].keys() 
                                     and "selected_successor" in session_state[node].keys()):
-        
+                            st.write(session_state)
                             if session_state[node]['split_the_node']:
                                 split_the_node_func(G, session_state, node, node_mapping)
                                 fig = img_log(G, [node, new_edge[0]], node_mapping, node_class)
-                                fig.write_html(img_path, full_html=True, auto_open=True)
+                                fig.write_html(img_path, full_html=True, auto_open=False)
                             
                         else:
                             split_the_node_input(node, G, node_mapping, session_state, log_file_path2)

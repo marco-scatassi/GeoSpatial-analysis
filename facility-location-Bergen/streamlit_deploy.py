@@ -16,20 +16,19 @@ import folium
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
-import yaml
 from facility_location import (
     FacilityLocation,
     FacilityLocationReport,
     StochasticFacilityLocation,
 )
 from graph_manipulation import *
-from kedro.framework.project import find_pipelines
-from kedro.framework.session import KedroSession
+
+# from kedro.framework.project import find_pipelines
+# from kedro.framework.session import KedroSession
 from kedro.framework.startup import bootstrap_project
-from kedro.pipeline import Pipeline, pipeline
-from kedro.runner import SequentialRunner
+# from kedro.pipeline import Pipeline, pipeline
+# from kedro.runner import SequentialRunner
 from log import print_INFO_message, print_INFO_message_timestamp
-from PIL import Image
 from retrieve_global_parameters import (
     retrieve_average_graph_path,
     retrieve_light_solution_path,
@@ -60,7 +59,14 @@ LOG_FILE_PATH = r"\\Pund\Stab$\guest801951\Documents\GitHub\GeoSpatial-analysis\
 LOG_FILE_PATH2 = r"\\Pund\Stab$\guest801951\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\logs\split_roads_changes.log"
 HTML_IMG_PATH = r"\\Pund\Stab$\guest801951\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\logs\img_split_roads.html"
 
-GRAPH_MANIPULATION_SEED=5487654
+GRAPH_MANIPULATION_SEED=8797
+
+
+# -------------------------------------------------- CALLBACK ---------------------------------------------------
+def stop_and_save_callback():
+    st.session_state["stop_and_save"] = True
+
+
 # --------------------------------------------- GRAPH MANIPULATION ----------------------------------------------
 def graph_manipulation_load_data(session_state, TIMES):
     progress_bar = st.progress(0, "Loading data...")
@@ -76,36 +82,133 @@ def graph_manipulation_load_data(session_state, TIMES):
                 average_graphs[time] = pkl.load(f)
 
         session_state[f"average_graphs"] = average_graphs
+    
+    
+    session_state["modified_graph"] = deepcopy(session_state[f"average_graphs"]["all_day"])
+    session_state["history_changes"] = {}
+    session_state["node"] = "___"
+    session_state["node_mapping"] = {}
+    session_state["predecessors_id"] = []
+    session_state["successors_id"] = []
+    session_state["is_split_the_node_form_submitted"] = False
 
     progress_bar.progress(100, "Loading data completed!")
 
 def graph_manipulation_process(session_state, TIMES, 
                                LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED):
-    F = deepcopy(session_state[f"average_graphs"]["all_day"])
-    nodes = list(F.nodes())
-    seed = random.seed(GRAPH_MANIPULATION_SEED)
-    if "history_changes" not in session_state:
-        session_state["history_changes"] = {}
+    
+    if "average_graphs" not in session_state:
+        return st.error("Please load data first!", icon="🚨")
+    text_col, img_col = st.columns(2)
+    with open(HTML_IMG_PATH, "r", encoding="utf-8") as f:
+        html_img = f.read()
+            
+    with img_col:
+        st.components.v1.html(html_img, height=600)
+        _, button_col, _ = st.columns(3)
+        with button_col:
+            session_state["stop_and_save"] = False
+            stop_and_save_button = st.button("Stop and save changes", on_click=stop_and_save_callback)
+            
+    with text_col:
+        split_the_node_form_placeholder = st.empty()
+        split_the_node_form = split_the_node_form_placeholder.form(f"split the node form")
+        with split_the_node_form:
+            node_mapping = session_state['node_mapping']
+            node_mapping_r = {v: k for k, v in node_mapping.items()}
+            node = session_state["node"]
+                
+            st.write("split the node "+f'{node}? If "yes", which predecessor and successor?')
+                
+            split_the_node = st.radio("split the node?", ("yes", "no"))
+            col1, col2 = st.columns(2)
+            with col1:
+                selcted_predecessor_id = st.selectbox("predecessor", session_state["predecessors_id"], key = "predecessor_select_box")
+            with col2:
+                selected_successor_id = st.selectbox("successor", session_state["successors_id"], key = "successor_select_box")
+                    
+            submit = st.form_submit_button("submit")
+            
+            if submit:
+                session_state["history_changes"][node] = {}
+                if split_the_node == "yes":
+                    session_state["history_changes"][node]["split_the_node"] = True
+                    session_state["history_changes"][node]['selected_predecessor'] = node_mapping_r[selcted_predecessor_id]
+                    session_state["history_changes"][node]['selected_successor'] = node_mapping_r[selected_successor_id]
+                else:
+                    session_state["history_changes"][node]["split_the_node"] = False
+                    session_state["history_changes"][node]['selected_predecessor'] = None
+                    session_state["history_changes"][node]['selected_successor'] = None
+                        
+                print_INFO_message_timestamp(f'split the node {node}? (y/n): {session_state["history_changes"][node]["split_the_node"]}', LOG_FILE_PATH2)
+                print_INFO_message(f'selected predecessor: {session_state["history_changes"][session_state["node"]]["selected_predecessor"]}', LOG_FILE_PATH2)
+                print_INFO_message(f'selected successor: {session_state["history_changes"][session_state["node"]]["selected_successor"]}', LOG_FILE_PATH2)
+                    
+                session_state["is_split_the_node_form_submitted"] = True
+                    
+        add_and_delete_form = st.form(f"add and delete form")
+        with add_and_delete_form:
+            node_mapping = session_state['node_mapping']
+            node_mapping_r = {v: k for k, v in node_mapping.items()}
+            node = session_state["node"]
+            history_changes = session_state["history_changes"]
+                
+            st.write(f"add and delete edges for node {node}")
+            edge_list = [None]
+            for node1 in node_mapping.keys():
+                for node2 in node_mapping.keys():
+                    if session_state["modified_graph"].has_edge(node1, node2):
+                        edge_list.append((node_mapping[node1], node_mapping[node2]))
+                            
+            edges_to_add = st.multiselect("edges to add", edge_list)
+            edges_to_delete = st.multiselect("edges to delete", edge_list)
+                            
+            submit = st.form_submit_button("submit")
+            if submit:
+                if None in edges_to_add:
+                    if len(edges_to_add) > 1:
+                        edges_to_add.remove(None)
+                        history_changes[node]["new_edges"] = [(node_mapping_r[e[0]], node_mapping_r[e[1]]) for e in edges_to_add]
+                    else:
+                        history_changes[node]["new_edges"] = []
+                if None in edges_to_delete:
+                    if len(edges_to_delete) > 1:
+                        edges_to_delete.remove(None)
+                        history_changes[node]["edges_to_delete"] = [(node_mapping_r[e[0]], node_mapping_r[e[1]]) for e in edges_to_delete]
+                    else:
+                        history_changes[node]["edges_to_delete"] = []
+                                
+                print_INFO_message_timestamp(f'new edges: {history_changes[node]["new_edges"]}', LOG_FILE_PATH)
+                print_INFO_message_timestamp(f'edges to delete: {history_changes[node]["edges_to_delete"]}', LOG_FILE_PATH)
+
+        # session_state_container = st.empty()
+        # session_state_container.json(session_state)
+        
+    F = session_state["modified_graph"]
     history_changes = session_state["history_changes"]
     
-    print_INFO_message_timestamp("Splitting two way roads")
-    for i in range(10):
-        if i == 0:
-            clear_log_file = True
-        else:
-            clear_log_file = False
-            
+    nodes = list(F.nodes())
+    seed = random.seed(GRAPH_MANIPULATION_SEED)
+
+    if history_changes == {}:
         origin = random.choice(nodes)
-        print_INFO_message(f"iteration:{i}, origin: {origin}")
+    else:
+        origin = list(history_changes.keys())[-1]
+    
+    if not session_state["stop_and_save"]:
+        print_INFO_message_timestamp("Splitting two way roads")
         split_two_way_roads(F, 
                             origin=origin, 
                             session_state=session_state,
-                            count_max=10, 
-                            clear_log_file=clear_log_file,
+                            split_the_node_form_placeholder=split_the_node_form_placeholder,
+                            count=0,
+                            count_max=100, 
                             log_file_path=LOG_FILE_PATH,
                             log_file_path2=LOG_FILE_PATH2, 
                             img_path=HTML_IMG_PATH,)
-    
+    else:
+        session_state["stop_and_save"] = False
+   
 def graph_manipulation(session_state, TIMES):
     col1, col2, _, _ = st.columns(4)
     with col1:
@@ -120,18 +223,11 @@ def graph_manipulation(session_state, TIMES):
     
     ############################################## GENERATE VIZ ##############################################    
     if button_manipulation:
-        if "average_graphs" not in session_state:
-            return st.error("Please load data first!", icon="🚨")
-        text_col, img_col = st.columns(2)
-        with open(HTML_IMG_PATH, "r", encoding="utf-8") as f:
-            html_img = f.read()
-            
-        with img_col:
-            st.components.v1.html(html_img, height=600, scrolling=True)
-        
-        with text_col:
-            graph_manipulation_process(session_state, TIMES, 
+        graph_manipulation_process(session_state, TIMES, 
                                    LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED)
+        
+        st.success("Changes has been saving", icon="📝")
+        
         
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------
 def deterministic_load_data(session_state, TIMES, facilities_number):
@@ -505,6 +601,17 @@ def stochastic_analysis(session_state):
                 df_metrics = session_state[f"df_metrics"]
                 st.dataframe(df_metrics)
 
+@st.cache_data
+def read_project_description(project_path):
+    with open(project_path+r"/data/09_streamlit_md/Project description.md", "r") as f:
+        content = f.read()
+    return content
+
+@st.cache_data
+def read_theoretical_framework(project_path):
+    with open(project_path+r"/data/09_streamlit_md/Theoretical framework.md", "r", encoding="utf-8") as f:
+        content = f.read()
+    return content
 
 if __name__ == '__main__':
     side_bar = st.sidebar
@@ -564,15 +671,13 @@ if __name__ == '__main__':
         st.markdown("---")
 
     if section == "Project description":
-        with open(project_path+r"/data/09_streamlit_md/Project description.md", "r") as f:
-            content = f.read()
+        content = read_project_description(project_path)
         col1, col2, col3 = st.columns([1,2.5,1])
         with col2:
             st.markdown(content)
             
     elif section == "Theoretical Framework":
-        with open(project_path+r"/data/09_streamlit_md/Theoretical framework.md", "r", encoding="utf-8") as f:
-            content = f.read()
+        content = read_theoretical_framework(project_path)
         col1, col2, col3 = st.columns([1,2.5,1])
         with col2:
             st.markdown(content)

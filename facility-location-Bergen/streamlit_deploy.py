@@ -99,7 +99,7 @@ def graph_manipulation_process(session_state, TIMES,
             
         origin = random.choice(nodes)
         print_INFO_message(f"iteration:{i}, origin: {origin}")
-        split_two_way_roads(F, 
+        is_stopped = split_two_way_roads(F, 
                             origin=origin, 
                             history_changes=history_changes,
                             split_the_node_form=split_the_node_form,
@@ -112,6 +112,8 @@ def graph_manipulation_process(session_state, TIMES,
                             log_file_path2=LOG_FILE_PATH2, 
                             img_path=HTML_IMG_PATH,
                             )
+        if is_stopped:
+            return
     
 def graph_manipulation(session_state, TIMES):
     col1, col2, _, _ = st.columns(4)

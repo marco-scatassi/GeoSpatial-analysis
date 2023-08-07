@@ -197,16 +197,9 @@ def graph_manipulation_process_template(session_state, TIMES,
             node_mapping_r = {v: k for k, v in node_mapping.items()}
             node = session_state["node"]
             history_changes = session_state["history_changes"]
-                
-            st.write(f"add and delete edges for node {node}")
-            edge_list = [None]
-            for node1 in node_mapping.keys():
-                for node2 in node_mapping.keys():
-                    if session_state["modified_graph"].has_edge(node1, node2):
-                        edge_list.append((node_mapping[node1], node_mapping[node2]))
                             
-            edges_to_add = st.multiselect("edges to add", edge_list, disabled=True)
-            edges_to_delete = st.multiselect("edges to delete", edge_list, disabled=True)
+            edges_to_add = st.multiselect("edges to add", [], disabled=True)
+            edges_to_delete = st.multiselect("edges to delete", [], disabled=True)
                             
             submit = st.form_submit_button("submit", disabled=True)
             if submit:

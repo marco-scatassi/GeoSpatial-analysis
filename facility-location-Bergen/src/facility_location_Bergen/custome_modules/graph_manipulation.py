@@ -299,6 +299,7 @@ def on_submit_add_and_delete_edges_form(session_state, G, node, img_path, log_fi
 def add_and_deleted_edges_input(G, node, session_state, node_mapping, 
                                 add_and_delete_form_placeholder, update_widgets_placeholder, 
                                 img_path, log_file_path):
+    node_mapping = session_state["node_mapping"]
     node_mapping_r = {v: k for k, v in node_mapping.items()}
     session_state["node_mapping_r"] = node_mapping_r
     edge_list_add = [None]

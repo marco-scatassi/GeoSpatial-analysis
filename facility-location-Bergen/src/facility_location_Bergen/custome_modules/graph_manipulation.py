@@ -205,6 +205,7 @@ def on_submit_split_the_node_form(session_state, G, node, node_class, img_path, 
         
         new_node_mapping, new_edge = split_the_node_func(G, session_state["history_changes"], node, node_mapping)
         session_state["history_changes"][key]["node_added"] = new_edge[0]
+        session_state["node_mapping"] = new_node_mapping
         fig = img_log(G, [node, new_edge[0]], new_node_mapping, node_class)
         fig.write_html(img_path, full_html=True, auto_open=False)
     else:

@@ -422,7 +422,7 @@ def split_two_way_roads(G, origin, session_state,
                                                  img_path,
                                                  log_file_path2)
                                     
-                        if node in session_state["history_changes"].keys() and \
+                        if key in session_state["history_changes"].keys() and \
                             ("new_edges" in session_state["history_changes"][key].keys() and "edges_to_delete" in session_state["history_changes"][key].keys()):
                                 for e in session_state["history_changes"][key]['new_edges']:
                                     for e_ in G.edges((e[0], e[1]), data=True):

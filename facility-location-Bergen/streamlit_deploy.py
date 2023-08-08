@@ -98,7 +98,7 @@ def clear_log_files():
     
 def stop_and_save_callback():
     st.session_state["stop_and_save"] = True
-    initialize_session_state_attributes()
+    #initialize_session_state_attributes()
     clear_log_files()
 
 

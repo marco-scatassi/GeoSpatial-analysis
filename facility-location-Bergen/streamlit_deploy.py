@@ -91,9 +91,8 @@ def clear_log_files():
                 </head>
                 
                 <body>
-                <h1>Local graph visualization</title>
-                <p>Searching for the first node to analyze...</p>
-                <p>Update widgets when ready!</p>
+                <h1>Graph visualization</h1>
+                <p>Click the button on the low-right corner to update the image</p>
                 </body>
                 </html>""")
     

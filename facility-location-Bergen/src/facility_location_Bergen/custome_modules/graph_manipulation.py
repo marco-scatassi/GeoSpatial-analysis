@@ -392,10 +392,10 @@ def split_two_way_roads(G, origin, session_state,
                     print_INFO_message_timestamp(f"no_double_sense: {no_double_sense}", log_file_path)
                         
                     resume_processing = False
-                    if node not in session_state.keys():
+                    if key not in session_state.keys():
                         resume_processing = False
                     else:
-                        if "new_edges" not in session_state["history_changes"][node].keys():
+                        if "new_edges" not in session_state["history_changes"][key].keys():
                             resume_processing = True
                         
                     if no_double_sense or is_crossroad or resume_processing: 

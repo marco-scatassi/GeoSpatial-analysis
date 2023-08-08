@@ -236,8 +236,8 @@ def graph_manipulation(session_state, TIMES):
             if att not in st.session_state:
                 return st.error("Please load data first!", icon="🚨")
 
-        st.write("#")
-        st.write("#")
+        st.write("")
+        st.write("")
         with placeholder:
             graph_manipulation_process_template(session_state, TIMES, 
                                    LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED)

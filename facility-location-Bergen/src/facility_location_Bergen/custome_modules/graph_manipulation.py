@@ -299,7 +299,6 @@ def on_submit_add_and_delete_edges_form(session_state, G, node, img_path, log_fi
 def add_and_deleted_edges_input(G, node, session_state, node_mapping, 
                                 add_and_delete_form_placeholder, update_widgets_placeholder, 
                                 img_path, log_file_path):
-    node_mapping = session_state["node_mapping"]
     node_mapping_r = {v: k for k, v in node_mapping.items()}
     session_state["node_mapping_r"] = node_mapping_r
     edge_list_add = [None]
@@ -424,11 +423,10 @@ def split_two_way_roads(G, origin, session_state,
                                                  log_file_path2)
                                     
                         if key in session_state["history_changes"].keys() and \
-                            ("new_edges" in session_state["history_changes"][key].keys() and "edges_to_delete" in session_state["history_changes"][key].keys()):
+                            ("new_edges" in session_state["history_changes"][key].keys() and \
+                             "edges_to_delete" in session_state["history_changes"][key].keys()):
                                 for e in session_state["history_changes"][key]['new_edges']:
-                                    for e_ in G.edges((e[0], e[1]), data=True):
-                                        if e_[0] == e[0] and e_[1] == e[1]:
-                                            add_edge((e[0], e[1], e_[2]), G)
+                                    add_edge(e, G)
                                 for e in session_state["history_changes"][key]['edges_to_delete']:
                                     G.remove_edge(e[0], e[1])
                         else:

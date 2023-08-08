@@ -403,7 +403,7 @@ def split_two_way_roads(G, origin, session_state,
                         fig = img_log(G, [node], node_mapping, node_class)
                         fig.write_html(img_path, full_html=True, auto_open=False)
                             
-                        if node in session_state["history_changes"].keys() and \
+                        if key in session_state["history_changes"].keys() and \
                             ("split_the_node" in session_state["history_changes"][key].keys() 
                                 and "selected_predecessor" in session_state["history_changes"][key].keys() 
                                     and "selected_successor" in session_state["history_changes"][key].keys()):

@@ -92,7 +92,7 @@ def clear_log_files():
                 
                 <body>
                 <h1>Graph visualization</h1>
-                <p>Click the button on the low-right corner to update the image</p>
+                <p>Click the button on the low-left corner to update the image</p>
                 </body>
                 </html>""")
     

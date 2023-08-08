@@ -260,7 +260,7 @@ def on_submit_add_and_delete_edges_form(session_state, G, node, edges_to_add, di
             try:
                 edges_to_add.remove(None)
                 dist = distances_to_add.replace(" ", "").split(",")
-                session_state["history_changes"][node]["new_edges"] = [(node_mapping_r[e[0]], node_mapping_r[e[1]], int(d)) for e,d  in zip(edges_to_add, dist)]
+                session_state["history_changes"][node]["new_edges"] = [(node_mapping_r[e[0]], node_mapping_r[e[1]], int(d)) for e, d  in zip(edges_to_add, dist)]
             except:
                 st.error("the input provide is not valid")
                 st.experimental_rerun()
@@ -274,7 +274,7 @@ def on_submit_add_and_delete_edges_form(session_state, G, node, edges_to_add, di
             session_state["history_changes"][node]["edges_to_delete"] = []
     
     for e in session_state["history_changes"][node]['new_edges']:
-        add_edge((e[0], e[1], e_[2]), G)
+        add_edge(e, G)
     for e in session_state["history_changes"][node]['edges_to_delete']:
         G.remove_edge(e[0], e[1])
     

@@ -160,7 +160,7 @@ def graph_manipulation_process_template(session_state, TIMES,
         html_img = f.read()
                                    
     with img_col:
-        st.components.v1.html(html_img, height=600)
+        st.components.v1.html(html_img, height=700)
         _, button_col, _ = st.columns(3)
         with button_col:
             stop_and_save_button = st.button("Stop and save changes", on_click=stop_and_save_callback)

@@ -259,9 +259,8 @@ def on_submit_add_and_delete_edges_form(session_state, G, node, edges_to_add, di
     
     dist = distances_to_add.replace(" ", "").split(",")
     if len(edges_to_add)-1 != len(dist):
-        st.error("the number of edges to add and the number of distances provided are different")
-        st.experimental_rerun()
-        return
+        st.error(f"the number of edges to add and the number of distances provided are different\n{edges_to_add}\n{dist}")
+        
         
     if None in edges_to_add:
         if len(edges_to_add) > 1:

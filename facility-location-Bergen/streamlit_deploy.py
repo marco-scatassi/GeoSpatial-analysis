@@ -61,7 +61,7 @@ LOG_FILE_PATH = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/s
 LOG_FILE_PATH2 = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/split_roads_changes.log"
 HTML_IMG_PATH = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/img_split_roads.html"
 
-GRAPH_MANIPULATION_SEED=5487654
+GRAPH_MANIPULATION_SEED=8797
 # --------------------------------------------- UTILITY AND CALLBACK --------------------------------------------
 def initialize_session_state_attributes():
     st.session_state["node"] = "___"

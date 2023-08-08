@@ -158,7 +158,10 @@ def graph_manipulation_process_template(session_state, TIMES,
     text_col, img_col = st.columns(2)
     with open(HTML_IMG_PATH, "r", encoding="utf-8") as f:
         html_img = f.read()
-            
+
+    st.write("#")
+    st.write("#")
+                                   
     with img_col:
         st.components.v1.html(html_img, height=600)
         _, button_col, _ = st.columns(3)

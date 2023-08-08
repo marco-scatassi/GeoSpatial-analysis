@@ -221,10 +221,10 @@ def split_the_node_input(node, G, node_mapping, node_class, session_state, split
     predecessors_id = [node_mapping[p] for p in predecessors]
     successors_id = [node_mapping[s] for s in successors]
 
-    update_widget_button = update_widgets_placeholder.button("Update Form 1 and image", 
+    update_widget_button = update_widgets_placeholder.button("Update Form 1", 
                                                                 on_click=update_split_the_node_input,
                                                                 args=(session_state, node, node_mapping, predecessors_id, successors_id),
-                                                                key=f"Update Form 1 and image_{node}")
+                                                                key=f"Update Form 1 {node}")
     
     while not update_widget_button:
         t.sleep(0.1)
@@ -253,10 +253,33 @@ def split_the_node_input(node, G, node_mapping, node_class, session_state, split
         while not submit:
             t.sleep(0.1)
 
+def on_submit_add_and_delete_edges_form(session_state, G, node, edges_to_add, edges_to_delete, img_path, log_file_path):
+    node_mapping_r = session_state["node_mapping_r"]
+    if None in edges_to_add:
+        if len(edges_to_add) > 1:
+            edges_to_add.remove(None)
+            session_state["history_changes"][node]["new_edges"] = [(node_mapping_r[e[0]], node_mapping_r[e[1]]) for e in edges_to_add]
+        else:
+            session_state["history_changes"][node]["new_edges"] = []
+    if None in edges_to_delete:
+        if len(edges_to_delete) > 1:
+            edges_to_delete.remove(None)
+            session_state["history_changes"][node]["edges_to_delete"] = [(node_mapping_r[e[0]], node_mapping_r[e[1]]) for e in edges_to_delete]
+        else:
+            session_state["history_changes"][node]["edges_to_delete"] = []
+    
+    node_mapping, node_class = node_mapping_log(G, node) 
+    fig = img_log(G, [node], node_mapping, node_class)
+    fig.write_html(img_path, full_html=True, auto_open=False)
+    
+    print_INFO_message_timestamp(f'new edges: {session_state["history_changes"][node]["new_edges"]}', log_file_path)
+    print_INFO_message_timestamp(f'edges to delete: {session_state["history_changes"][node]["edges_to_delete"]}', log_file_path)
+
 def add_and_deleted_edges_input(G, node, session_state, node_mapping, 
-                                add_and_delete_form_placeholder, update_widgets_placeholder, log_file_path):
-    stay = True
+                                add_and_delete_form_placeholder, update_widgets_placeholder, 
+                                img_path, log_file_path):
     node_mapping_r = {v: k for k, v in node_mapping.items()}
+    session_state["node_mapping_r"] = node_mapping_r
     edge_list_add = [None]
     edge_list_delete = [None]
     for node1 in node_mapping.keys():
@@ -266,8 +289,8 @@ def add_and_deleted_edges_input(G, node, session_state, node_mapping,
             else:
                 edge_list_add.append((node_mapping[node1], node_mapping[node2]))
                 
-    update_widget_button = update_widgets_placeholder.button("Update Form 2 and image",
-                                                             key=f"Update Form 2 and image_{node}")
+    update_widget_button = update_widgets_placeholder.button("Update Form 2",
+                                                             key=f"Update Form 2 {node}")
     
     while not update_widget_button:
         t.sleep(0.1)
@@ -278,27 +301,13 @@ def add_and_deleted_edges_input(G, node, session_state, node_mapping,
         st.write(f"**Form 2**: add and delete edges for node {node_mapping[node]}")
         edges_to_add = st.multiselect("edges to add", edge_list_add)
         edges_to_delete = st.multiselect("edges to delete", edge_list_delete)
-        submit = st.form_submit_button("submit")
+        submit = st.form_submit_button("submit", on_click=on_submit_add_and_delete_edges_form,
+                                       args=(session_state, G, node, edges_to_add, edges_to_delete, img_path, log_file_path))
         
-        while stay: 
-            if submit:
-                if None in edges_to_add:
-                    if len(edges_to_add) > 1:
-                        edges_to_add.remove(None)
-                        session_state["history_changes"][node]["new_edges"] = [(node_mapping_r[e[0]], node_mapping_r[e[1]]) for e in edges_to_add]
-                    else:
-                        session_state["history_changes"][node]["new_edges"] = []
-                if None in edges_to_delete:
-                    if len(edges_to_delete) > 1:
-                        edges_to_delete.remove(None)
-                        session_state["history_changes"][node]["edges_to_delete"] = [(node_mapping_r[e[0]], node_mapping_r[e[1]]) for e in edges_to_delete]
-                    else:
-                        session_state["history_changes"][node]["edges_to_delete"] = []
-                        
-                print_INFO_message_timestamp(f'new edges: {session_state["history_changes"][node]["new_edges"]}', log_file_path)
-                print_INFO_message_timestamp(f'edges to delete: {session_state["history_changes"][node]["edges_to_delete"]}', log_file_path)
+        while not submit: 
+            t.sleep(0.1)
 
-                stay = False
+
 
 def reconnect_predecessors(G, origin, log_file_path, node, new_edge):
     print_INFO_message(f"replacing edge {origin}-{node}", log_file_path)
@@ -404,15 +413,12 @@ def split_two_way_roads(G, origin, session_state,
                                             add_edge((e[0], e[1], e_[2]), G)
                                 for e in session_state["history_changes"][node]['edges_to_delete']:
                                     G.remove_edge(e[0], e[1])
-                                
-                                fig = img_log(G, [node, new_edge[0]], node_mapping, node_class)
-                                fig.write_html(img_path, full_html=True, auto_open=False)
-                                update_widgets_placeholder.button("Final image", key="Final image")
                         else:
                             add_and_deleted_edges_input(G, node, session_state, 
                                                         node_mapping, 
                                                         add_and_delete_form_placeholder,
                                                         update_widgets_placeholder,
+                                                        img_path,
                                                         log_file_path2)
                             
                     break

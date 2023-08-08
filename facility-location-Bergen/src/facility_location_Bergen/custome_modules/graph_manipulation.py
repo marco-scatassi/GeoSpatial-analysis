@@ -201,14 +201,15 @@ def on_submit_split_the_node_form(session_state, G, node, node_class, img_path, 
         session_state["history_changes"][node]["split_the_node"] = True
         session_state["history_changes"][node]['selected_predecessor'] = node_mapping_r[session_state[f"predecessor_select_box_{node}"]]
         session_state["history_changes"][node]['selected_successor'] = node_mapping_r[session_state[f"successor_select_box_{node}"]]
+        
+        new_node_mapping, new_edge = split_the_node_func(G, session_state["history_changes"], node, node_mapping)
+        session_state["history_changes"][node]["node_added"] = new_edge[0]
+        fig = img_log(G, [node, new_edge[0]], new_node_mapping, node_class)
+        fig.write_html(img_path, full_html=True, auto_open=False)
     else:
         session_state["history_changes"][node]["split_the_node"] = False
         session_state["history_changes"][node]['selected_predecessor'] = None
         session_state["history_changes"][node]['selected_successor'] = None
-    
-    new_node_mapping, new_edge = split_the_node_func(G, session_state["history_changes"], node, node_mapping)
-    fig = img_log(G, [node, new_edge[0]], new_node_mapping, node_class)
-    fig.write_html(img_path, full_html=True, auto_open=False)
     
     print_INFO_message_timestamp(f'split the node {node}? (y/n): {session_state["history_changes"][node]["split_the_node"]}', LOG_FILE_PATH2)
     print_INFO_message(f'selected predecessor: {session_state["history_changes"][session_state["node"]]["selected_predecessor"]}', LOG_FILE_PATH2)
@@ -269,7 +270,11 @@ def on_submit_add_and_delete_edges_form(session_state, G, node, edges_to_add, ed
             session_state["history_changes"][node]["edges_to_delete"] = []
     
     node_mapping, node_class = node_mapping_log(G, node) 
-    fig = img_log(G, [node], node_mapping, node_class)
+    if "node_added" in session_state["history_changes"][node]:
+        node2 = session_state["history_changes"][node]["node_added"]
+        fig = img_log(G, [node, node2], node_mapping, node_class)
+    else:
+        fig = img_log(G, [node], node_mapping, node_class)
     fig.write_html(img_path, full_html=True, auto_open=False)
     
     print_INFO_message_timestamp(f'new edges: {session_state["history_changes"][node]["new_edges"]}', log_file_path)

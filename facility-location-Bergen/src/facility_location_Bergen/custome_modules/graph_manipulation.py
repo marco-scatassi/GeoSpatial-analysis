@@ -222,14 +222,9 @@ def split_the_node_input(node, G, node_mapping, node_class, session_state, split
     predecessors_id = [node_mapping[p] for p in predecessors]
     successors_id = [node_mapping[s] for s in successors]
 
-    # update_widget_button = update_widgets_placeholder.button("Update Form 1", 
-    #                                                             on_click=update_split_the_node_input,
-    #                                                             args=(session_state, node, node_mapping, predecessors_id, successors_id),
-    #                                                             key=f"Update Form 1 {node}",
-    #                                                             default=True)
+    update_split_the_node_input(session_state, node, node_mapping, predecessors_id, successors_id)
     
-    # while not update_widget_button:
-    #     t.sleep(0.1)
+    update_widget_button = update_widgets_placeholder.button("Update graph image", key=f"Update graph image {node}")
     
     update_split_the_node_input(session_state, node, node_mapping, predecessors_id, successors_id)
     
@@ -302,11 +297,7 @@ def add_and_deleted_edges_input(G, node, session_state, node_mapping,
             else:
                 edge_list_add.append((node_mapping[node1], node_mapping[node2]))
                 
-    # update_widget_button = update_widgets_placeholder.button("Update Form 2",
-    #                                                          key=f"Update Form 2 {node}",)
-    
-    # while not update_widget_button:
-    #     t.sleep(0.1)
+    update_widget_button = update_widgets_placeholder.button("Update graph image", key=f"Update graph image 2 {node}")
         
     add_and_delete_form_placeholder.empty()
     add_and_delete_form = add_and_delete_form_placeholder.form(key=f"add_and_delete_form_{node}")

@@ -223,8 +223,9 @@ def split_the_node_input(node, G, node_mapping, node_class, session_state, split
     successors_id = [node_mapping[s] for s in successors]
 
     update_split_the_node_input(session_state, node, node_mapping, predecessors_id, successors_id)
+    st.experimental_rerun()
     
-    update_widget_button = update_widgets_placeholder.button("Update graph image", key=f"Update graph image {node}")
+    #update_widget_button = update_widgets_placeholder.button("Update graph image", key=f"Update graph image {node}")
     
     update_split_the_node_input(session_state, node, node_mapping, predecessors_id, successors_id)
     

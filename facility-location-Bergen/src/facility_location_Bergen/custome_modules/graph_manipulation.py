@@ -223,9 +223,8 @@ def split_the_node_input(node, G, node_mapping, node_class, session_state, split
     successors_id = [node_mapping[s] for s in successors]
 
     update_split_the_node_input(session_state, node, node_mapping, predecessors_id, successors_id)
-    st.experimental_rerun()
     
-    #update_widget_button = update_widgets_placeholder.button("Update graph image", key=f"Update graph image {node}")
+    update_widget_button = update_widgets_placeholder.button("Update graph image", key=f"Update graph image {node}")
     
     update_split_the_node_input(session_state, node, node_mapping, predecessors_id, successors_id)
     
@@ -284,6 +283,14 @@ def on_submit_add_and_delete_edges_form(session_state, G, node, edges_to_add, ed
     print_INFO_message_timestamp(f'new edges: {session_state["history_changes"][node]["new_edges"]}', log_file_path)
     print_INFO_message_timestamp(f'edges to delete: {session_state["history_changes"][node]["edges_to_delete"]}', log_file_path)
 
+def on_submit_multiselect_edges_to_add(session_state, node, container):
+    count = session_state["history_changes"][node]["new_edges_count"]
+    if count > 0:
+        for i in range(count):
+            container.number_input(f'{session_state["edges to add"][i]}', 
+                                   key=f"edge_{i}", 
+                                   min_value=0, value=0)
+
 def add_and_deleted_edges_input(G, node, session_state, node_mapping, 
                                 add_and_delete_form_placeholder, update_widgets_placeholder, 
                                 img_path, log_file_path):
@@ -304,17 +311,19 @@ def add_and_deleted_edges_input(G, node, session_state, node_mapping,
     add_and_delete_form = add_and_delete_form_placeholder.form(key=f"add_and_delete_form_{node}")
     with add_and_delete_form:
         st.write(f"**Form 2**: add and delete edges for node {node_mapping[node]}")
-        edges_to_add = st.multiselect("edges to add", edge_list_add)
-        edges_to_add_with_distance = st.container()
+        edges_to_add_container = st.container()
+        add_distance = st.container()
+        
+        if "new_edges_count" not in session_state["history_changes"][node]:
+            session_state["history_changes"][node]["new_edges_count"] = 0
+        
+        edges_to_add = edges_to_add_container.multiselect("edges to add", edge_list_add, 
+                                                          on_change=on_submit_multiselect_edges_to_add, 
+                                                          args=(session_state, node, add_distance))
         edges_to_delete = st.multiselect("edges to delete", edge_list_delete)
         submit = st.form_submit_button("submit", on_click=on_submit_add_and_delete_edges_form,
                                        args=(session_state, G, node, edges_to_add, edges_to_delete, img_path, log_file_path))
         
-        while not submit: 
-            st.write(edges_to_add)
-            with edges_to_add_with_distance:
-                for edge in edges_to_add.remove(None):
-                    st.number_input(f"distance between {edge[0]} and {edge[1]}", key=f"distance_{edge[0]}_{edge[1]}")
 
 
 

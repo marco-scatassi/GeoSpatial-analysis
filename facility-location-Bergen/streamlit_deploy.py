@@ -158,9 +158,6 @@ def graph_manipulation_process_template(session_state, TIMES,
     text_col, img_col = st.columns(2)
     with open(HTML_IMG_PATH, "r", encoding="utf-8") as f:
         html_img = f.read()
-
-    st.write("#")
-    st.write("#")
                                    
     with img_col:
         st.components.v1.html(html_img, height=600)
@@ -240,6 +237,8 @@ def graph_manipulation(session_state, TIMES):
                 return st.error("Please load data first!", icon="🚨")
             
         with placeholder:
+            st.write("#")
+            st.write("#")
             graph_manipulation_process_template(session_state, TIMES, 
                                    LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED)
         

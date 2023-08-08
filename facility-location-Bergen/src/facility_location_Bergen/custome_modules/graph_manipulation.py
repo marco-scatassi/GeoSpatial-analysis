@@ -225,7 +225,8 @@ def split_the_node_input(node, G, node_mapping, node_class, session_state, split
     update_widget_button = update_widgets_placeholder.button("Update Form 1", 
                                                                 on_click=update_split_the_node_input,
                                                                 args=(session_state, node, node_mapping, predecessors_id, successors_id),
-                                                                key=f"Update Form 1 {node}")
+                                                                key=f"Update Form 1 {node}",
+                                                                default=True)
     
     while not update_widget_button:
         t.sleep(0.1)
@@ -300,7 +301,8 @@ def add_and_deleted_edges_input(G, node, session_state, node_mapping,
                 edge_list_add.append((node_mapping[node1], node_mapping[node2]))
                 
     update_widget_button = update_widgets_placeholder.button("Update Form 2",
-                                                             key=f"Update Form 2 {node}")
+                                                             key=f"Update Form 2 {node}",
+                                                             default=True)
     
     while not update_widget_button:
         t.sleep(0.1)

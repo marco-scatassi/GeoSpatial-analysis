@@ -378,7 +378,8 @@ def split_two_way_roads(G, origin, session_state,
             print_INFO_message(f"TWO WAY STREET FOUND", log_file_path)
             new_edge = traslate_path([(origin[0], origin[1]), (node[0], node[1])], 0.00005, True)
             for e in G.edges((origin, node), data=True):
-                if e[0] == origin and e[1] == node:      
+                if e[0] == origin and e[1] == node:   
+                    key = str(node)   
                     reconnect_predecessors(G, origin, log_file_path, node, new_edge)
                         
                     print_INFO_message(f"old edge is {(origin, node)}", log_file_path)
@@ -398,7 +399,6 @@ def split_two_way_roads(G, origin, session_state,
                             resume_processing = True
                         
                     if no_double_sense or is_crossroad or resume_processing: 
-                        key = str(node)
                         node_mapping, node_class = node_mapping_log(G, node) 
                         fig = img_log(G, [node], node_mapping, node_class)
                         fig.write_html(img_path, full_html=True, auto_open=False)

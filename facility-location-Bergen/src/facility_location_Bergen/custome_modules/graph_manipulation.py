@@ -255,11 +255,16 @@ def split_the_node_input(node, G, node_mapping, node_class, session_state, split
 def on_submit_add_and_delete_edges_form(session_state, G, node, edges_to_add, distances_to_add, edges_to_delete, img_path, log_file_path):
     node_mapping_r = session_state["node_mapping_r"]
     
+    dist = distances_to_add.replace(" ", "").split(",")
+    if len(edges_to_add) != len(dist):
+        st.error("the number of edges to add and the number of distances provided are different")
+        st.experimental_rerun()
+        
     if None in edges_to_add:
         if len(edges_to_add) > 1:
             try:
                 edges_to_add.remove(None)
-                dist = distances_to_add.replace(" ", "").split(",")
+                
                 session_state["history_changes"][node]["new_edges"] = [(node_mapping_r[e[0]], node_mapping_r[e[1]], int(d)) for e, d  in zip(edges_to_add, dist)]
             except:
                 st.error("the input provide is not valid")
@@ -273,8 +278,6 @@ def on_submit_add_and_delete_edges_form(session_state, G, node, edges_to_add, di
         else:
             session_state["history_changes"][node]["edges_to_delete"] = []
     
-    st.write("edges to add: ", session_state["history_changes"][node]["new_edges"])
-    st.write("new_edges: ", edges_to_add)
     for e in session_state["history_changes"][node]['new_edges']:
         add_edge(e, G)
     for e in session_state["history_changes"][node]['edges_to_delete']:

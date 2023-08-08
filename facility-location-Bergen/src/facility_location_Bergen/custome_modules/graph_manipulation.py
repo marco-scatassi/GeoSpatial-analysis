@@ -237,7 +237,7 @@ def split_the_node_input(node, G, node_mapping, node_class, session_state, split
         
         st.write("**Form 1**: split the node "+f'{node}? If "yes", which predecessor and successor?')
                 
-        st.radio("split the node?", ("yes", "no"), key="split_the_node_radio")
+        st.radio("split the node?", ("yes", "no"), key=f"split_the_node_radio_{node}")
         
         col1, col2 = st.columns(2)
         with col1:

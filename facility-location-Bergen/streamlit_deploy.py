@@ -244,7 +244,7 @@ def graph_manipulation(session_state, TIMES):
             placeholder.warning("Process interrupted", icon="❌")
         else:
             placeholder.success("Process completed: changes has been saved", icon="✅")
-            st.write(session_state["history"])
+            st.write(session_state["history_changes"])
         
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------
 def deterministic_load_data(session_state, TIMES, facilities_number):

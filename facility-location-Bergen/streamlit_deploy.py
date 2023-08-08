@@ -98,7 +98,7 @@ def clear_log_files():
     
 def stop_and_save_callback():
     st.session_state["stop_and_save"] = True
-    #initialize_session_state_attributes()
+    initialize_session_state_attributes()
     clear_log_files()
 
 
@@ -244,7 +244,7 @@ def graph_manipulation(session_state, TIMES):
             placeholder.warning("Process interrupted", icon="❌")
         else:
             placeholder.success("Process completed: changes has been saved", icon="✅")
-            st.write(session_state)
+            st.write(session_state["history_changes"])
         
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------
 def deterministic_load_data(session_state, TIMES, facilities_number):

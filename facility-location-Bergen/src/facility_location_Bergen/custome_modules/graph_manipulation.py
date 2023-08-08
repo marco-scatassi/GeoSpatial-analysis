@@ -252,12 +252,18 @@ def split_the_node_input(node, G, node_mapping, node_class, session_state, split
         while not submit:
             t.sleep(0.1)
 
-def on_submit_add_and_delete_edges_form(session_state, G, node, edges_to_add, edges_to_delete, img_path, log_file_path):
+def on_submit_add_and_delete_edges_form(session_state, G, node, edges_to_add, distances_to_add, edges_to_delete, img_path, log_file_path):
     node_mapping_r = session_state["node_mapping_r"]
+    
     if None in edges_to_add:
         if len(edges_to_add) > 1:
-            edges_to_add.remove(None)
-            session_state["history_changes"][node]["new_edges"] = [(node_mapping_r[e[0]], node_mapping_r[e[1]]) for e in edges_to_add]
+            try:
+                edges_to_add.remove(None)
+                dist = distances_to_add.replace(" ", "").split(",")
+                session_state["history_changes"][node]["new_edges"] = [(node_mapping_r[e[0]], node_mapping_r[e[1]], int(d)) for e,d  in zip(edges_to_add, dist)]
+            except:
+                st.error("the input provide is not valid")
+                st.experimental_rerun()
         else:
             session_state["history_changes"][node]["new_edges"] = []
     if None in edges_to_delete:
@@ -283,14 +289,6 @@ def on_submit_add_and_delete_edges_form(session_state, G, node, edges_to_add, ed
     print_INFO_message_timestamp(f'new edges: {session_state["history_changes"][node]["new_edges"]}', log_file_path)
     print_INFO_message_timestamp(f'edges to delete: {session_state["history_changes"][node]["edges_to_delete"]}', log_file_path)
 
-def on_submit_multiselect_edges_to_add(session_state, node, container):
-    count = session_state["history_changes"][node]["new_edges_count"]
-    if count > 0:
-        for i in range(count):
-            container.number_input(f'{session_state["edges to add"][i]}', 
-                                   key=f"edge_{i}", 
-                                   min_value=0, value=0)
-
 def add_and_deleted_edges_input(G, node, session_state, node_mapping, 
                                 add_and_delete_form_placeholder, update_widgets_placeholder, 
                                 img_path, log_file_path):
@@ -311,18 +309,13 @@ def add_and_deleted_edges_input(G, node, session_state, node_mapping,
     add_and_delete_form = add_and_delete_form_placeholder.form(key=f"add_and_delete_form_{node}")
     with add_and_delete_form:
         st.write(f"**Form 2**: add and delete edges for node {node_mapping[node]}")
-        edges_to_add_container = st.container()
-        add_distance = st.container()
-        
-        if "new_edges_count" not in session_state["history_changes"][node]:
-            session_state["history_changes"][node]["new_edges_count"] = 0
-        
-        edges_to_add = edges_to_add_container.multiselect("edges to add", edge_list_add, 
-                                                          on_change=on_submit_multiselect_edges_to_add, 
-                                                          args=(session_state, node, add_distance))
+
+        edges_to_add = st.multiselect("edges to add", edge_list_add)
+        distances_to_add = st.text_input("in order, for each edge added, provide its lenght (m)",
+                                         placeholder="d1, d2, d3, ...")
         edges_to_delete = st.multiselect("edges to delete", edge_list_delete)
         submit = st.form_submit_button("submit", on_click=on_submit_add_and_delete_edges_form,
-                                       args=(session_state, G, node, edges_to_add, edges_to_delete, img_path, log_file_path))
+                                       args=(session_state, G, node, edges_to_add, distances_to_add, edges_to_delete, img_path, log_file_path))
         
 
 

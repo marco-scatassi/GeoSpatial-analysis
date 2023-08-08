@@ -231,7 +231,7 @@ def split_the_node_input(node, G, node_mapping, node_class, session_state, split
         t.sleep(0.1)
     
     split_the_node_form_placeholder.empty()
-    split_the_node_form = split_the_node_form_placeholder.form(key="split_the_node_form")
+    split_the_node_form = split_the_node_form_placeholder.form(key=f"split_the_node_form_{node}")
     
     with split_the_node_form:
         node = session_state["node"]
@@ -269,6 +269,13 @@ def on_submit_add_and_delete_edges_form(session_state, G, node, edges_to_add, ed
         else:
             session_state["history_changes"][node]["edges_to_delete"] = []
     
+    for e in session_state["history_changes"][node]['new_edges']:
+        for e_ in G.edges((e[0], e[1]), data=True):
+            if e_[0] == e[0] and e_[1] == e[1]:
+                add_edge((e[0], e[1], e_[2]), G)
+    for e in session_state["history_changes"][node]['edges_to_delete']:
+        G.remove_edge(e[0], e[1])
+    
     node_mapping, node_class = node_mapping_log(G, node) 
     if "node_added" in session_state["history_changes"][node]:
         node2 = session_state["history_changes"][node]["node_added"]
@@ -301,7 +308,7 @@ def add_and_deleted_edges_input(G, node, session_state, node_mapping,
         t.sleep(0.1)
         
     add_and_delete_form_placeholder.empty()
-    add_and_delete_form = add_and_delete_form_placeholder.form(key="add_and_delete_form")
+    add_and_delete_form = add_and_delete_form_placeholder.form(key=f"add_and_delete_form_{node}")
     with add_and_delete_form:
         st.write(f"**Form 2**: add and delete edges for node {node_mapping[node]}")
         edges_to_add = st.multiselect("edges to add", edge_list_add)

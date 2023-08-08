@@ -235,10 +235,10 @@ def graph_manipulation(session_state, TIMES):
         for att in ["node", "node_mapping", "predecessors_id", "successors_id", "is_split_the_node_form_submitted", "stop_and_save", "button_load"]:
             if att not in st.session_state:
                 return st.error("Please load data first!", icon="🚨")
-            
+
+        st.write("#")
+        st.write("#")
         with placeholder:
-            st.write("#")
-            st.write("#")
             graph_manipulation_process_template(session_state, TIMES, 
                                    LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED)
         

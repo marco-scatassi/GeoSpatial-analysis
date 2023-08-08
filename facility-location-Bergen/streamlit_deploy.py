@@ -218,7 +218,9 @@ def graph_manipulation(session_state, TIMES):
         button_load = st.button("Load data for graph manipulation")
     with col2:
         button_manipulation = st.button("Start graph manipulation process")
-    st.markdown("---")
+
+    placeholder2 = st.empty()
+    placeholder2.markdown("---")
     
     ############################################## LOAD DATA ##############################################
     if button_load:
@@ -236,7 +238,6 @@ def graph_manipulation(session_state, TIMES):
             if att not in st.session_state:
                 return st.error("Please load data first!", icon="🚨")
 
-        st.markdown("---")
         with placeholder:
             graph_manipulation_process_template(session_state, TIMES, 
                                    LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED)

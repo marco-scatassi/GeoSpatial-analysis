@@ -195,25 +195,26 @@ def update_split_the_node_input(session_state, node, node_mapping, predecessors_
 def on_submit_split_the_node_form(session_state, G, node, node_class, img_path, LOG_FILE_PATH2):
     node_mapping = session_state["node_mapping"]
     node_mapping_r = session_state["node_mapping_r"]
+    key = str(node)
     
-    session_state["history_changes"][node] = {}
+    session_state["history_changes"][key] = {}
     if session_state["split_the_node_radio"] == "yes":
-        session_state["history_changes"][node]["split_the_node"] = True
-        session_state["history_changes"][node]['selected_predecessor'] = node_mapping_r[session_state[f"predecessor_select_box_{node}"]]
-        session_state["history_changes"][node]['selected_successor'] = node_mapping_r[session_state[f"successor_select_box_{node}"]]
+        session_state["history_changes"][key]["split_the_node"] = True
+        session_state["history_changes"][key]['selected_predecessor'] = node_mapping_r[session_state[f"predecessor_select_box_{node}"]]
+        session_state["history_changes"][key]['selected_successor'] = node_mapping_r[session_state[f"successor_select_box_{node}"]]
         
         new_node_mapping, new_edge = split_the_node_func(G, session_state["history_changes"], node, node_mapping)
-        session_state["history_changes"][node]["node_added"] = new_edge[0]
+        session_state["history_changes"][key]["node_added"] = new_edge[0]
         fig = img_log(G, [node, new_edge[0]], new_node_mapping, node_class)
         fig.write_html(img_path, full_html=True, auto_open=False)
     else:
-        session_state["history_changes"][node]["split_the_node"] = False
-        session_state["history_changes"][node]['selected_predecessor'] = None
-        session_state["history_changes"][node]['selected_successor'] = None
+        session_state["history_changes"][key]["split_the_node"] = False
+        session_state["history_changes"][key]['selected_predecessor'] = None
+        session_state["history_changes"][key]['selected_successor'] = None
     
-    print_INFO_message_timestamp(f'split the node {node}? (y/n): {session_state["history_changes"][node]["split_the_node"]}', LOG_FILE_PATH2)
-    print_INFO_message(f'selected predecessor: {session_state["history_changes"][session_state["node"]]["selected_predecessor"]}', LOG_FILE_PATH2)
-    print_INFO_message(f'selected successor: {session_state["history_changes"][session_state["node"]]["selected_successor"]}', LOG_FILE_PATH2)
+    print_INFO_message_timestamp(f'split the node {node}? (y/n): {session_state["history_changes"][key]["split_the_node"]}', LOG_FILE_PATH2)
+    print_INFO_message(f'selected predecessor: {session_state["history_changes"][key]["selected_predecessor"]}', LOG_FILE_PATH2)
+    print_INFO_message(f'selected successor: {session_state["history_changes"][key]["selected_successor"]}', LOG_FILE_PATH2)
               
 def split_the_node_input(node, G, node_mapping, node_class, session_state, split_the_node_form_placeholder, update_widgets_placeholder, img_path, LOG_FILE_PATH2):
     predecessors = list(G.predecessors(node))
@@ -254,6 +255,7 @@ def split_the_node_input(node, G, node_mapping, node_class, session_state, split
 
 def on_submit_add_and_delete_edges_form(session_state, G, node, edges_to_add, distances_to_add, edges_to_delete, img_path, log_file_path):
     node_mapping_r = session_state["node_mapping_r"]
+    key = str(node)
     
     dist = distances_to_add.replace(" ", "").split(",")
     if len(edges_to_add) != len(dist):
@@ -265,34 +267,34 @@ def on_submit_add_and_delete_edges_form(session_state, G, node, edges_to_add, di
             try:
                 edges_to_add.remove(None)
                 
-                session_state["history_changes"][node]["new_edges"] = [(node_mapping_r[e[0]], node_mapping_r[e[1]], int(d)) for e, d  in zip(edges_to_add, dist)]
+                session_state["history_changes"][key]["new_edges"] = [(node_mapping_r[e[0]], node_mapping_r[e[1]], int(d)) for e, d  in zip(edges_to_add, dist)]
             except:
                 st.error("the input provide is not valid")
                 st.experimental_rerun()
         else:
-            session_state["history_changes"][node]["new_edges"] = []
+            session_state["history_changes"][key]["new_edges"] = []
     if None in edges_to_delete:
         if len(edges_to_delete) > 1:
             edges_to_delete.remove(None)
-            session_state["history_changes"][node]["edges_to_delete"] = [(node_mapping_r[e[0]], node_mapping_r[e[1]]) for e in edges_to_delete]
+            session_state["history_changes"][key]["edges_to_delete"] = [(node_mapping_r[e[0]], node_mapping_r[e[1]]) for e in edges_to_delete]
         else:
-            session_state["history_changes"][node]["edges_to_delete"] = []
+            session_state["history_changes"][key]["edges_to_delete"] = []
     
-    for e in session_state["history_changes"][node]['new_edges']:
+    for e in session_state["history_changes"][key]['new_edges']:
         add_edge(e, G)
-    for e in session_state["history_changes"][node]['edges_to_delete']:
+    for e in session_state["history_changes"][key]['edges_to_delete']:
         G.remove_edge(e[0], e[1])
     
     node_mapping, node_class = node_mapping_log(G, node) 
-    if "node_added" in session_state["history_changes"][node]:
-        node2 = session_state["history_changes"][node]["node_added"]
+    if "node_added" in session_state["history_changes"][key]:
+        node2 = session_state["history_changes"][key]["node_added"]
         fig = img_log(G, [node, node2], node_mapping, node_class)
     else:
         fig = img_log(G, [node], node_mapping, node_class)
     fig.write_html(img_path, full_html=True, auto_open=False)
     
-    print_INFO_message_timestamp(f'new edges: {session_state["history_changes"][node]["new_edges"]}', log_file_path)
-    print_INFO_message_timestamp(f'edges to delete: {session_state["history_changes"][node]["edges_to_delete"]}', log_file_path)
+    print_INFO_message_timestamp(f'new edges: {session_state["history_changes"][key]["new_edges"]}', log_file_path)
+    print_INFO_message_timestamp(f'edges to delete: {session_state["history_changes"][key]["edges_to_delete"]}', log_file_path)
 
 def add_and_deleted_edges_input(G, node, session_state, node_mapping, 
                                 add_and_delete_form_placeholder, update_widgets_placeholder, 
@@ -322,9 +324,6 @@ def add_and_deleted_edges_input(G, node, session_state, node_mapping,
         submit = st.form_submit_button("submit", on_click=on_submit_add_and_delete_edges_form,
                                        args=(session_state, G, node, edges_to_add, distances_to_add, edges_to_delete, img_path, log_file_path))
         
-
-
-
 def reconnect_predecessors(G, origin, log_file_path, node, new_edge):
     print_INFO_message(f"replacing edge {origin}-{node}", log_file_path)
     predecessors = list(G.predecessors(origin))

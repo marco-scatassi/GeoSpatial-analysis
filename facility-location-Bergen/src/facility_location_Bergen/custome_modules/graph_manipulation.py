@@ -205,7 +205,6 @@ def on_submit_split_the_node_form(session_state, G, node, node_class, img_path, 
         
         new_node_mapping, new_edge = split_the_node_func(G, session_state["history_changes"], node, node_mapping)
         session_state["history_changes"][key]["node_added"] = new_edge[0]
-        session_state["node_mapping"] = new_node_mapping
         fig = img_log(G, [node, new_edge[0]], new_node_mapping, node_class)
         fig.write_html(img_path, full_html=True, auto_open=False)
     else:
@@ -254,8 +253,7 @@ def split_the_node_input(node, G, node_mapping, node_class, session_state, split
         while not submit:
             t.sleep(0.1)
 
-def on_submit_add_and_delete_edges_form(session_state, G, node, img_path, log_file_path):
-    node_mapping_r = session_state["node_mapping_r"]
+def on_submit_add_and_delete_edges_form(session_state, G, node, node_mapping_r, img_path, log_file_path):
     edges_to_add = session_state[f"edges_to_add_{node}"]
     distances_to_add = session_state[f"distances_to_add_{node}"]
     edges_to_delete = session_state[f"edges_to_delete_{node}"]
@@ -300,7 +298,6 @@ def add_and_deleted_edges_input(G, node, session_state, node_mapping,
                                 add_and_delete_form_placeholder, update_widgets_placeholder, 
                                 img_path, log_file_path):
     node_mapping_r = {v: k for k, v in node_mapping.items()}
-    session_state["node_mapping_r"] = node_mapping_r
     edge_list_add = [None]
     edge_list_delete = [None]
     for node1 in node_mapping.keys():
@@ -322,7 +319,7 @@ def add_and_deleted_edges_input(G, node, session_state, node_mapping,
                                          placeholder="d1, d2, d3, ...", key=f"distances_to_add_{node}")
         st.multiselect("edges to delete", edge_list_delete, key=f"edges_to_delete_{node}")
         st.form_submit_button("submit", on_click=on_submit_add_and_delete_edges_form,
-                                       args=(session_state, G, node, img_path, log_file_path))
+                                       args=(session_state, G, node, node_mapping_r, img_path, log_file_path))
         
 def reconnect_predecessors(G, origin, log_file_path, node, new_edge):
     print_INFO_message(f"replacing edge {origin}-{node}", log_file_path)

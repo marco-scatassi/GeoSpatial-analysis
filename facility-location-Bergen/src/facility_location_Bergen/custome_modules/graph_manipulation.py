@@ -273,6 +273,7 @@ def on_submit_add_and_delete_edges_form(session_state, G, node, edges_to_add, di
         else:
             session_state["history_changes"][node]["edges_to_delete"] = []
     
+    st.write("edges to add: ", session_state["history_changes"][node]["new_edges"])
     for e in session_state["history_changes"][node]['new_edges']:
         add_edge(e, G)
     for e in session_state["history_changes"][node]['edges_to_delete']:

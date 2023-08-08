@@ -198,7 +198,7 @@ def on_submit_split_the_node_form(session_state, G, node, node_class, img_path, 
     key = str(node)
     
     session_state["history_changes"][key] = {}
-    if session_state["split_the_node_radio"] == "yes":
+    if session_state[f"split_the_node_radio_{node}"] == "yes":
         session_state["history_changes"][key]["split_the_node"] = True
         session_state["history_changes"][key]['selected_predecessor'] = node_mapping_r[session_state[f"predecessor_select_box_{node}"]]
         session_state["history_changes"][key]['selected_successor'] = node_mapping_r[session_state[f"successor_select_box_{node}"]]

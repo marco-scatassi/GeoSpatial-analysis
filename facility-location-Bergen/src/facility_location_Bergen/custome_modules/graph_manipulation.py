@@ -320,7 +320,7 @@ def add_and_deleted_edges_input(G, node, session_state, node_mapping,
         while not submit: 
             st.write(edges_to_add)
             with edges_to_add_with_distance:
-                for edge in edges_to_add:
+                for edge in edges_to_add.remove(None):
                     st.number_input(f"distance between {edge[0]} and {edge[1]}", key=f"distance_{edge[0]}_{edge[1]}")
 
 

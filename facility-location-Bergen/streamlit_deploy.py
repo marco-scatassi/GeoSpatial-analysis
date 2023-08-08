@@ -90,9 +90,8 @@ def clear_log_files():
                 </head>
                 
                 <body>
-                <h1>Loacal graph visualization</title>
-                <p>Searching for the first node to analyze...</p>
-                <p>Update widgets when ready!</p>
+                <h1>Graph visualization</h1>
+                <p>Click the button on the low-left corner to update the image</p>
                 </body>
                 </html>""")
     
@@ -126,21 +125,14 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
                                split_the_node_form_placeholder, add_and_delete_form_placeholder, update_widgets_placeholder):
     
     F = deepcopy(session_state[f"average_graphs"]["all_day"])
-    history_changes = session_state["history_changes"]
     
     nodes = list(F.nodes())
     seed = random.seed(GRAPH_MANIPULATION_SEED)
-
-    # if history_changes == {}:
-    #     origin = random.choice(nodes)
-    # else:
-    #     origin = list(history_changes.keys())[-1]
     
     origin = random.choice(nodes)
     
-    if not session_state["stop_and_save"]:
-        print_INFO_message_timestamp("Splitting two way roads")
-        split_two_way_roads(F, 
+    print_INFO_message_timestamp("Splitting two way roads")
+    split_two_way_roads(F, 
                             origin=origin, 
                             session_state=session_state,
                             split_the_node_form_placeholder=split_the_node_form_placeholder,
@@ -151,10 +143,7 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
                             log_file_path=LOG_FILE_PATH,
                             log_file_path2=LOG_FILE_PATH2, 
                             img_path=HTML_IMG_PATH,)
-    else:
-        print_INFO_message_timestamp("Stop and save changes")
-        session_state["stop_and_save"] = False
-        return
+    
     
 def graph_manipulation_process_template(session_state, TIMES, 
                                LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED):
@@ -162,7 +151,7 @@ def graph_manipulation_process_template(session_state, TIMES,
     text_col, img_col = st.columns(2)
     with open(HTML_IMG_PATH, "r", encoding="utf-8") as f:
         html_img = f.read()
-            
+    
     with img_col:
         st.components.v1.html(html_img, height=600)
         _, button_col, _ = st.columns(3)
@@ -175,7 +164,7 @@ def graph_manipulation_process_template(session_state, TIMES,
         with split_the_node_form:
             node = session_state["node"]
                 
-            st.write("split the node "+f'{node}? If "yes", which predecessor and successor?')
+            st.write("**Form 1**: split the node "+f'{node}? If "yes", which predecessor and successor?')
                 
             split_the_node = st.radio("split the node?", ("yes", "no"), disabled=True)
             col1, col2 = st.columns(2)
@@ -193,41 +182,23 @@ def graph_manipulation_process_template(session_state, TIMES,
         add_and_delete_form_placeholder = st.empty()           
         add_and_delete_form = add_and_delete_form_placeholder.form(f"add and delete form")
         with add_and_delete_form:
-            node_mapping = session_state['node_mapping']
-            node_mapping_r = {v: k for k, v in node_mapping.items()}
             node = session_state["node"]
-            history_changes = session_state["history_changes"]
-                            
+            st.write(f"**Form 2**: add and delete edges for node {node}")               
             edges_to_add = st.multiselect("edges to add", [], disabled=True)
             edges_to_delete = st.multiselect("edges to delete", [], disabled=True)
                             
             submit = st.form_submit_button("submit", disabled=True)
-            if submit:
-                if None in edges_to_add:
-                    if len(edges_to_add) > 1:
-                        edges_to_add.remove(None)
-                        history_changes[node]["new_edges"] = [(node_mapping_r[e[0]], node_mapping_r[e[1]]) for e in edges_to_add]
-                    else:
-                        history_changes[node]["new_edges"] = []
-                if None in edges_to_delete:
-                    if len(edges_to_delete) > 1:
-                        edges_to_delete.remove(None)
-                        history_changes[node]["edges_to_delete"] = [(node_mapping_r[e[0]], node_mapping_r[e[1]]) for e in edges_to_delete]
-                    else:
-                        history_changes[node]["edges_to_delete"] = []
-                                
-                print_INFO_message_timestamp(f'new edges: {history_changes[node]["new_edges"]}', LOG_FILE_PATH)
-                print_INFO_message_timestamp(f'edges to delete: {history_changes[node]["edges_to_delete"]}', LOG_FILE_PATH)
-
-        
+                 
         update_widgets_placeholder = st.empty()
         update_widgets_placeholder.write("Searching for the next node to analyze...")
-                
-        # session_state_container = st.empty()
-        # session_state_container.json(session_state)
-        
-    graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED, 
+    
+    if not stop_and_save_button:
+        graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED, 
                                split_the_node_form_placeholder, add_and_delete_form_placeholder, update_widgets_placeholder)
+    else:
+        print_INFO_message_timestamp("Stop and save changes")
+        session_state["stop_and_save"] = False
+        return
 
 def graph_manipulation(session_state, TIMES):
     col1, col2, _, _ = st.columns(4)
@@ -254,7 +225,8 @@ def graph_manipulation(session_state, TIMES):
         for att in ["node", "node_mapping", "predecessors_id", "successors_id", "is_split_the_node_form_submitted", "stop_and_save", "button_load"]:
             if att not in st.session_state:
                 return st.error("Please load data first!", icon="🚨")
-            
+        
+        st.markdown("---")
         with placeholder:
             graph_manipulation_process_template(session_state, TIMES, 
                                    LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED)
@@ -263,7 +235,8 @@ def graph_manipulation(session_state, TIMES):
             placeholder.warning("Process interrupted", icon="❌")
         else:
             placeholder.success("Process completed: changes has been saved", icon="✅")
-        
+            st.write(session_state["history_changes"])
+            
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------
 def deterministic_load_data(session_state, TIMES, facilities_number):
     c = 0

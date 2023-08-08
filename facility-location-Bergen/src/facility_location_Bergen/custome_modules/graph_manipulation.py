@@ -253,8 +253,12 @@ def split_the_node_input(node, G, node_mapping, node_class, session_state, split
         while not submit:
             t.sleep(0.1)
 
-def on_submit_add_and_delete_edges_form(session_state, G, node, edges_to_add, distances_to_add, edges_to_delete, img_path, log_file_path):
+def on_submit_add_and_delete_edges_form(session_state, G, node, img_path, log_file_path):
     node_mapping_r = session_state["node_mapping_r"]
+    edges_to_add = session_state[f"edges_to_add_{node}"]
+    distances_to_add = session_state[f"distances_to_add_{node}"]
+    edges_to_delete = session_state[f"edges_to_delete_{node}"]
+    
     key = str(node)
     
     dist = distances_to_add.replace(" ", "").split(",")
@@ -312,12 +316,12 @@ def add_and_deleted_edges_input(G, node, session_state, node_mapping,
     with add_and_delete_form:
         st.write(f"**Form 2**: add and delete edges for node {node_mapping[node]}")
 
-        edges_to_add = st.multiselect("edges to add", edge_list_add)
-        distances_to_add = st.text_input("in order, for each edge added, provide its lenght (m)",
-                                         placeholder="d1, d2, d3, ...")
-        edges_to_delete = st.multiselect("edges to delete", edge_list_delete)
-        submit = st.form_submit_button("submit", on_click=on_submit_add_and_delete_edges_form,
-                                       args=(session_state, G, node, edges_to_add, distances_to_add, edges_to_delete, img_path, log_file_path))
+        st.multiselect("edges to add", edge_list_add, key=f"edges_to_add_{node}")
+        st.text_input("in order, for each edge added, provide its lenght (m)",
+                                         placeholder="d1, d2, d3, ...", key=f"distances_to_add_{node}")
+        st.multiselect("edges to delete", edge_list_delete, key=f"edges_to_delete_{node}")
+        st.form_submit_button("submit", on_click=on_submit_add_and_delete_edges_form,
+                                       args=(session_state, G, node, img_path, log_file_path))
         
 def reconnect_predecessors(G, origin, log_file_path, node, new_edge):
     print_INFO_message(f"replacing edge {origin}-{node}", log_file_path)

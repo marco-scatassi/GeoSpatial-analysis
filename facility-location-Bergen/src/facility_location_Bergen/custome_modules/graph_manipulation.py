@@ -264,13 +264,8 @@ def on_submit_add_and_delete_edges_form(session_state, G, node, edges_to_add, di
         
     if None in edges_to_add:
         if len(edges_to_add) > 1:
-            try:
-                edges_to_add.remove(None)
-                
-                session_state["history_changes"][key]["new_edges"] = [(node_mapping_r[e[0]], node_mapping_r[e[1]], int(d)) for e, d  in zip(edges_to_add, dist)]
-            except:
-                st.error("the input provide is not valid")
-                st.experimental_rerun()
+            edges_to_add.remove(None)
+            session_state["history_changes"][key]["new_edges"] = [(node_mapping_r[e[0]], node_mapping_r[e[1]], int(d)) for e, d  in zip(edges_to_add, dist)]
         else:
             session_state["history_changes"][key]["new_edges"] = []
     if None in edges_to_delete:

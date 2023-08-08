@@ -1,4 +1,4 @@
-    import sys
+import sys
 
 # Get the directory path to add to PYTHONPATH
 directory_path = r"/mount/src/geospatial-analysis/facility-location-Bergen/src/facility_location_Bergen/custome_modules"

@@ -212,15 +212,16 @@ def graph_manipulation_process_template(session_state, TIMES,
 
 def graph_manipulation(session_state, TIMES):
     col1, col2, _, _ = st.columns(4)
-    placeholder = st.empty()
     
     with col1:
         button_load = st.button("Load data for graph manipulation")
     with col2:
         button_manipulation = st.button("Start graph manipulation process")
 
+    placeholder = st.empty()
+    placeholder.markdown("---")
+    
     placeholder2 = st.empty()
-    placeholder2.markdown("---")
     
     ############################################## LOAD DATA ##############################################
     if button_load:
@@ -238,14 +239,14 @@ def graph_manipulation(session_state, TIMES):
             if att not in st.session_state:
                 return st.error("Please load data first!", icon="🚨")
 
-        with placeholder:
+        with placeholder2:
             graph_manipulation_process_template(session_state, TIMES, 
                                    LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED)
         
         if session_state["button_load"]:
-            placeholder.warning("Process interrupted", icon="❌")
+            placeholder2.warning("Process interrupted", icon="❌")
         else:
-            placeholder.success("Process completed: changes has been saved", icon="✅")
+            placeholder2.success("Process completed: changes has been saved", icon="✅")
             st.write(session_state["history_changes"])
         
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------

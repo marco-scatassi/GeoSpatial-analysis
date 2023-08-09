@@ -230,9 +230,6 @@ def split_the_node_input(node, G, node_mapping, node_class, session_state, split
     
     update_split_the_node_input(session_state, node, node_mapping, predecessors_id, successors_id)
     
-    update_widgets_placeholder.empty()
-    update_widget_button = update_widgets_placeholder.button("Update graph image")
-    
     split_the_node_form_placeholder.empty()
     split_the_node_form = split_the_node_form_placeholder.form(key=f"split_the_node_form_{node}")
     
@@ -318,9 +315,6 @@ def add_and_deleted_edges_input(G, node, session_state, node_mapping,
                 edge_list_delete.append((node_mapping[node1], node_mapping[node2]))
             else:
                 edge_list_add.append((node_mapping[node1], node_mapping[node2]))
-    
-    update_widgets_placeholder.empty()
-    update_widget_button = update_widgets_placeholder.button("Update graph image")
         
     add_and_delete_form_placeholder.empty()
     add_and_delete_form = add_and_delete_form_placeholder.form(key=f"add_and_delete_form_{node}")
@@ -384,6 +378,9 @@ def split_two_way_roads(G, origin, session_state,
     if clear_log_file:
         clear_log(log_file_path)
         clear_log(log_file_path2)
+        
+    if update_widgets_placeholder is None:
+        update_widgets_placeholder.button("update widgets")
             
     print_INFO_message_timestamp(f"count: {count}", log_file_path)    
     if count > count_max:

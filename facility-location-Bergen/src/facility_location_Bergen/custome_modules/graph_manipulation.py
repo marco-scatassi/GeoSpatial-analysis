@@ -197,7 +197,9 @@ def on_submit_split_the_node_form(session_state, G, node, node_class, img_path, 
     node_mapping_r = session_state["node_mapping_r"]
     key = str(node)
     
-    session_state["history_changes"][key] = {}
+    if key not in session_state["history_changes"].keys():
+        session_state["history_changes"][key] = {}
+        
     if session_state[f"split_the_node_radio_{node}"] == "yes":
         session_state["history_changes"][key]["split_the_node"] = True
         session_state["history_changes"][key]['selected_predecessor'] = node_mapping_r[session_state[f"predecessor_select_box_{node}"]]
@@ -222,12 +224,10 @@ def split_the_node_input(node, G, node_mapping, node_class, session_state, split
     
     predecessors_id = [node_mapping[p] for p in predecessors]
     successors_id = [node_mapping[s] for s in successors]
-
+    
     update_split_the_node_input(session_state, node, node_mapping, predecessors_id, successors_id)
     
     update_widget_button = update_widgets_placeholder.button("Update graph image", key=f"Update graph image {node}")
-    
-    update_split_the_node_input(session_state, node, node_mapping, predecessors_id, successors_id)
     
     split_the_node_form_placeholder.empty()
     split_the_node_form = split_the_node_form_placeholder.form(key=f"split_the_node_form_{node}")
@@ -237,7 +237,7 @@ def split_the_node_input(node, G, node_mapping, node_class, session_state, split
         
         st.write("**Form 1**: split the node "+f'{node}? If "yes", which predecessor and successor?')
                 
-        st.radio("split the node?", ("yes", "no"), key=f"split_the_node_radio_{node}")
+        st.radio("split the node?", ("yes", "no"), horizontal=True, key=f"split_the_node_radio_{node}")
         
         col1, col2 = st.columns(2)
         with col1:
@@ -250,8 +250,8 @@ def split_the_node_input(node, G, node_mapping, node_class, session_state, split
         submit = st.form_submit_button("submit", on_click=on_submit_split_the_node_form, 
                                        args=(session_state, G, node, node_class, img_path, LOG_FILE_PATH2))
                 
-        while not submit:
-            t.sleep(0.1)
+        if not submit:
+            st.stop()
 
 def on_submit_add_and_delete_edges_form(session_state, G, node, node_mapping_r, img_path, log_file_path):
     edges_to_add = session_state[f"edges_to_add_{node}"]

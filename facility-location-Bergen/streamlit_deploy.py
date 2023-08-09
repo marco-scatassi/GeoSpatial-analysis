@@ -93,7 +93,7 @@ def clear_log_files():
                 
                 <body>
                 <h1>Graph visualization</h1>
-                <p>Click the button on the low-left corner to update the image</p>
+                <p>Click the refresh button to update the image</p>
                 </body>
                 </html>""")
     
@@ -155,7 +155,7 @@ def graph_manipulation_process_template(session_state, TIMES,
     
     with img_col:
         st.components.v1.html(html_img, height=600)
-        refresh_col, _, stop_and_save_col = st.columns(3)
+        _, refresh_col, _, stop_and_save_col, _ = st.columns(5)
         with refresh_col:
             st.button("refresh widgets")
         with stop_and_save_col:

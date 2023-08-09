@@ -160,11 +160,12 @@ def graph_manipulation_process_template(session_state, TIMES,
         st.components.v1.html(html_img, height=600)
         _, refresh_col, _, stop_and_save_col, _ = st.columns(5)
         with refresh_col:
-            st.button("refresh image", on_click=refresh_callback)
+            refresh_button_placeholder = st.empty()
         with stop_and_save_col:
             stop_and_save_button = st.button("Stop and save changes", on_click=stop_and_save_callback)
             
     with text_col:
+        refresh_button_placeholder.button("refresh image", on_click=refresh_callback)
         split_the_node_form_placeholder = st.empty()
         split_the_node_form = split_the_node_form_placeholder.form(f"split the node form")
         with split_the_node_form:

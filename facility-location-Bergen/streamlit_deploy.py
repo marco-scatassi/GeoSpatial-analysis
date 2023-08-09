@@ -212,7 +212,7 @@ def graph_manipulation(session_state, TIMES):
                                pkl.dumps(session_state["modified_graph"]),)
     with col4:
         st.download_button("download history changes",
-                               session_state["history_changes"],)
+                               pkl.dumps(session_state["history_changes"]),)
     st.markdown("---")
     
     placeholder = st.empty()

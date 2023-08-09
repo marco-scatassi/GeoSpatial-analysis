@@ -220,6 +220,7 @@ def on_submit_split_the_node_form(session_state, G, node, node_class, img_path, 
     
     session_state["is_form1_disabled"] = True
     session_state["is_form2_disabled"] = False
+    session_state["is_form1_submitted"] = True
               
 def split_the_node_input(node, G, node_mapping, node_class, session_state, split_the_node_form_placeholder, img_path, LOG_FILE_PATH2):
     predecessors = list(G.predecessors(node))
@@ -432,9 +433,11 @@ def split_two_way_roads(G, origin, session_state,
                                                  node_class,
                                                  session_state, 
                                                  split_the_node_form_placeholder,
-                                                   
                                                  img_path,
                                                  log_file_path2)
+                            
+                            while True:
+                                t.sleep(1)
                                     
                         if key in session_state["history_changes"].keys() and \
                             ("new_edges" in session_state["history_changes"][key].keys() and \

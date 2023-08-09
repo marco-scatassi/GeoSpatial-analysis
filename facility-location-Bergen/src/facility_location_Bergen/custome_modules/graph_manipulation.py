@@ -255,7 +255,9 @@ def split_the_node_input(node, G, node_mapping, node_class, session_state, split
                          disabled=session_state["is_form1_disabled"],
                          key = f"successor_select_box_{node}",)
                  
-        submit = st.form_submit_button("submit", on_click=on_submit_split_the_node_form, 
+        submit = st.form_submit_button("submit", 
+                                       disabled=session_state["is_form1_disabled"],
+                                       on_click=on_submit_split_the_node_form, 
                                        args=(session_state, G, node, node_class, img_path, LOG_FILE_PATH2))
         
         while not submit:

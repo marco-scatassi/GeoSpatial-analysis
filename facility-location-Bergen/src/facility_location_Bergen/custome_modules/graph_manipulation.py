@@ -260,8 +260,7 @@ def split_the_node_input(node, G, node_mapping, node_class, session_state, split
                                        disabled=session_state["is_form1_disabled"],
                                        on_click=on_submit_split_the_node_form, 
                                        args=(session_state, G, node, node_class, img_path, LOG_FILE_PATH2))
-  
-     
+      
 def on_submit_add_and_delete_edges_form(session_state, G, node, node_mapping_r, img_path, log_file_path):
     edges_to_add = session_state[f"edges_to_add_{node}"]
     distances_to_add = session_state[f"distances_to_add_{node}"]
@@ -304,7 +303,7 @@ def on_submit_add_and_delete_edges_form(session_state, G, node, node_mapping_r, 
     print_INFO_message_timestamp(f'edges to delete: {session_state["history_changes"][key]["edges_to_delete"]}', log_file_path)
     
     session_state["is_form2_disabled"] = True
-    session_state["is_form1_disabled"] = False
+    st.write("refresh image to continue")
 
 def add_and_deleted_edges_input(G, node, session_state, node_mapping, 
                                 add_and_delete_form_placeholder,   

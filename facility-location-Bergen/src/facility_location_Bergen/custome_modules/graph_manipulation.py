@@ -453,6 +453,9 @@ def split_two_way_roads(G, origin, session_state,
                                                          
                                                         img_path,
                                                         log_file_path2)
+
+                            while True:
+                                t.sleep(1)
                             
                     break
 

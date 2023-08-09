@@ -221,7 +221,7 @@ def on_submit_split_the_node_form(session_state, G, node, node_class, img_path, 
     session_state["is_form1_disabled"] = True
     session_state["is_form2_disabled"] = False
               
-def split_the_node_input(node, G, node_mapping, node_class, session_state, split_the_node_form_placeholder, update_widgets_placeholder, img_path, LOG_FILE_PATH2):
+def split_the_node_input(node, G, node_mapping, node_class, session_state, split_the_node_form_placeholder, img_path, LOG_FILE_PATH2):
     predecessors = list(G.predecessors(node))
     successors = list(G.successors(node))
     
@@ -306,7 +306,7 @@ def on_submit_add_and_delete_edges_form(session_state, G, node, node_mapping_r, 
     session_state["is_form1_disabled"] = False
 
 def add_and_deleted_edges_input(G, node, session_state, node_mapping, 
-                                add_and_delete_form_placeholder, update_widgets_placeholder, 
+                                add_and_delete_form_placeholder,   
                                 img_path, log_file_path):
     node_mapping_r = {v: k for k, v in node_mapping.items()}
     edge_list_add = [None]
@@ -373,16 +373,12 @@ def split_the_node_func(G, session_state, node, node_mapping):
 def split_two_way_roads(G, origin, session_state,
                         split_the_node_form_placeholder,
                         add_and_delete_form_placeholder,
-                        update_widgets_placeholder,
                         count=0, count_max=1, 
                         log_file_path=None, log_file_path2 = None, clear_log_file=True, img_path=None):
     
     if clear_log_file:
         clear_log(log_file_path)
         clear_log(log_file_path2)
-        
-    if update_widgets_placeholder is None:
-        update_widgets_placeholder.button("update widgets")
             
     print_INFO_message_timestamp(f"count: {count}", log_file_path)    
     if count > count_max:
@@ -436,7 +432,7 @@ def split_two_way_roads(G, origin, session_state,
                                                  node_class,
                                                  session_state, 
                                                  split_the_node_form_placeholder,
-                                                 update_widgets_placeholder, 
+                                                   
                                                  img_path,
                                                  log_file_path2)
                                     
@@ -451,7 +447,7 @@ def split_two_way_roads(G, origin, session_state,
                             add_and_deleted_edges_input(G, node, session_state, 
                                                         node_mapping, 
                                                         add_and_delete_form_placeholder,
-                                                        update_widgets_placeholder,
+                                                         
                                                         img_path,
                                                         log_file_path2)
                             
@@ -460,7 +456,7 @@ def split_two_way_roads(G, origin, session_state,
         split_two_way_roads(G, node, session_state,
                                 split_the_node_form_placeholder,
                                 add_and_delete_form_placeholder,
-                                update_widgets_placeholder,
+                                 
                                 count+1, count_max, 
                                 log_file_path=log_file_path, 
                                 log_file_path2=log_file_path2,

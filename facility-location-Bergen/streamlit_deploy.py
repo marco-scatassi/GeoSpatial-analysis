@@ -64,12 +64,14 @@ GRAPH_MANIPULATION_SEED=8797
 # --------------------------------------------- UTILITY AND CALLBACK --------------------------------------------
 def initialize_session_state_attributes():
     st.session_state["node"] = "___"
+    st.session_state["modified_graph"] = None
     st.session_state["node_mapping"] = {}
     st.session_state["predecessors_id"] = []
     st.session_state["successors_id"] = []
-    st.session_state["is_split_the_node_form_submitted"] = False
     st.session_state["stop_and_save"] = False
     st.session_state["button_load"] = False
+    st.session_state["is_form1_disabled"] = False
+    st.session_state["is_form2_disabled"] = True
  
 def clear_log_files():
     with open(LOG_FILE_PATH, "w") as f:
@@ -91,7 +93,7 @@ def clear_log_files():
                 
                 <body>
                 <h1>Graph visualization</h1>
-                <p>Click the button on the low-left corner to update the image</p>
+                <p>Click the refresh image button to update the image</p>
                 </body>
                 </html>""")
     
@@ -99,8 +101,7 @@ def stop_and_save_callback():
     st.session_state["stop_and_save"] = True
     initialize_session_state_attributes()
     clear_log_files()
-
-
+    
 # --------------------------------------------- GRAPH MANIPULATION ----------------------------------------------
 def graph_manipulation_load_data(session_state, TIMES):
     progress_bar = st.progress(0, "Loading data...")
@@ -122,29 +123,27 @@ def graph_manipulation_load_data(session_state, TIMES):
     progress_bar.progress(100, "Loading data completed!")
 
 def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED, 
-                               split_the_node_form_placeholder, add_and_delete_form_placeholder, update_widgets_placeholder):
+                               split_the_node_form_placeholder, add_and_delete_form_placeholder):
     
-    F = deepcopy(session_state[f"average_graphs"]["all_day"])
+    session_state["modified_graph"] = deepcopy(session_state[f"average_graphs"]["all_day"])
     
-    nodes = list(F.nodes())
+    nodes = list(session_state["modified_graph"].nodes())
     seed = random.seed(GRAPH_MANIPULATION_SEED)
     
     origin = random.choice(nodes)
     
     print_INFO_message_timestamp("Splitting two way roads")
-    split_two_way_roads(F, 
+    split_two_way_roads(session_state["modified_graph"], 
                             origin=origin, 
                             session_state=session_state,
                             split_the_node_form_placeholder=split_the_node_form_placeholder,
                             add_and_delete_form_placeholder=add_and_delete_form_placeholder,
-                            update_widgets_placeholder=update_widgets_placeholder,
                             count=0,
                             count_max=100, 
                             log_file_path=LOG_FILE_PATH,
                             log_file_path2=LOG_FILE_PATH2, 
                             img_path=HTML_IMG_PATH,)
-    
-    
+       
 def graph_manipulation_process_template(session_state, TIMES, 
                                LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED):
     
@@ -154,9 +153,11 @@ def graph_manipulation_process_template(session_state, TIMES,
     
     with img_col:
         st.components.v1.html(html_img, height=600)
-        _, button_col, _ = st.columns(3)
-        with button_col:
-            stop_and_save_button = st.button("Stop and save changes", on_click=stop_and_save_callback)
+        _, refresh_col, _, stop_and_save_col, _ = st.columns(5)
+        with refresh_col:
+            st.button("refresh image")
+        with stop_and_save_col:
+            st.button("Stop and save changes", on_click=stop_and_save_callback)
             
     with text_col:
         split_the_node_form_placeholder = st.empty()
@@ -166,49 +167,53 @@ def graph_manipulation_process_template(session_state, TIMES,
                 
             st.write("**Form 1**: split the node "+f'{node}? If "yes", which predecessor and successor?')
                 
-            split_the_node = st.radio("split the node?", ("yes", "no"), disabled=True)
+            st.radio("split the node?", ("yes", "no"), disabled=True)
             col1, col2 = st.columns(2)
             with col1:
-                selcted_predecessor_id = st.selectbox("predecessor", [], 
+                st.selectbox("predecessor", [], 
                                                       key = "predecessor_select_box",
                                                       disabled=True)
             with col2:
-                selected_successor_id = st.selectbox("successor", [], 
+                st.selectbox("successor", [], 
                                                      key = "successor_select_box",
                                                      disabled=True)
                     
-            submit = st.form_submit_button("submit", disabled=True)
+            st.form_submit_button("submit", disabled=True)
             
         add_and_delete_form_placeholder = st.empty()           
         add_and_delete_form = add_and_delete_form_placeholder.form(f"add and delete form")
         with add_and_delete_form:
             node = session_state["node"]
             st.write(f"**Form 2**: add and delete edges for node {node}")               
-            edges_to_add = st.multiselect("edges to add", [], disabled=True)
-            edges_to_delete = st.multiselect("edges to delete", [], disabled=True)
+            st.multiselect("edges to add", [], disabled=True)
+            st.multiselect("edges to delete", [], disabled=True)
                             
-            submit = st.form_submit_button("submit", disabled=True)
-                 
-        update_widgets_placeholder = st.empty()
-        update_widgets_placeholder.write("Searching for the next node to analyze...")
+            st.form_submit_button("submit", disabled=True)
     
-    if not stop_and_save_button:
+    if not session_state["stop_and_save"]:
         graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED, 
-                               split_the_node_form_placeholder, add_and_delete_form_placeholder, update_widgets_placeholder)
+                               split_the_node_form_placeholder, add_and_delete_form_placeholder)
     else:
         print_INFO_message_timestamp("Stop and save changes")
         session_state["stop_and_save"] = False
         return
 
 def graph_manipulation(session_state, TIMES):
-    col1, col2, _, _ = st.columns(4)
-    placeholder = st.empty()
+    col1, col2, col3, col4 = st.columns(4)
     
     with col1:
         button_load = st.button("Load data for graph manipulation")
     with col2:
         button_manipulation = st.button("Start graph manipulation process")
+    with col3:
+        st.download_button("download modified graph",
+                               pkl.dumps(session_state["modified_graph"]),)
+    with col4:
+        st.download_button("download history changes",
+                               session_state["history_changes"],)
     st.markdown("---")
+    
+    placeholder = st.empty()
     
     ############################################## LOAD DATA ##############################################
     if button_load:
@@ -222,11 +227,10 @@ def graph_manipulation(session_state, TIMES):
     
     ############################################## GENERATE VIZ ##############################################    
     if button_manipulation:
-        for att in ["node", "node_mapping", "predecessors_id", "successors_id", "is_split_the_node_form_submitted", "stop_and_save", "button_load"]:
+        for att in ["node", "node_mapping", "predecessors_id", "successors_id", "stop_and_save", "button_load"]:
             if att not in st.session_state:
                 return st.error("Please load data first!", icon="🚨")
         
-        st.markdown("---")
         with placeholder:
             graph_manipulation_process_template(session_state, TIMES, 
                                    LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED)
@@ -234,8 +238,8 @@ def graph_manipulation(session_state, TIMES):
         if session_state["button_load"]:
             placeholder.warning("Process interrupted", icon="❌")
         else:
-            placeholder.success("Process completed: changes has been saved", icon="✅")
-            st.write(session_state["history_changes"])
+            placeholder.success("Process completed: changes has been saved. Download data using the download button", icon="✅")
+
             
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------
 def deterministic_load_data(session_state, TIMES, facilities_number):

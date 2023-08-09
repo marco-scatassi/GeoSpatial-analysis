@@ -71,6 +71,8 @@ def initialize_session_state_attributes():
     st.session_state["is_split_the_node_form_submitted"] = False
     st.session_state["stop_and_save"] = False
     st.session_state["button_load"] = False
+    st.session_state["is_form1_disabled"] = True
+    st.session_state["is_form2_disabled"] = False
  
 def clear_log_files():
     with open(LOG_FILE_PATH, "w") as f:

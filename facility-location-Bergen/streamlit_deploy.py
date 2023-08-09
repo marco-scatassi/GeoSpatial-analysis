@@ -102,6 +102,9 @@ def stop_and_save_callback():
     initialize_session_state_attributes()
     clear_log_files()
 
+def refresh_callback():
+    st.session_state["is_form1_disabled"] = False
+    st.session_state["is_form2_disabled"] = True
 
 # --------------------------------------------- GRAPH MANIPULATION ----------------------------------------------
 def graph_manipulation_load_data(session_state, TIMES):
@@ -157,7 +160,7 @@ def graph_manipulation_process_template(session_state, TIMES,
         st.components.v1.html(html_img, height=600)
         _, refresh_col, _, stop_and_save_col, _ = st.columns(5)
         with refresh_col:
-            st.button("refresh widgets")
+            st.button("refresh image", on_click=refresh_callback)
         with stop_and_save_col:
             stop_and_save_button = st.button("Stop and save changes", on_click=stop_and_save_callback)
             

@@ -303,7 +303,7 @@ def on_submit_add_and_delete_edges_form(session_state, G, node, node_mapping_r, 
     print_INFO_message_timestamp(f'edges to delete: {session_state["history_changes"][key]["edges_to_delete"]}', log_file_path)
     
     session_state["is_form2_disabled"] = True
-    st.write("refresh image to continue")
+    session_state["is_form1_disabled"] = False
 
 def add_and_deleted_edges_input(G, node, session_state, node_mapping, 
                                 add_and_delete_form_placeholder,   

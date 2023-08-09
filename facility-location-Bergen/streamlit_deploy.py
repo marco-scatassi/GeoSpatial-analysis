@@ -155,8 +155,10 @@ def graph_manipulation_process_template(session_state, TIMES,
     
     with img_col:
         st.components.v1.html(html_img, height=600)
-        _, button_col, _ = st.columns(3)
-        with button_col:
+        refresh_col, _, stop_and_save_col = st.columns(3)
+        with refresh_col:
+            st.button("refresh widgets")
+        with stop_and_save_col:
             stop_and_save_button = st.button("Stop and save changes", on_click=stop_and_save_callback)
             
     with text_col:
@@ -189,9 +191,6 @@ def graph_manipulation_process_template(session_state, TIMES,
             st.multiselect("edges to delete", [], disabled=True)
                             
             st.form_submit_button("submit", disabled=True)
-                 
-        update_widgets_placeholder = st.empty()
-        update_widgets_placeholder.button("refresh image")
     
     if not stop_and_save_button:
         graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED, 
@@ -237,7 +236,6 @@ def graph_manipulation(session_state, TIMES):
             placeholder.warning("Process interrupted", icon="❌")
         else:
             placeholder.success("Process completed: changes has been saved", icon="✅")
-            st.write(session_state["history_changes"])
             
        
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------

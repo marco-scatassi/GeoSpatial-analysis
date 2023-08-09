@@ -178,25 +178,25 @@ def graph_manipulation_process_template(session_state, TIMES,
             split_the_node = st.radio("split the node?", ("yes", "no"), disabled=True)
             col1, col2 = st.columns(2)
             with col1:
-                selcted_predecessor_id = st.selectbox("predecessor", [], 
+                st.selectbox("predecessor", [], 
                                                       key = "predecessor_select_box",
                                                       disabled=True)
             with col2:
-                selected_successor_id = st.selectbox("successor", [], 
+                st.selectbox("successor", [], 
                                                      key = "successor_select_box",
                                                      disabled=True)
                     
-            submit = st.form_submit_button("submit", disabled=True)
+            st.form_submit_button("submit", disabled=True)
             
         add_and_delete_form_placeholder = st.empty()           
         add_and_delete_form = add_and_delete_form_placeholder.form(f"add and delete form")
         with add_and_delete_form:
             node = session_state["node"]
             st.write(f"**Form 2**: add and delete edges for node {node}")               
-            edges_to_add = st.multiselect("edges to add", [], disabled=True)
-            edges_to_delete = st.multiselect("edges to delete", [], disabled=True)
+            st.multiselect("edges to add", [], disabled=True)
+            st.multiselect("edges to delete", [], disabled=True)
                             
-            submit = st.form_submit_button("submit", disabled=True)
+            st.form_submit_button("submit", disabled=True)
                  
         update_widgets_placeholder = st.empty()
         update_widgets_placeholder.write("Searching for the next node to analyze...")

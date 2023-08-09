@@ -191,7 +191,7 @@ def graph_manipulation_process_template(session_state, TIMES,
             st.form_submit_button("submit", disabled=True)
                  
         update_widgets_placeholder = st.empty()
-        update_widgets_placeholder.button("refresh widgets")
+        update_widgets_placeholder.button("refresh image")
     
     if not stop_and_save_button:
         graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED, 

@@ -65,6 +65,7 @@ GRAPH_MANIPULATION_SEED=8797
 # --------------------------------------------- UTILITY AND CALLBACK --------------------------------------------
 def initialize_session_state_attributes():
     st.session_state["node"] = "___"
+    st.session_state["modified_graph"] = None
     st.session_state["node_mapping"] = {}
     st.session_state["predecessors_id"] = []
     st.session_state["successors_id"] = []
@@ -125,15 +126,15 @@ def graph_manipulation_load_data(session_state, TIMES):
 def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED, 
                                split_the_node_form_placeholder, add_and_delete_form_placeholder):
     
-    F = deepcopy(session_state[f"average_graphs"]["all_day"])
+    session_state["modified_graph"] = deepcopy(session_state[f"average_graphs"]["all_day"])
     
-    nodes = list(F.nodes())
+    nodes = list(session_state["modified_graph"].nodes())
     seed = random.seed(GRAPH_MANIPULATION_SEED)
     
     origin = random.choice(nodes)
     
     print_INFO_message_timestamp("Splitting two way roads")
-    split_two_way_roads(F, 
+    split_two_way_roads(session_state["modified_graph"], 
                             origin=origin, 
                             session_state=session_state,
                             split_the_node_form_placeholder=split_the_node_form_placeholder,
@@ -235,6 +236,14 @@ def graph_manipulation(session_state, TIMES):
             placeholder.warning("Process interrupted", icon="❌")
         else:
             placeholder.success("Process completed: changes has been saved", icon="✅")
+            st.write("Use the following buttons to download process results:")
+            col1, col2 = st.columns(2)
+            with col1:
+                st.download_button("download modified graph",
+                               session_state["modified_graph"],)
+            with col2:
+                st.download_button("download history changes",
+                               session_state["history_changes"],)
             
        
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------

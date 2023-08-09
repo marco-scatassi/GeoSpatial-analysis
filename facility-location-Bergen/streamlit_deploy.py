@@ -125,7 +125,7 @@ def graph_manipulation_load_data(session_state, TIMES):
     progress_bar.progress(100, "Loading data completed!")
 
 def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED, 
-                               split_the_node_form_placeholder, add_and_delete_form_placeholder, update_widgets_placeholder):
+                               split_the_node_form_placeholder, add_and_delete_form_placeholder):
     
     F = deepcopy(session_state[f"average_graphs"]["all_day"])
     history_changes = session_state["history_changes"]
@@ -146,7 +146,6 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
                             session_state=session_state,
                             split_the_node_form_placeholder=split_the_node_form_placeholder,
                             add_and_delete_form_placeholder=add_and_delete_form_placeholder,
-                            update_widgets_placeholder=update_widgets_placeholder,
                             count=0,
                             count_max=100, 
                             log_file_path=LOG_FILE_PATH,

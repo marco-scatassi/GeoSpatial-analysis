@@ -105,6 +105,7 @@ def stop_and_save_callback():
 def refresh_callback():
     st.session_state["is_form1_disabled"] = False
     st.session_state["is_form2_disabled"] = True
+    st.stop()
 
 # --------------------------------------------- GRAPH MANIPULATION ----------------------------------------------
 def graph_manipulation_load_data(session_state, TIMES):

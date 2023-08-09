@@ -230,6 +230,7 @@ def split_the_node_input(node, G, node_mapping, node_class, session_state, split
     
     update_split_the_node_input(session_state, node, node_mapping, predecessors_id, successors_id)
     
+    update_widgets_placeholder.empty()
     update_widget_button = update_widgets_placeholder.button("Update graph image")
     
     split_the_node_form_placeholder.empty()
@@ -317,7 +318,8 @@ def add_and_deleted_edges_input(G, node, session_state, node_mapping,
                 edge_list_delete.append((node_mapping[node1], node_mapping[node2]))
             else:
                 edge_list_add.append((node_mapping[node1], node_mapping[node2]))
-                
+    
+    update_widgets_placeholder.empty()
     update_widget_button = update_widgets_placeholder.button("Update graph image")
         
     add_and_delete_form_placeholder.empty()

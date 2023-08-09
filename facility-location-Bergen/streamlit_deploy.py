@@ -203,13 +203,14 @@ def graph_manipulation_process_template(session_state, TIMES,
 
 def graph_manipulation(session_state, TIMES):
     col1, col2, _, _ = st.columns(4)
-    placeholder = st.empty()
     
     with col1:
         button_load = st.button("Load data for graph manipulation")
     with col2:
         button_manipulation = st.button("Start graph manipulation process")
     st.markdown("---")
+    
+    placeholder = st.empty()
     
     ############################################## LOAD DATA ##############################################
     if button_load:

@@ -68,7 +68,6 @@ def initialize_session_state_attributes():
     st.session_state["node_mapping"] = {}
     st.session_state["predecessors_id"] = []
     st.session_state["successors_id"] = []
-    st.session_state["is_split_the_node_form_submitted"] = False
     st.session_state["stop_and_save"] = False
     st.session_state["button_load"] = False
     st.session_state["is_form1_disabled"] = False
@@ -128,15 +127,9 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
                                split_the_node_form_placeholder, add_and_delete_form_placeholder):
     
     F = deepcopy(session_state[f"average_graphs"]["all_day"])
-    history_changes = session_state["history_changes"]
     
     nodes = list(F.nodes())
     seed = random.seed(GRAPH_MANIPULATION_SEED)
-
-    # if history_changes == {}:
-    #     origin = random.choice(nodes)
-    # else:
-    #     origin = list(history_changes.keys())[-1]
     
     origin = random.choice(nodes)
     
@@ -159,9 +152,9 @@ def graph_manipulation_process_template(session_state, TIMES,
     text_col, img_col = st.columns(2)
     with open(HTML_IMG_PATH, "r", encoding="utf-8") as f:
         html_img = f.read()
-                                   
+    
     with img_col:
-        st.components.v1.html(html_img, height=700)
+        st.components.v1.html(html_img, height=600)
         _, button_col, _ = st.columns(3)
         with button_col:
             stop_and_save_button = st.button("Stop and save changes", on_click=stop_and_save_callback)
@@ -174,7 +167,7 @@ def graph_manipulation_process_template(session_state, TIMES,
                 
             st.write("**Form 1**: split the node "+f'{node}? If "yes", which predecessor and successor?')
                 
-            split_the_node = st.radio("split the node?", ("yes", "no"), disabled=True)
+            st.radio("split the node?", ("yes", "no"), disabled=True)
             col1, col2 = st.columns(2)
             with col1:
                 st.selectbox("predecessor", [], 
@@ -210,16 +203,13 @@ def graph_manipulation_process_template(session_state, TIMES,
 
 def graph_manipulation(session_state, TIMES):
     col1, col2, _, _ = st.columns(4)
+    placeholder = st.empty()
     
     with col1:
         button_load = st.button("Load data for graph manipulation")
     with col2:
         button_manipulation = st.button("Start graph manipulation process")
-
-    placeholder = st.empty()
-    placeholder.markdown("---")
-    
-    placeholder2 = st.empty()
+    st.markdown("---")
     
     ############################################## LOAD DATA ##############################################
     if button_load:
@@ -233,19 +223,22 @@ def graph_manipulation(session_state, TIMES):
     
     ############################################## GENERATE VIZ ##############################################    
     if button_manipulation:
-        for att in ["node", "node_mapping", "predecessors_id", "successors_id", "is_split_the_node_form_submitted", "stop_and_save", "button_load"]:
+        for att in ["node", "node_mapping", "predecessors_id", "successors_id", "stop_and_save", "button_load"]:
             if att not in st.session_state:
                 return st.error("Please load data first!", icon="🚨")
-
-        with placeholder2:
+        
+        st.markdown("---")
+        with placeholder:
             graph_manipulation_process_template(session_state, TIMES, 
                                    LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED)
         
         if session_state["button_load"]:
-            placeholder2.warning("Process interrupted", icon="❌")
+            placeholder.warning("Process interrupted", icon="❌")
         else:
-            placeholder2.success("Process completed: changes has been saved", icon="✅")
-        
+            placeholder.success("Process completed: changes has been saved", icon="✅")
+            st.write(session_state["history_changes"])
+            
+       
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------
 def deterministic_load_data(session_state, TIMES, facilities_number):
     c = 0

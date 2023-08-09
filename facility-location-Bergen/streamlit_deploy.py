@@ -209,7 +209,7 @@ def graph_manipulation(session_state, TIMES):
         button_manipulation = st.button("Start graph manipulation process")
     with col3:
         st.download_button("download modified graph",
-                               pickle.dumps(session_state["modified_graph"]),)
+                               pkl.dumps(session_state["modified_graph"]),)
     with col4:
         st.download_button("download history changes",
                                session_state["history_changes"],)

@@ -201,12 +201,18 @@ def graph_manipulation_process_template(session_state, TIMES,
         return
 
 def graph_manipulation(session_state, TIMES):
-    col1, col2, _, _ = st.columns(4)
+    col1, col2, col3, col4 = st.columns(4)
     
     with col1:
         button_load = st.button("Load data for graph manipulation")
     with col2:
         button_manipulation = st.button("Start graph manipulation process")
+    with col3:
+        st.download_button("download modified graph",
+                               session_state["modified_graph"],)
+    with col4:
+        st.download_button("download history changes",
+                               session_state["history_changes"],)
     st.markdown("---")
     
     placeholder = st.empty()
@@ -227,7 +233,6 @@ def graph_manipulation(session_state, TIMES):
             if att not in st.session_state:
                 return st.error("Please load data first!", icon="🚨")
         
-        st.markdown("---")
         with placeholder:
             graph_manipulation_process_template(session_state, TIMES, 
                                    LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED)
@@ -235,15 +240,7 @@ def graph_manipulation(session_state, TIMES):
         if session_state["button_load"]:
             placeholder.warning("Process interrupted", icon="❌")
         else:
-            placeholder.success("Process completed: changes has been saved", icon="✅")
-            st.write("Use the following buttons to download process results:")
-            col1, col2 = st.columns(2)
-            with col1:
-                st.download_button("download modified graph",
-                               session_state["modified_graph"],)
-            with col2:
-                st.download_button("download history changes",
-                               session_state["history_changes"],)
+            placeholder.success("Process completed: changes has been saved. Download data using the download button", icon="✅")
             
        
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------

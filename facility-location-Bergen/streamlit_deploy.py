@@ -11,7 +11,6 @@ import random
 import time as ptime
 from copy import deepcopy
 from pathlib import Path
-import networkx as nx
 
 import folium
 import pandas as pd
@@ -210,7 +209,7 @@ def graph_manipulation(session_state, TIMES):
         button_manipulation = st.button("Start graph manipulation process")
     with col3:
         st.download_button("download modified graph",
-                               nx.write_gpickle(session_state["modified_graph"]),)
+                               pickle.dumps(session_state["modified_graph"]),)
     with col4:
         st.download_button("download history changes",
                                session_state["history_changes"],)

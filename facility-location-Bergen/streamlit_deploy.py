@@ -683,8 +683,8 @@ if __name__ == '__main__':
             
         if section == "Graph manipulation":
             uploaded_file = st.file_uploader("**Upload history changes**", type=["pkl", "bin"])
-            if uploaded_file is not None:
-                session_state["history_changes"] = pkl.load(uploaded_file)
+            # if uploaded_file is not None:
+            #     session_state["history_changes"] = pkl.load(uploaded_file)
             st.download_button("download modified graph",
                                pkl.dumps(session_state["modified_graph"]),)
             st.download_button("download history changes",

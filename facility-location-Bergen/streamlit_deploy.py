@@ -681,8 +681,7 @@ if __name__ == '__main__':
             if uploaded_file is not None:
                 session_state["history_changes"] = pkl.load(uploaded_file)
             st.download_button("download modified graph",
-                               pkl.dumps(session_state["modified_graph"]),
-                              type="primary")
+                               pkl.dumps(session_state["modified_graph"]),)
             st.download_button("download history changes",
                                pkl.dumps(session_state["history_changes"]),)
             

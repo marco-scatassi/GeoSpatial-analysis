@@ -107,8 +107,7 @@ def clear_log_files():
     
 def stop_and_save_callback():
     st.session_state["stop_and_save"] = True
-    st.session_state["is_form1_disabled"] = False
-    st.session_state["is_form2_disabled"] = True
+    st.session_state["button_load"] = False
     
     with open(PROCESSED_DATA_ROOT_PATH+"\history_changes.pkl", "wb") as f:
         pkl.dump(st.session_state["history_changes"], f)

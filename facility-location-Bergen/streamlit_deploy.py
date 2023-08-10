@@ -193,7 +193,7 @@ def graph_manipulation_process_template(session_state, TIMES,
                             
             st.form_submit_button("submit", disabled=True)
     
-    if not session_state["stop_and_save"]:
+    if not stop_and_save_button:
         graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED, 
                                split_the_node_form_placeholder, add_and_delete_form_placeholder)
     else:

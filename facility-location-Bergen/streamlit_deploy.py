@@ -101,7 +101,8 @@ def clear_log_files():
     
 def stop_and_save_callback():
     st.session_state["stop_and_save"] = True
-    initialize_session_state_attributes()
+    st.session_state["is_form1_disabled"] = False
+    st.session_state["is_form2_disabled"] = True
     clear_log_files()
 
 # --------------------------------------------- GRAPH MANIPULATION ----------------------------------------------

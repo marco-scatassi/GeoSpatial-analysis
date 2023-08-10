@@ -64,18 +64,15 @@ HTML_IMG_PATH = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/i
 GRAPH_MANIPULATION_SEED=8797
 # --------------------------------------------- UTILITY AND CALLBACK --------------------------------------------
 def initialize_session_state_attributes():
-    st.session_state["node"] = "___"
-    if "modified_graph" not in st.session_state.keys():
-        st.session_state["modified_graph"] = None
-    if "history_changes" not in st.session_state.keys():
-        st.session_state["history_changes"] = {}
-    st.session_state["node_mapping"] = {}
-    st.session_state["predecessors_id"] = []
-    st.session_state["successors_id"] = []
-    st.session_state["stop_and_save"] = False
-    st.session_state["button_load"] = False
-    st.session_state["is_form1_disabled"] = False
-    st.session_state["is_form2_disabled"] = True
+    keys = ["node", "modified_graph", "history_changes", 
+            "node_mapping", "predecessors_id", "successors_id", 
+            "stop_and_save", "button_load", "is_form1_disabled", "is_form2_disabled"]
+    
+    default = ["___", None, {}, {}, [], [], False, False, False, True]
+    
+    for key, value in zip(keys, default):
+        if key not in st.session_state:
+            st.session_state[key] = value
  
 def clear_log_files():
     with open(LOG_FILE_PATH, "w") as f:

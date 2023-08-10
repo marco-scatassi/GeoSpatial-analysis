@@ -66,6 +66,7 @@ GRAPH_MANIPULATION_SEED=8797
 def initialize_session_state_attributes():
     st.session_state["node"] = "___"
     st.session_state["modified_graph"] = None
+    st.session_state["history_changes"] = None
     st.session_state["node_mapping"] = {}
     st.session_state["predecessors_id"] = []
     st.session_state["successors_id"] = []

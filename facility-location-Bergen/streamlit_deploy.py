@@ -201,20 +201,13 @@ def graph_manipulation_process_template(session_state, TIMES,
         return
 
 def graph_manipulation(session_state, TIMES):
-    initialize_session_state_attributes()
-        
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, _, _ = st.columns(4)
     
     with col1:
         button_load = st.button("Load data for graph manipulation")
     with col2:
         button_manipulation = st.button("Start graph manipulation process")
-    with col3:
-        st.download_button("download modified graph",
-                               pkl.dumps(session_state["modified_graph"]),)
-    with col4:
-        st.download_button("download history changes",
-                               pkl.dumps(session_state["history_changes"]),)
+
     st.markdown("---")
     
     placeholder = st.empty()
@@ -630,6 +623,7 @@ def read_theoretical_framework(project_path):
     return content
 
 if __name__ == '__main__':
+    initialize_session_state_attributes()
     side_bar = st.sidebar
 
     with side_bar:
@@ -681,6 +675,15 @@ if __name__ == '__main__':
                     "Seed for reproducibility",
                     (324324,),
                     label_visibility="collapsed",)
+            
+        if section == "Graph manipulation":
+            uploaded_file = st.file_uploader("Upload history changes", type=["pkl", "bin"])
+            if uploaded_file is not None:
+                session_state["history_changes"] = pkl.load(uploaded_file)
+            st.download_button("download modified graph",
+                               pkl.dumps(session_state["modified_graph"]),)
+            st.download_button("download history changes",
+                               pkl.dumps(session_state["history_changes"]),)
             
     if section not in ["Project description", "Theoretical Framework"]:
         st.title("Facility Location dashboard")

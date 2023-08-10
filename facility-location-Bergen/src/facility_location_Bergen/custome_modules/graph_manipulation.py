@@ -268,7 +268,7 @@ def on_submit_add_and_delete_edges_form(session_state, G, node, node_mapping_r, 
     key = str(node)
     
     dist = distances_to_add.replace(" ", "").split(",")
-    if len(edges_to_add)-1 != len(dist):
+    if len(edges_to_add) != len(dist) and dist != [""]:
         st.error(f"the number of edges to add and the number of distances provided are different\n{edges_to_add}\n{dist}")
         
         
@@ -308,8 +308,8 @@ def add_and_deleted_edges_input(G, node, session_state, node_mapping,
                                 add_and_delete_form_placeholder,   
                                 img_path, log_file_path):
     node_mapping_r = {v: k for k, v in node_mapping.items()}
-    edge_list_add = [None]
-    edge_list_delete = [None]
+    edge_list_add = []
+    edge_list_delete = []
     for node1 in node_mapping.keys():
         for node2 in node_mapping.keys():
             if G.has_edge(node1, node2):

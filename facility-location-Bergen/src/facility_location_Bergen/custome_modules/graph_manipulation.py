@@ -75,10 +75,10 @@ def traslate_path(path, factor=0.01, traslate_first_node=False):
         t0 = np.sum((np.array(path[n])-p0)*(p1-p0))/l2
         t1 = np.sum((np.array(path[n+1])-p0)*(p1-p0))/l2
         if n == 0 and traslate_first_node:
-            new_path.append(np.round(p0+t0*(p1-p0),5))
+            new_path.append(np.round(p0+t0*(p1-p0),6))
         elif n == 0 and not traslate_first_node:
             new_path.append(path[n])
-        new_path.append(np.round(p0+t1*(p1-p0),5))
+        new_path.append(np.round(p0+t1*(p1-p0),6))
     return [tuple(p) for p in new_path]
 
 def clear_log(log_file_path):
@@ -350,7 +350,7 @@ def split_the_node_func(G, session_state, node, node_mapping):
     key = str(node)
     selected_predecessor = session_state[key]['selected_predecessor']
     selected_successor = session_state[key]['selected_successor']
-    new_edge = traslate_path([(node[0], node[1]), (selected_successor[0], selected_successor[1])], 0.00005, True)
+    new_edge = traslate_path([(node[0], node[1]), (selected_successor[0], selected_successor[1])], 0.00007, True)
     node_mapping[new_edge[0]] = max(list(node_mapping.values()))+1
     for e in G.edges((selected_predecessor, node), data=True):
         if e[0] == selected_predecessor and e[1] == node:

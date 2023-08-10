@@ -105,12 +105,10 @@ def clear_log_files():
                 </body>
                 </html>""")
     
-def stop_and_save_callback():
+def stop_and_save_callback(f):
     st.session_state["stop_and_save"] = True
     st.session_state["button_load"] = False
-    
-    with open(PROCESSED_DATA_ROOT_PATH+"/history_changes.pkl", "wb") as f:
-        pkl.dump(st.session_state["history_changes"], f)
+    pkl.dump(st.session_state["history_changes"], f)
     
     clear_log_files()
 
@@ -170,7 +168,10 @@ def graph_manipulation_process_template(session_state, TIMES,
         with refresh_col:
             st.button("refresh image")
         with stop_and_save_col:
-            stop_and_save_button = st.button("Stop and save changes", on_click=stop_and_save_callback)
+            with open(PROCESSED_DATA_ROOT_PATH+"/history_changes.pkl", "wb") as f:
+                stop_and_save_button = st.button("Stop and save changes", 
+                                             on_click=stop_and_save_callback,
+                                             args=(f),)
             
     with text_col:
         split_the_node_form_placeholder = st.empty()

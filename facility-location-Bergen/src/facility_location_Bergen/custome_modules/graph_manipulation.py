@@ -75,10 +75,10 @@ def traslate_path(path, factor=0.01, traslate_first_node=False):
         t0 = np.sum((np.array(path[n])-p0)*(p1-p0))/l2
         t1 = np.sum((np.array(path[n+1])-p0)*(p1-p0))/l2
         if n == 0 and traslate_first_node:
-            new_path.append(np.round(p0+t0*(p1-p0),5))
+            new_path.append(np.round(p0+t0*(p1-p0),6))
         elif n == 0 and not traslate_first_node:
             new_path.append(path[n])
-        new_path.append(np.round(p0+t1*(p1-p0),5))
+        new_path.append(np.round(p0+t1*(p1-p0),6))
     return [tuple(p) for p in new_path]
 
 def clear_log(log_file_path):
@@ -220,7 +220,6 @@ def on_submit_split_the_node_form(session_state, G, node, node_class, img_path, 
     
     session_state["is_form1_disabled"] = True
     session_state["is_form2_disabled"] = False
-    session_state["is_form1_submitted"] = True
               
 def split_the_node_input(node, G, node_mapping, node_class, session_state, split_the_node_form_placeholder, img_path, LOG_FILE_PATH2):
     predecessors = list(G.predecessors(node))
@@ -269,22 +268,18 @@ def on_submit_add_and_delete_edges_form(session_state, G, node, node_mapping_r, 
     key = str(node)
     
     dist = distances_to_add.replace(" ", "").split(",")
-    if len(edges_to_add)-1 != len(dist):
+    if len(edges_to_add) != len(dist) and dist != [""]:
         st.error(f"the number of edges to add and the number of distances provided are different\n{edges_to_add}\n{dist}")
         
         
-    if None in edges_to_add:
-        if len(edges_to_add) > 1:
-            edges_to_add.remove(None)
-            session_state["history_changes"][key]["new_edges"] = [(node_mapping_r[e[0]], node_mapping_r[e[1]], int(d)) for e, d  in zip(edges_to_add, dist)]
-        else:
-            session_state["history_changes"][key]["new_edges"] = []
-    if None in edges_to_delete:
-        if len(edges_to_delete) > 1:
-            edges_to_delete.remove(None)
-            session_state["history_changes"][key]["edges_to_delete"] = [(node_mapping_r[e[0]], node_mapping_r[e[1]]) for e in edges_to_delete]
-        else:
-            session_state["history_changes"][key]["edges_to_delete"] = []
+    if len(edges_to_add) > 0:
+        session_state["history_changes"][key]["new_edges"] = [(node_mapping_r[e[0]], node_mapping_r[e[1]], int(d)) for e, d  in zip(edges_to_add, dist)]
+    else:
+        session_state["history_changes"][key]["new_edges"] = []
+    if len(edges_to_delete) > 0:
+        session_state["history_changes"][key]["edges_to_delete"] = [(node_mapping_r[e[0]], node_mapping_r[e[1]]) for e in edges_to_delete]
+    else:
+        session_state["history_changes"][key]["edges_to_delete"] = []
     
     for e in session_state["history_changes"][key]['new_edges']:
         add_edge(e, G)
@@ -309,8 +304,8 @@ def add_and_deleted_edges_input(G, node, session_state, node_mapping,
                                 add_and_delete_form_placeholder,   
                                 img_path, log_file_path):
     node_mapping_r = {v: k for k, v in node_mapping.items()}
-    edge_list_add = [None]
-    edge_list_delete = [None]
+    edge_list_add = []
+    edge_list_delete = []
     for node1 in node_mapping.keys():
         for node2 in node_mapping.keys():
             if G.has_edge(node1, node2):
@@ -355,7 +350,7 @@ def split_the_node_func(G, session_state, node, node_mapping):
     key = str(node)
     selected_predecessor = session_state[key]['selected_predecessor']
     selected_successor = session_state[key]['selected_successor']
-    new_edge = traslate_path([(node[0], node[1]), (selected_successor[0], selected_successor[1])], 0.00005, True)
+    new_edge = traslate_path([(node[0], node[1]), (selected_successor[0], selected_successor[1])], 0.00007, True)
     node_mapping[new_edge[0]] = max(list(node_mapping.values()))+1
     for e in G.edges((selected_predecessor, node), data=True):
         if e[0] == selected_predecessor and e[1] == node:

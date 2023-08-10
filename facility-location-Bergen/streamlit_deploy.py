@@ -59,27 +59,32 @@ LOG_FILE_PATH = r"\\Pund\Stab$\guest801951\Documents\GitHub\GeoSpatial-analysis\
 LOG_FILE_PATH2 = r"\\Pund\Stab$\guest801951\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\logs\split_roads_changes.log"
 HTML_IMG_PATH = r"\\Pund\Stab$\guest801951\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\logs\img_split_roads.html"
 
+PROCESSED_DATA_ROOT_PATH = r"\\Pund\Stab$\guest801951\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\data\05_model_input"
+
 GRAPH_MANIPULATION_SEED=8797
 
 # --------------------------------------------- UTILITY AND CALLBACK --------------------------------------------
-def initialize_session_state_attributes():
-    st.session_state["node"] = "___"
-    st.session_state["modified_graph"] = None
-    st.session_state["node_mapping"] = {}
-    st.session_state["predecessors_id"] = []
-    st.session_state["successors_id"] = []
-    st.session_state["stop_and_save"] = False
-    st.session_state["button_load"] = False
-    st.session_state["is_form1_disabled"] = False
-    st.session_state["is_form2_disabled"] = True
+def initialize_session_state_attributes(from_graph_button_load=False):
+    keys = ["node", "modified_graph", "history_changes", 
+            "node_mapping", "predecessors_id", "successors_id", 
+            "stop_and_save", "button_load", "is_form1_disabled", "is_form2_disabled"]
+    
+    default = ["___", None, {}, {}, [], [], False, False, False, True]
+    
+    for key, value in zip(keys, default):
+        if key not in st.session_state:
+            st.session_state[key] = value
+    
+    if from_graph_button_load:
+        st.session_state["button_load"] = True
+        st.session_state["is_form1_disabled"] = False
+        st.session_state["is_form2_disabled"] = True
  
 def clear_log_files():
     with open(LOG_FILE_PATH, "w") as f:
-        f.write("")
-    
+        f.write("")    
     with open(LOG_FILE_PATH2, "w") as f:
-        f.write("")
-        
+        f.write("") 
     with open(HTML_IMG_PATH, "w") as f:
         f.write("""<!DOCTYPE html>
                 <html>
@@ -99,7 +104,8 @@ def clear_log_files():
     
 def stop_and_save_callback():
     st.session_state["stop_and_save"] = True
-    initialize_session_state_attributes()
+    st.session_state["button_load"] = False
+    
     clear_log_files()
     
 # --------------------------------------------- GRAPH MANIPULATION ----------------------------------------------
@@ -117,8 +123,6 @@ def graph_manipulation_load_data(session_state, TIMES):
                 average_graphs[time] = pkl.load(f)
 
         session_state[f"average_graphs"] = average_graphs
-    
-    session_state["history_changes"] = {}
 
     progress_bar.progress(100, "Loading data completed!")
 
@@ -157,7 +161,10 @@ def graph_manipulation_process_template(session_state, TIMES,
         with refresh_col:
             st.button("refresh image")
         with stop_and_save_col:
-            st.button("Stop and save changes", on_click=stop_and_save_callback)
+            with open(PROCESSED_DATA_ROOT_PATH+"\history_changes.pkl", "wb") as f:
+                stop_and_save_button = st.button("Stop and save changes", 
+                                                 on_click=stop_and_save_callback,
+                                                 args=(f))
             
     with text_col:
         split_the_node_form_placeholder = st.empty()
@@ -190,27 +197,22 @@ def graph_manipulation_process_template(session_state, TIMES,
                             
             st.form_submit_button("submit", disabled=True)
     
-    if not session_state["stop_and_save"]:
+    if not session_state["stop_and_save"] and not stop_and_save_button:
         graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED, 
                                split_the_node_form_placeholder, add_and_delete_form_placeholder)
     else:
         print_INFO_message_timestamp("Stop and save changes")
         session_state["stop_and_save"] = False
-        return
+        return 
 
 def graph_manipulation(session_state, TIMES):
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, _, _ = st.columns(4)
     
     with col1:
         button_load = st.button("Load data for graph manipulation")
     with col2:
         button_manipulation = st.button("Start graph manipulation process")
-    with col3:
-        st.download_button("download modified graph",
-                               pkl.dumps(session_state["modified_graph"]),)
-    with col4:
-        st.download_button("download history changes",
-                               pkl.dumps(session_state["history_changes"]),)
+
     st.markdown("---")
     
     placeholder = st.empty()
@@ -218,7 +220,7 @@ def graph_manipulation(session_state, TIMES):
     ############################################## LOAD DATA ##############################################
     if button_load:
         graph_manipulation_load_data(session_state, TIMES)
-        initialize_session_state_attributes()
+        initialize_session_state_attributes(True)
         clear_log_files()
         session_state["button_load"] = True
         
@@ -626,6 +628,7 @@ def read_theoretical_framework(project_path):
     return content
 
 if __name__ == '__main__':
+    initialize_session_state_attributes()
     side_bar = st.sidebar
 
     with side_bar:
@@ -677,6 +680,15 @@ if __name__ == '__main__':
                     "Seed for reproducibility",
                     (324324,),
                     label_visibility="collapsed",)
+            
+        if section == "Graph manipulation":
+            uploaded_file = st.file_uploader("Upload history changes", type=["pkl", "bin"])
+            if uploaded_file is not None:
+                session_state["history_changes"] = pkl.load(uploaded_file)
+            st.download_button("download modified graph",
+                               pkl.dumps(session_state["modified_graph"]),)
+            st.download_button("download history changes",
+                               pkl.dumps(session_state["history_changes"]),)
             
     if section not in ["Project description", "Theoretical Framework"]:
         st.title("Facility Location dashboard")

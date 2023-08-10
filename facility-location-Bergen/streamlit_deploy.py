@@ -63,10 +63,6 @@ HTML_IMG_PATH = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/i
 
 GRAPH_MANIPULATION_SEED=8797
 # --------------------------------------------- UTILITY AND CALLBACK --------------------------------------------
-def upload_callback():
-    if st.session_state["upload_button_1"] is not None:
-        st.session_state["history_changes"] = pkl.load(st.session_state["upload_button_1"])
-
 def initialize_session_state_attributes(from_graph_button_load=False):
     keys = ["node", "modified_graph", "history_changes", 
             "node_mapping", "predecessors_id", "successors_id", 
@@ -82,6 +78,9 @@ def initialize_session_state_attributes(from_graph_button_load=False):
         st.session_state["button_load"] = True
         st.session_state["is_form1_disabled"] = False
         st.session_state["is_form2_disabled"] = True
+        if st.session_state["upload_button_1"] is not None:
+            st.session_state["history_changes"] = pkl.load(st.session_state["upload_button_1"])
+        
  
 def clear_log_files():
     with open(LOG_FILE_PATH, "w") as f:
@@ -688,8 +687,7 @@ if __name__ == '__main__':
         if section == "Graph manipulation":
             uploaded_file = st.file_uploader("**Upload history changes**", 
                                              type=["pkl", "bin"], 
-                                             key="upload_button_1",
-                                             on_change=upload_callback,)
+                                             key="upload_button_1",)
             st.download_button("download modified graph",
                                pkl.dumps(session_state["modified_graph"]),)
             st.download_button("download history changes",

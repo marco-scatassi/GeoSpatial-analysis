@@ -689,7 +689,7 @@ if __name__ == '__main__':
             uploaded_file = st.file_uploader("**Upload history changes**", 
                                              type=["pkl", "bin"], 
                                              on_change=upload_callback,
-                                            args=(uploaded_file,)
+                                            args=(uploaded_file,))
             st.download_button("download modified graph",
                                pkl.dumps(session_state["modified_graph"]),)
             st.download_button("download history changes",

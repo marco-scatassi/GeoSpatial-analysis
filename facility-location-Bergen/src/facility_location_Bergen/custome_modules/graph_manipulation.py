@@ -272,11 +272,11 @@ def on_submit_add_and_delete_edges_form(session_state, G, node, node_mapping_r, 
         st.error(f"the number of edges to add and the number of distances provided are different\n{edges_to_add}\n{dist}")
         
 
-    if len(edges_to_add) > 1:
+    if len(edges_to_add) > 0:
         session_state["history_changes"][key]["new_edges"] = [(node_mapping_r[e[0]], node_mapping_r[e[1]], int(d)) for e, d  in zip(edges_to_add, dist)]
     else:
         session_state["history_changes"][key]["new_edges"] = []
-    if len(edges_to_delete) > 1:
+    if len(edges_to_delete) > 0:
         edges_to_delete.remove(None)
         session_state["history_changes"][key]["edges_to_delete"] = [(node_mapping_r[e[0]], node_mapping_r[e[1]]) for e in edges_to_delete]
     else:

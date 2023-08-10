@@ -65,7 +65,7 @@ GRAPH_MANIPULATION_SEED=8797
 # --------------------------------------------- UTILITY AND CALLBACK --------------------------------------------
 def upload_callback():
     if st.session_state["upload_button_1"] is not None:
-        session_state["history_changes"] = pkl.load(st.session_state["upload_button_1"])
+        st.session_state["history_changes"] = pkl.load(st.session_state["upload_button_1"])
 
 def initialize_session_state_attributes(from_graph_button_load=False):
     keys = ["node", "modified_graph", "history_changes", 

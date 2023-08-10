@@ -63,7 +63,7 @@ HTML_IMG_PATH = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/i
 
 GRAPH_MANIPULATION_SEED=8797
 # --------------------------------------------- UTILITY AND CALLBACK --------------------------------------------
-def initialize_session_state_attributes():
+def initialize_session_state_attributes(from_graph_button_load=False):
     keys = ["node", "modified_graph", "history_changes", 
             "node_mapping", "predecessors_id", "successors_id", 
             "stop_and_save", "button_load", "is_form1_disabled", "is_form2_disabled"]
@@ -73,6 +73,11 @@ def initialize_session_state_attributes():
     for key, value in zip(keys, default):
         if key not in st.session_state:
             st.session_state[key] = value
+    
+    if from_graph_button_load:
+        st.session_state["button_load"] = True
+        st.session_state["is_form1_disabled"] = False
+        st.session_state["is_form2_disabled"] = True
  
 def clear_log_files():
     with open(LOG_FILE_PATH, "w") as f:
@@ -215,7 +220,7 @@ def graph_manipulation(session_state, TIMES):
     ############################################## LOAD DATA ##############################################
     if button_load:
         graph_manipulation_load_data(session_state, TIMES)
-        initialize_session_state_attributes()
+        initialize_session_state_attributes(True)
         clear_log_files()
         session_state["button_load"] = True
         

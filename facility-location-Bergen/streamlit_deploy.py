@@ -67,7 +67,8 @@ GRAPH_MANIPULATION_SEED=8797
 # --------------------------------------------- UTILITY AND CALLBACK --------------------------------------------
 def initialize_session_state_attributes():
     st.session_state["node"] = "___"
-    st.session_state["modified_graph"] = None
+    if "modified_graph" not in st.session_state.keys():
+        st.session_state["modified_graph"] = None
     if os.path.exists(PROCESSED_DATA_ROOT_PATH+"/history_changes.pkl"):
         with open(PROCESSED_DATA_ROOT_PATH+"/history_changes.pkl", "rb") as f:
             st.session_state["history_changes"] = pkl.load(f)
@@ -213,6 +214,8 @@ def graph_manipulation_process_template(session_state, TIMES,
         return
 
 def graph_manipulation(session_state, TIMES):
+    initialize_session_state_attributes()
+        
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
@@ -640,8 +643,6 @@ def read_theoretical_framework(project_path):
     return content
 
 if __name__ == '__main__':
-    if "modified_graph" not in st.session_state:
-        initialize_session_state_attributes()
     side_bar = st.sidebar
 
     with side_bar:

@@ -628,6 +628,7 @@ def read_theoretical_framework(project_path):
     return content
 
 if __name__ == '__main__':
+    initialize_session_state_attributes()
     side_bar = st.sidebar
 
     with side_bar:

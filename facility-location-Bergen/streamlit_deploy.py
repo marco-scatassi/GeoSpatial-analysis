@@ -63,8 +63,9 @@ HTML_IMG_PATH = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/i
 
 GRAPH_MANIPULATION_SEED=8797
 # --------------------------------------------- UTILITY AND CALLBACK --------------------------------------------
-def upload_callback():
-    session_state["history_changes"] = pkl.load(uploaded_file)
+def upload_callback(uploaded_file):
+    if uploaded_file is not None:
+        session_state["history_changes"] = pkl.load(uploaded_file)
 
 def initialize_session_state_attributes(from_graph_button_load=False):
     keys = ["node", "modified_graph", "history_changes", 
@@ -685,7 +686,10 @@ if __name__ == '__main__':
                     label_visibility="collapsed",)
             
         if section == "Graph manipulation":
-            uploaded_file = st.file_uploader("**Upload history changes**", type=["pkl", "bin"], on_change=upload_callback)
+            uploaded_file = st.file_uploader("**Upload history changes**", 
+                                             type=["pkl", "bin"], 
+                                             on_change=upload_callback,
+                                            args=(uploaded_file,)
             st.download_button("download modified graph",
                                pkl.dumps(session_state["modified_graph"]),)
             st.download_button("download history changes",

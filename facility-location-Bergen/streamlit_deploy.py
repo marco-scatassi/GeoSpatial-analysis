@@ -68,8 +68,8 @@ GRAPH_MANIPULATION_SEED=8797
 def initialize_session_state_attributes():
     st.session_state["node"] = "___"
     st.session_state["modified_graph"] = None
-    if os.path.exists(PROCESSED_DATA_ROOT_PATH+"\history_changes.pkl"):
-        with open(PROCESSED_DATA_ROOT_PATH+"\history_changes.pkl", "rb") as f:
+    if os.path.exists(PROCESSED_DATA_ROOT_PATH+"/history_changes.pkl"):
+        with open(PROCESSED_DATA_ROOT_PATH+"/history_changes.pkl", "rb") as f:
             st.session_state["history_changes"] = pkl.load(f)
     else:
         st.session_state["history_changes"] = {}

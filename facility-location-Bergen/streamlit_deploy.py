@@ -61,12 +61,18 @@ LOG_FILE_PATH = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/s
 LOG_FILE_PATH2 = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/split_roads_changes.log"
 HTML_IMG_PATH = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/img_split_roads.html"
 
+PROCESSED_DATA_ROOT_PATH = r"/mount/src/geospatial-analysis/facility-location-Bergen/data/05_model_input"
+
 GRAPH_MANIPULATION_SEED=8797
 # --------------------------------------------- UTILITY AND CALLBACK --------------------------------------------
 def initialize_session_state_attributes():
     st.session_state["node"] = "___"
     st.session_state["modified_graph"] = None
-    st.session_state["history_changes"] = {}
+    if os.path.exists(PROCESSED_DATA_ROOT_PATH+"\history_changes.pkl"):
+        with open(PROCESSED_DATA_ROOT_PATH+"\history_changes.pkl", "rb") as f:
+            st.session_state["history_changes"] = pkl.load(f)
+    else:
+        st.session_state["history_changes"] = {}
     st.session_state["node_mapping"] = {}
     st.session_state["predecessors_id"] = []
     st.session_state["successors_id"] = []
@@ -103,6 +109,10 @@ def stop_and_save_callback():
     st.session_state["stop_and_save"] = True
     st.session_state["is_form1_disabled"] = False
     st.session_state["is_form2_disabled"] = True
+    
+    with open(PROCESSED_DATA_ROOT_PATH+"\history_changes.pkl", "wb") as f:
+        pkl.dump(st.session_state["history_changes"], f)
+    
     clear_log_files()
 
 # --------------------------------------------- GRAPH MANIPULATION ----------------------------------------------

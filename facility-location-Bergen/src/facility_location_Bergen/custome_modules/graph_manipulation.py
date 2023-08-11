@@ -397,7 +397,8 @@ def split_two_way_roads(G, origin, session_state,
                     G.add_edge(new_edge[0], node, **e[2])
                             
                     successors, no_double_sense = check_double_sense_continues(G, node)
-                    is_crossroad = len(successors) > 2
+                    predecessors = list(G.predecessors(node))
+                    is_crossroad = len(successors) > 2 or len(predecessors) > 2
                     print_INFO_message_timestamp(f"no_double_sense: {no_double_sense}", log_file_path)
                         
                     resume_processing = False

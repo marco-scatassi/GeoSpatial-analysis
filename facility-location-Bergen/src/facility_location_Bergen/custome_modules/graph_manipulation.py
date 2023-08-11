@@ -389,6 +389,8 @@ def split_two_way_roads(G, origin, session_state,
             for e in G.edges((origin, node), data=True):
                 if e[0] == origin and e[1] == node:   
                     key = str(node)   
+                    is_roundabout = True if len(list(G.successors(node))) > 1 else False
+                    
                     reconnect_predecessors(G, origin, log_file_path, node, new_edge)
                         
                     print_INFO_message(f"old edge is {(origin, node)}", log_file_path)
@@ -408,7 +410,7 @@ def split_two_way_roads(G, origin, session_state,
                         if "new_edges" not in session_state["history_changes"][key].keys():
                             resume_processing = True
                         
-                    if no_double_sense or is_crossroad or resume_processing: 
+                    if no_double_sense or is_crossroad or is_roundabout or resume_processing: 
                         node_mapping, node_class = node_mapping_log(G, node) 
                         fig = img_log(G, [node], node_mapping, node_class)
                         fig.write_html(img_path, full_html=True, auto_open=False)

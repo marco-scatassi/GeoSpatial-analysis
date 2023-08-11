@@ -689,9 +689,11 @@ if __name__ == '__main__':
                                              type=["pkl", "bin"], 
                                              key="upload_button_1",)
             st.download_button("download modified graph",
-                               pkl.dumps(session_state["modified_graph"]),)
+                               pkl.dumps(session_state["modified_graph"]),
+                              file_name="graph.pkl")
             st.download_button("download history changes",
-                               pkl.dumps(session_state["history_changes"]),)
+                               pkl.dumps(session_state["history_changes"]),
+                              file_name="history_changes.pkl")
             
     if section not in ["Project description", "Theoretical Framework"]:
         st.title("Facility Location dashboard")

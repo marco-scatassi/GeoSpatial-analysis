@@ -106,9 +106,12 @@ def clear_log_files():
                 </body>
                 </html>""")
     
-def stop_and_save_callback():
+def stop_and_clear_callback():
     st.session_state["stop_and_save"] = True
     st.session_state["button_load"] = False
+    for key in st.session_state.keys():
+        if key != stop_and_save and key != button_load:
+            del st.session_state[key]
 
 # --------------------------------------------- GRAPH MANIPULATION ----------------------------------------------
 def graph_manipulation_load_data(session_state, TIMES):
@@ -166,8 +169,8 @@ def graph_manipulation_process_template(session_state, TIMES,
         with refresh_col:
             st.button("refresh image")
         with stop_and_save_col:
-            stop_and_save_button = st.button("Stop and save changes", 
-                                             on_click=stop_and_save_callback,)
+            stop_and_save_button = st.button("Stop process and clear memory", 
+                                             on_click=stop_and_clear_callback,)
             
     with text_col:
         split_the_node_form_placeholder = st.empty()

@@ -686,9 +686,11 @@ if __name__ == '__main__':
             if uploaded_file is not None:
                 session_state["history_changes"] = pkl.load(uploaded_file)
             st.download_button("download modified graph",
-                               pkl.dumps(session_state["modified_graph"]),)
+                               pkl.dumps(session_state["modified_graph"]),
+                              file_name="graph.pkl")
             st.download_button("download history changes",
-                               pkl.dumps(session_state["history_changes"]),)
+                               pkl.dumps(session_state["history_changes"]),
+                              file_name="history_changes.pkl")
             
     if section not in ["Project description", "Theoretical Framework"]:
         st.title("Facility Location dashboard")

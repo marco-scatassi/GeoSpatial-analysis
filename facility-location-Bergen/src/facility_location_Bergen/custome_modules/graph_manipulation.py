@@ -408,7 +408,7 @@ def split_two_way_roads(G, origin, session_state,
                         if "new_edges" not in session_state["history_changes"][key].keys():
                             resume_processing = True
                         
-                    if no_double_sense or is_crossroad or resume_processing: 
+                    if True: 
                         node_mapping, node_class = node_mapping_log(G, node) 
                         fig = img_log(G, [node], node_mapping, node_class)
                         fig.write_html(img_path, full_html=True, auto_open=False)

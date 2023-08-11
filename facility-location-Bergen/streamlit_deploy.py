@@ -110,7 +110,7 @@ def stop_and_clear_callback():
     st.session_state["stop_and_save"] = True
     st.session_state["button_load"] = False
     for key in st.session_state.keys():
-        if key != stop_and_save and key != button_load:
+        if key != "stop_and_save" and key != "button_load":
             del st.session_state[key]
 
 # --------------------------------------------- GRAPH MANIPULATION ----------------------------------------------

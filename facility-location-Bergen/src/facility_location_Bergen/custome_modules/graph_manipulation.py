@@ -214,9 +214,9 @@ def on_submit_split_the_node_form(session_state, G, node, node_class, img_path, 
         session_state["history_changes"][key]['selected_predecessor'] = None
         session_state["history_changes"][key]['selected_successor'] = None
     
-    print_INFO_message_timestamp(f'split the node {node}? (y/n): {session_state["history_changes"][key]["split_the_node"]}', LOG_FILE_PATH2)
-    print_INFO_message(f'selected predecessor: {session_state["history_changes"][key]["selected_predecessor"]}', LOG_FILE_PATH2)
-    print_INFO_message(f'selected successor: {session_state["history_changes"][key]["selected_successor"]}', LOG_FILE_PATH2)
+    #print_INFO_message_timestamp(f'split the node {node}? (y/n): {session_state["history_changes"][key]["split_the_node"]}', LOG_FILE_PATH2)
+    #print_INFO_message(f'selected predecessor: {session_state["history_changes"][key]["selected_predecessor"]}', LOG_FILE_PATH2)
+    #print_INFO_message(f'selected successor: {session_state["history_changes"][key]["selected_successor"]}', LOG_FILE_PATH2)
     
     session_state["is_form1_disabled"] = True
     session_state["is_form2_disabled"] = False
@@ -294,8 +294,8 @@ def on_submit_add_and_delete_edges_form(session_state, G, node, node_mapping_r, 
         fig = img_log(G, [node], node_mapping, node_class)
     fig.write_html(img_path, full_html=True, auto_open=False)
     
-    print_INFO_message_timestamp(f'new edges: {session_state["history_changes"][key]["new_edges"]}', log_file_path)
-    print_INFO_message_timestamp(f'edges to delete: {session_state["history_changes"][key]["edges_to_delete"]}', log_file_path)
+    #print_INFO_message_timestamp(f'new edges: {session_state["history_changes"][key]["new_edges"]}', log_file_path)
+    #print_INFO_message_timestamp(f'edges to delete: {session_state["history_changes"][key]["edges_to_delete"]}', log_file_path)
     
     session_state["is_form2_disabled"] = True
     session_state["is_form1_disabled"] = False
@@ -335,13 +335,13 @@ def add_and_deleted_edges_input(G, node, session_state, node_mapping,
                               args=(session_state, G, node, node_mapping_r, img_path, log_file_path))
         
 def reconnect_predecessors(G, origin, log_file_path, node, new_edge):
-    print_INFO_message(f"replacing edge {origin}-{node}", log_file_path)
+    #print_INFO_message(f"replacing edge {origin}-{node}", log_file_path)
     predecessors = list(G.predecessors(origin))
     for p in predecessors:
         for e in G.edges((p, origin), data=True):
             if e[0] == p and e[1] == origin:
                 if nx.has_path(G, p, node) and p!=node:                  
-                    print_INFO_message(f"processing predecessor: {p}", log_file_path)
+                    #print_INFO_message(f"processing predecessor: {p}", log_file_path)
                     G.remove_edge(p, origin)
                     G.add_edge(p, new_edge[0], **e[2])
                     break
@@ -375,7 +375,7 @@ def split_two_way_roads(G, origin, session_state,
         clear_log(log_file_path)
         clear_log(log_file_path2)
             
-    print_INFO_message_timestamp(f"count: {count}", log_file_path)    
+    #print_INFO_message_timestamp(f"count: {count}", log_file_path)    
     if count > count_max:
         return
         
@@ -384,22 +384,22 @@ def split_two_way_roads(G, origin, session_state,
     for i, node in enumerate(successors):
         # print_INFO_message(f"succerssors number: {i}", log_file_path)
         if G.has_edge(node, origin):
-            print_INFO_message(f"TWO WAY STREET FOUND", log_file_path)
+            #print_INFO_message(f"TWO WAY STREET FOUND", log_file_path)
             new_edge = traslate_path([(origin[0], origin[1]), (node[0], node[1])], 0.00005, True)
             for e in G.edges((origin, node), data=True):
                 if e[0] == origin and e[1] == node:   
                     key = str(node)
                     reconnect_predecessors(G, origin, log_file_path, node, new_edge)
                         
-                    print_INFO_message(f"old edge is {(origin, node)}", log_file_path)
-                    print_INFO_message(f"new edge is {(new_edge[0], node)}", log_file_path)   
+                    #print_INFO_message(f"old edge is {(origin, node)}", log_file_path)
+                    #print_INFO_message(f"new edge is {(new_edge[0], node)}", log_file_path)   
                     G.remove_edge(origin, node) 
                     G.add_edge(new_edge[0], node, **e[2])
                             
                     successors, no_double_sense = check_double_sense_continues(G, node)
                     predecessors = list(G.predecessors(node))
                     is_crossroad = len(successors) > 2 or len(predecessors) > 2
-                    print_INFO_message_timestamp(f"no_double_sense: {no_double_sense}", log_file_path)
+                    #print_INFO_message_timestamp(f"no_double_sense: {no_double_sense}", log_file_path)
                         
                     resume_processing = False
                     if key not in session_state.keys():

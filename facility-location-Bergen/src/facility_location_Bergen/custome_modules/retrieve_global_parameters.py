@@ -68,7 +68,7 @@ def retrieve_gdf_worst_average_path(time):
 
 def retrieve_average_graph_path(time, connected=True):
     if connected:
-        saving_path = f"data/03_primary/average_graph_{time}_connected.pkl"
+        saving_path = f"data/03_primary/average_graph_{time}_connected_2.pkl"
     else:
         saving_path = f"data/03_primary/average_graph_{time}_original.pkl"
     return saving_path

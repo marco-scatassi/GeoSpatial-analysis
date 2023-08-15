@@ -399,10 +399,14 @@ def split_two_way_roads(G, origin, session_state,
         # print_INFO_message_timestamp(f"origin: {origin}", log_file_path)
         for i, node in enumerate(successors):
             # print_INFO_message(f"succerssors number: {i}", log_file_path)
-            check_manually = False
+            only_double = True
+            only_single = True
             for s in successors:
                 if not G.has_edge(s, origin):
-                    check_manually= True
+                    only_double = False
+                if G.has_edge(s, origin):
+                    only_single = False
+            check_manually = not(only_double or only_single) 
                 #print_INFO_message(f"TWO WAY STREET FOUND", log_file_path)
                 new_edge = traslate_path([(origin[0], origin[1]), (node[0], node[1])], 0.00005, True)
                 for e in G.edges((origin, node), data=True):

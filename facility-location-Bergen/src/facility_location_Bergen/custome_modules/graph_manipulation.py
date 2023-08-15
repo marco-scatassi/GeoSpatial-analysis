@@ -399,7 +399,10 @@ def split_two_way_roads(G, origin, session_state,
         # print_INFO_message_timestamp(f"origin: {origin}", log_file_path)
         for i, node in enumerate(successors):
             # print_INFO_message(f"succerssors number: {i}", log_file_path)
-            if G.has_edge(node, origin):
+            check_manually = False
+            for s in successors:
+                if not G.has_edge(s, origin):
+                    check_manually= True
                 #print_INFO_message(f"TWO WAY STREET FOUND", log_file_path)
                 new_edge = traslate_path([(origin[0], origin[1]), (node[0], node[1])], 0.00005, True)
                 for e in G.edges((origin, node), data=True):
@@ -414,7 +417,7 @@ def split_two_way_roads(G, origin, session_state,
                                 
                         successors, no_double_sense = check_double_sense_continues(G, node)
                         predecessors = list(G.predecessors(node))
-                        is_crossroad = len(successors) > 2
+                        #is_crossroad = len(successors) > 2
                         #print_INFO_message_timestamp(f"no_double_sense: {no_double_sense}", log_file_path)
                             
                         resume_processing = False
@@ -424,7 +427,7 @@ def split_two_way_roads(G, origin, session_state,
                             if "new_edges" not in session_state["history_changes"][key].keys():
                                 resume_processing = True
                             
-                        if is_crossroad or resume_processing: 
+                        if check_manually or resume_processing: 
                             node_mapping, node_class = node_mapping_log(G, node) 
                             fig = img_log(G, [node], node_mapping, node_class)
                             fig.write_html(img_path, full_html=True, auto_open=False)

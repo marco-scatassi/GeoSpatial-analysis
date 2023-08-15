@@ -8,6 +8,7 @@ from log import print_INFO_message, print_INFO_message_timestamp
 from shapely.geometry import Point
 from functools import partial
 import time as t
+from copy import deepcopy
 
 def build_cc(G, strong=False):
     if not strong:
@@ -161,7 +162,7 @@ def img_log(G, node_list, node_mapping, node_class=[]):
 
     return fig
 
-def node_mapping_log(G, node):
+def node_mapping_log(G, node, c=True):
     node_mapping = {node: 0}
     node_class = {node: ["origin"]}
     i = 1
@@ -182,6 +183,20 @@ def node_mapping_log(G, node):
                 node_class[edge[0]] = ["predecessor"]
             else:
                 node_class[edge[0]].append("predecessor")
+    
+    nodes = deepcopy(list(node_mapping.keys()))
+    for n in nodes:
+        ss = list(G.successors(n))
+        ps = list(G.predecessors(n))
+        for s in ss:
+            if s not in node_mapping.keys():
+                node_mapping[s] = i
+                i += 1
+        for p in ps:
+            if p not in node_mapping.keys():
+                node_mapping[s] = i
+                i += 1
+    
     return node_mapping, node_class
         
 def update_split_the_node_input(session_state, node, node_mapping, predecessors_id, successors_id):

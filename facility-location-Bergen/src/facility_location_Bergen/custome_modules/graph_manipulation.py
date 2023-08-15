@@ -469,7 +469,7 @@ def split_two_way_roads(G, origin, session_state,
                             
                     break
 
-        split_two_way_roads(G, node, session_state,
+        return split_two_way_roads(G, node, session_state,
                                 split_the_node_form_placeholder,
                                 add_and_delete_form_placeholder,
                                  

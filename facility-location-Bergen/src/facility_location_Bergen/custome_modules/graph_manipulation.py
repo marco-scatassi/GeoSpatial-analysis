@@ -194,7 +194,7 @@ def node_mapping_log(G, node, c=True):
                 i += 1
         for p in ps:
             if p not in node_mapping.keys():
-                node_mapping[s] = i
+                node_mapping[p] = i
                 i += 1
     
     return node_mapping, node_class

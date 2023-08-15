@@ -400,7 +400,10 @@ def split_two_way_roads(G, origin, session_state,
             return False
             
         successors = list(G.successors(origin))
-        original_successors = list(G_original.successors(origin))
+        if G_original.has_node(origin):
+            original_successors = list(G_original.successors(origin))
+        else:
+            original_successors = successors
         # print_INFO_message_timestamp(f"origin: {origin}", log_file_path)
         for i, node in enumerate(successors):
             # print_INFO_message(f"succerssors number: {i}", log_file_path)

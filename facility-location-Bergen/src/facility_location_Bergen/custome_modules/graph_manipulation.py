@@ -384,7 +384,11 @@ def split_two_way_roads(G, origin, session_state,
                         split_the_node_form_placeholder,
                         add_and_delete_form_placeholder,
                         count=0, count_max=1, 
-                        log_file_path=None, log_file_path2 = None, clear_log_file=True, img_path=None):
+                        log_file_path=None, log_file_path2 = None, 
+                        clear_log_file=True, img_path=None, G_original=None):
+
+    if G_original == None:
+        G_original = deepcopy(G)
     r=True
     while r:
         if clear_log_file:
@@ -396,15 +400,16 @@ def split_two_way_roads(G, origin, session_state,
             return False
             
         successors = list(G.successors(origin))
+        original_successors = list(G_original.successors(origin))
         # print_INFO_message_timestamp(f"origin: {origin}", log_file_path)
         for i, node in enumerate(successors):
             # print_INFO_message(f"succerssors number: {i}", log_file_path)
             only_double = True
             only_single = True
-            for s in successors:
-                if not G.has_edge(s, origin):
+            for s in original_successors:
+                if not G_original.has_edge(s, origin):
                     only_double = False
-                if G.has_edge(s, origin):
+                if G_original.has_edge(s, origin):
                     only_single = False
             check_manually = not(only_double or only_single) 
             if G.has_edge(node, origin):
@@ -481,12 +486,12 @@ def split_two_way_roads(G, origin, session_state,
             r = split_two_way_roads(G, node, session_state,
                                     split_the_node_form_placeholder,
                                     add_and_delete_form_placeholder,
-                                     
                                     count+1, count_max, 
                                     log_file_path=log_file_path, 
                                     log_file_path2=log_file_path2,
                                     clear_log_file=False, 
                                     img_path=img_path,
+                                    G_original=G_original
                                     )
     
          

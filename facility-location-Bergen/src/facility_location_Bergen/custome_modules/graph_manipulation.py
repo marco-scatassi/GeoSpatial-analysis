@@ -430,7 +430,7 @@ def split_two_way_roads(G, origin, session_state,
                                 
                         successors, no_double_sense = check_double_sense_continues(G, node)
                         predecessors = list(G.predecessors(node))
-                        #is_crossroad = len(successors) > 2
+                        is_crossroad = len(successors) > 2
                         #print_INFO_message_timestamp(f"no_double_sense: {no_double_sense}", log_file_path)
                             
                         resume_processing = False
@@ -440,7 +440,7 @@ def split_two_way_roads(G, origin, session_state,
                             if "new_edges" not in session_state["history_changes"][key].keys():
                                 resume_processing = True
                             
-                        if check_manually or resume_processing: 
+                        if check_manually or is_crossroad or resume_processing: 
                             node_mapping, node_class = node_mapping_log(G, node) 
                             fig = img_log(G, [node], node_mapping, node_class)
                             fig.write_html(img_path, full_html=True, auto_open=False)

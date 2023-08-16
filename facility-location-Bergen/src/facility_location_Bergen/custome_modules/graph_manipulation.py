@@ -496,8 +496,8 @@ def split_two_way_roads(G, origin, session_state,
                                     img_path=img_path,
                                     G_original=G_original
                                     )
-    
-         
+
+        return False
             
 
         

@@ -97,7 +97,12 @@ def check_double_sense_continues(G, node):
 
 def img_log(G, node_list, node_mapping, node_class=[]):
     fig = go.Figure()
-    for node in node_list: 
+    new_node_list = deepcopy(node_list)
+    for node in node_list:
+        new_node_list += list(G.predecessors(node))
+        new_node_list += list(G.successors(node))
+        
+    for node in new_node_list: 
         nodes_lon = []
         nodes_lat = []
         weights = []
@@ -184,6 +189,19 @@ def node_mapping_log(G, node, c=True):
             else:
                 node_class[edge[0]].append("predecessor")
     
+    nodes = deepcopy(list(node_mapping.keys()))
+    for n in nodes:
+        ss = list(G.successors(n))
+        ps = list(G.predecessors(n))
+        for s in ss:
+            if s not in node_mapping.keys():
+                node_mapping[s] = i
+                i += 1
+        for p in ps:
+            if p not in node_mapping.keys():
+                node_mapping[p] = i
+                i += 1
+
     nodes = deepcopy(list(node_mapping.keys()))
     for n in nodes:
         ss = list(G.successors(n))

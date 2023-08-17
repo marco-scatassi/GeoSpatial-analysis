@@ -138,22 +138,23 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
     
     session_state["modified_graph"] = deepcopy(session_state[f"average_graphs"]["all_day"])
     
-    nodes = list(session_state["modified_graph"].nodes())
+    nodes = list(session_state[f"average_graphs"]["all_day"].nodes())
     seed = random.seed(GRAPH_MANIPULATION_SEED)
-    
+
     origin = random.choice(nodes)
-    
-    print_INFO_message_timestamp("Splitting two way roads")
-    split_two_way_roads(session_state["modified_graph"], 
-                            origin=origin, 
-                            session_state=session_state,
-                            split_the_node_form_placeholder=split_the_node_form_placeholder,
-                            add_and_delete_form_placeholder=add_and_delete_form_placeholder,
-                            count=0,
-                            count_max=22, 
-                            log_file_path=LOG_FILE_PATH,
-                            log_file_path2=LOG_FILE_PATH2, 
-                            img_path=HTML_IMG_PATH,)
+    for i in range(15):
+        print_INFO_message_timestamp("Splitting two way roads")
+        split_two_way_roads(session_state["modified_graph"], 
+                                origin=origin, 
+                                session_state=session_state,
+                                split_the_node_form_placeholder=split_the_node_form_placeholder,
+                                add_and_delete_form_placeholder=add_and_delete_form_placeholder,
+                                count=0,
+                                count_max=90, 
+                                log_file_path=LOG_FILE_PATH,
+                                log_file_path2=LOG_FILE_PATH2, 
+                                img_path=HTML_IMG_PATH,)
+        origin = random.choice(nodes)
     
     
 def graph_manipulation_process_template(session_state, TIMES, 

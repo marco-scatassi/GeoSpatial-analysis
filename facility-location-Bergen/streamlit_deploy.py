@@ -66,7 +66,7 @@ GRAPH_MANIPULATION_SEED=8797
 def initialize_session_state_attributes(from_graph_button_load=False):
     keys = ["node", "modified_graph", "history_changes", 
             "node_mapping", "predecessors_id", "successors_id", 
-            "stop_and_save", "button_load", "is_form1_disabled", "is_form2_disabled"]
+            "stop_and_clear", "button_load", "is_form1_disabled", "is_form2_disabled"]
     
     default = ["___", None, {}, {}, [], [], False, False, False, True]
     
@@ -107,10 +107,10 @@ def clear_log_files():
                 </html>""")
     
 def stop_and_clear_callback():
-    st.session_state["stop_and_save"] = True
+    st.session_state["stop_and_clear"] = True
     st.session_state["button_load"] = False
     for key in st.session_state.keys():
-        if key != "stop_and_save" and key != "button_load":
+        if key != "stop_and_clear" and key != "button_load":
             del st.session_state[key]
 
 # --------------------------------------------- GRAPH MANIPULATION ----------------------------------------------
@@ -166,11 +166,11 @@ def graph_manipulation_process_template(session_state, TIMES,
     
     with img_col:
         st.components.v1.html(html_img, height=600)
-        _, refresh_col, _, stop_and_save_col, _ = st.columns(5)
+        _, refresh_col, _, stop_and_clear_col, _ = st.columns(5)
         with refresh_col:
             st.button("refresh image")
-        with stop_and_save_col:
-            stop_and_save_button = st.button("Stop process and clear memory", 
+        with stop_and_clear_col:
+            stop_and_clear_button = st.button("Stop process and clear memory", 
                                              on_click=stop_and_clear_callback,)
             
     with text_col:
@@ -204,12 +204,12 @@ def graph_manipulation_process_template(session_state, TIMES,
                             
             st.form_submit_button("submit", disabled=True)
     
-    if not stop_and_save_button and not session_state["stop_and_save"]:
+    if not stop_and_clear_button and not session_state["stop_and_clear"]:
         graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED, 
                                split_the_node_form_placeholder, add_and_delete_form_placeholder)
     else:
-        print_INFO_message_timestamp("Stop and save changes")
-        session_state["stop_and_save"] = False
+        print_INFO_message_timestamp("Stop and clear state")
+        session_state["stop_and_clear"] = False
         return
 
 def graph_manipulation(session_state, TIMES):
@@ -232,11 +232,11 @@ def graph_manipulation(session_state, TIMES):
         session_state["button_load"] = True
         
         if button_manipulation:
-            st.session_state["stop_and_save"] = True
+            st.session_state["stop_and_clear"] = True
     
     ############################################## GENERATE VIZ ##############################################    
     if button_manipulation:
-        for att in ["node", "node_mapping", "predecessors_id", "successors_id", "stop_and_save", "button_load"]:
+        for att in ["node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
             if att not in st.session_state:
                 return st.error("Please load data first!", icon="🚨")
                 
@@ -248,6 +248,8 @@ def graph_manipulation(session_state, TIMES):
         
         if session_state["button_load"]:
             placeholder.warning("Process interrupted", icon="❌")
+        elif session_state["stop_and_clear"]:
+            placeholder.warning("Process interrupted and state cleared", icon="❌")
         else:
             placeholder.success("Process completed: changes has been saved. Download data using the download button", icon="✅")
             

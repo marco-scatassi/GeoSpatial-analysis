@@ -254,7 +254,7 @@ def on_submit_split_the_node_form(session_state, iteration,  G, node, node_class
     session_state["is_form1_disabled"] = True
     session_state["is_form2_disabled"] = False
               
-def split_the_node_input(node, G, node_mapping, node_class, session_state, split_the_node_form_placeholder, img_path, LOG_FILE_PATH2):
+def split_the_node_input(node, G, node_mapping, node_class, session_state, iteration, split_the_node_form_placeholder, img_path, LOG_FILE_PATH2):
     predecessors = list(G.predecessors(node))
     successors = list(G.successors(node))
     
@@ -291,7 +291,7 @@ def split_the_node_input(node, G, node_mapping, node_class, session_state, split
         submit = st.form_submit_button("submit", 
                                        disabled=session_state["is_form1_disabled"],
                                        on_click=on_submit_split_the_node_form, 
-                                       args=(session_state, G, node, node_class, img_path, LOG_FILE_PATH2))
+                                       args=(session_state, iteration, G, node, node_class, img_path, LOG_FILE_PATH2))
       
 def on_submit_add_and_delete_edges_form(session_state, iteration, G, node, node_mapping_r, img_path, log_file_path):
     edges_to_add = session_state[f"edges_to_add_{node}"]
@@ -333,7 +333,7 @@ def on_submit_add_and_delete_edges_form(session_state, iteration, G, node, node_
     session_state["is_form2_disabled"] = True
     session_state["is_form1_disabled"] = False
 
-def add_and_deleted_edges_input(G, node, session_state, node_mapping, 
+def add_and_deleted_edges_input(G, node, session_state, iteration, node_mapping, 
                                 add_and_delete_form_placeholder,   
                                 img_path, log_file_path):
     node_mapping_r = {v: k for k, v in node_mapping.items()}
@@ -365,7 +365,7 @@ def add_and_deleted_edges_input(G, node, session_state, node_mapping,
         st.form_submit_button("submit", 
                               disabled=session_state["is_form2_disabled"],
                               on_click=on_submit_add_and_delete_edges_form,
-                              args=(session_state, G, node, node_mapping_r, img_path, log_file_path))
+                              args=(session_state, iteration, G, node, node_mapping_r, img_path, log_file_path))
         
 def reconnect_predecessors(G, origin, log_file_path, node, new_edge):
     #print_INFO_message(f"replacing edge {origin}-{node}", log_file_path)
@@ -483,6 +483,7 @@ def split_two_way_roads(G, origin, session_state, iteration,
                                                      node_mapping, 
                                                      node_class,
                                                      session_state, 
+                                                     iteration,
                                                      split_the_node_form_placeholder,
                                                      img_path,
                                                      log_file_path2)
@@ -498,10 +499,11 @@ def split_two_way_roads(G, origin, session_state, iteration,
                                     for e in session_state["history_changes"][f"iter_{iteration}"][key]['edges_to_delete']:
                                         G.remove_edge(e[0], e[1])
                             else:
-                                add_and_deleted_edges_input(G, node, session_state, 
+                                add_and_deleted_edges_input(G, node, 
+                                                            iteration,
+                                                            session_state, 
                                                             node_mapping, 
                                                             add_and_delete_form_placeholder,
-                                                             
                                                             img_path,
                                                             log_file_path2)
     

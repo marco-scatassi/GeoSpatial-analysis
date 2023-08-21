@@ -143,16 +143,20 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
 
     origin = random.choice(nodes)
     print_INFO_message_timestamp("Splitting two way roads")
+    session_state["history_changes"][f"iter_{0}"] = {}
     split_two_way_roads(session_state["modified_graph"], 
-                                origin=origin, 
-                                session_state=session_state,
-                                split_the_node_form_placeholder=split_the_node_form_placeholder,
-                                add_and_delete_form_placeholder=add_and_delete_form_placeholder,
-                                count=0,
-                                count_max=80, 
-                                log_file_path=LOG_FILE_PATH,
-                                log_file_path2=LOG_FILE_PATH2, 
-                                img_path=HTML_IMG_PATH,)
+                                    origin=origin, 
+                                    session_state=session_state,
+                                    iter=i,
+                                    split_the_node_form_placeholder=split_the_node_form_placeholder,
+                                    add_and_delete_form_placeholder=add_and_delete_form_placeholder,
+                                    count=0,
+                                    count_max=80, 
+                                    log_file_path=LOG_FILE_PATH,
+                                    log_file_path2=LOG_FILE_PATH2, 
+                                    img_path=HTML_IMG_PATH,)
+        
+
     
     
 def graph_manipulation_process_template(session_state, TIMES, 

@@ -147,7 +147,7 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
     split_two_way_roads(session_state["modified_graph"], 
                                     origin=origin, 
                                     session_state=session_state,
-                                    iter=i,
+                                    iter=0,
                                     split_the_node_form_placeholder=split_the_node_form_placeholder,
                                     add_and_delete_form_placeholder=add_and_delete_form_placeholder,
                                     count=0,

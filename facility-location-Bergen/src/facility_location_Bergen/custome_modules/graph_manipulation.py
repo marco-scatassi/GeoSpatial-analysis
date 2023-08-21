@@ -230,26 +230,26 @@ def on_submit_split_the_node_form(session_state, G, node, node_class, img_path, 
     node_mapping_r = session_state["node_mapping_r"]
     key = str(node)
     
-    if key not in session_state["history_changes"][f"iter_{iter}"].keys():
-        session_state["history_changes"][f"iter_{iter}"][key] = {}
+    if key not in session_state["history_changes"][f"iter_{iteration}"].keys():
+        session_state["history_changes"][f"iter_{iteration}"][key] = {}
         
     if session_state[f"split_the_node_radio_{node}"] == "yes":
-        session_state["history_changes"][f"iter_{iter}"][key]["split_the_node"] = True
-        session_state["history_changes"][f"iter_{iter}"][key]['selected_predecessor'] = node_mapping_r[session_state[f"predecessor_select_box_{node}"]]
-        session_state["history_changes"][f"iter_{iter}"][key]['selected_successor'] = node_mapping_r[session_state[f"successor_select_box_{node}"]]
+        session_state["history_changes"][f"iter_{iteration}"][key]["split_the_node"] = True
+        session_state["history_changes"][f"iter_{iteration}"][key]['selected_predecessor'] = node_mapping_r[session_state[f"predecessor_select_box_{node}"]]
+        session_state["history_changes"][f"iter_{iteration}"][key]['selected_successor'] = node_mapping_r[session_state[f"successor_select_box_{node}"]]
         
-        new_node_mapping, new_edge = split_the_node_func(G, session_state["history_changes"][f"iter_{iter}"], node, node_mapping)
-        session_state["history_changes"][f"iter_{iter}"][key]["node_added"] = new_edge[0]
+        new_node_mapping, new_edge = split_the_node_func(G, session_state["history_changes"][f"iter_{iteration}"], node, node_mapping)
+        session_state["history_changes"][f"iter_{iteration}"][key]["node_added"] = new_edge[0]
         fig = img_log(G, [node, new_edge[0]], new_node_mapping, node_class)
         fig.write_html(img_path, full_html=True, auto_open=False)
     else:
-        session_state["history_changes"][f"iter_{iter}"][key]["split_the_node"] = False
-        session_state["history_changes"][f"iter_{iter}"][key]['selected_predecessor'] = None
-        session_state["history_changes"][f"iter_{iter}"][key]['selected_successor'] = None
+        session_state["history_changes"][f"iter_{iteration}"][key]["split_the_node"] = False
+        session_state["history_changes"][f"iter_{iteration}"][key]['selected_predecessor'] = None
+        session_state["history_changes"][f"iter_{iteration}"][key]['selected_successor'] = None
     
-    #print_INFO_message_timestamp(f'split the node {node}? (y/n): {session_state["history_changes"][f"iter_{iter}"][key]["split_the_node"]}', LOG_FILE_PATH2)
-    #print_INFO_message(f'selected predecessor: {session_state["history_changes"][f"iter_{iter}"][key]["selected_predecessor"]}', LOG_FILE_PATH2)
-    #print_INFO_message(f'selected successor: {session_state["history_changes"][f"iter_{iter}"][key]["selected_successor"]}', LOG_FILE_PATH2)
+    #print_INFO_message_timestamp(f'split the node {node}? (y/n): {session_state["history_changes"][f"iter_{iteration}"][key]["split_the_node"]}', LOG_FILE_PATH2)
+    #print_INFO_message(f'selected predecessor: {session_state["history_changes"][f"iter_{iteration}"][key]["selected_predecessor"]}', LOG_FILE_PATH2)
+    #print_INFO_message(f'selected successor: {session_state["history_changes"][f"iter_{iteration}"][key]["selected_successor"]}', LOG_FILE_PATH2)
     
     session_state["is_form1_disabled"] = True
     session_state["is_form2_disabled"] = False
@@ -306,29 +306,29 @@ def on_submit_add_and_delete_edges_form(session_state, G, node, node_mapping_r, 
         
 
     if len(edges_to_add) > 0:
-        session_state["history_changes"][f"iter_{iter}"][key]["new_edges"] = [(node_mapping_r[e[0]], node_mapping_r[e[1]], int(d)) for e, d  in zip(edges_to_add, dist)]
+        session_state["history_changes"][f"iter_{iteration}"][key]["new_edges"] = [(node_mapping_r[e[0]], node_mapping_r[e[1]], int(d)) for e, d  in zip(edges_to_add, dist)]
     else:
-        session_state["history_changes"][f"iter_{iter}"][key]["new_edges"] = []
+        session_state["history_changes"][f"iter_{iteration}"][key]["new_edges"] = []
     if len(edges_to_delete) > 0:
-        session_state["history_changes"][f"iter_{iter}"][key]["edges_to_delete"] = [(node_mapping_r[e[0]], node_mapping_r[e[1]]) for e in edges_to_delete]
+        session_state["history_changes"][f"iter_{iteration}"][key]["edges_to_delete"] = [(node_mapping_r[e[0]], node_mapping_r[e[1]]) for e in edges_to_delete]
     else:
-        session_state["history_changes"][f"iter_{iter}"][key]["edges_to_delete"] = []
+        session_state["history_changes"][f"iter_{iteration}"][key]["edges_to_delete"] = []
     
-    for e in session_state["history_changes"][f"iter_{iter}"][key]['new_edges']:
+    for e in session_state["history_changes"][f"iter_{iteration}"][key]['new_edges']:
         add_edge(e, G)
-    for e in session_state["history_changes"][f"iter_{iter}"][key]['edges_to_delete']:
+    for e in session_state["history_changes"][f"iter_{iteration}"][key]['edges_to_delete']:
         G.remove_edge(e[0], e[1])
     
     node_mapping, node_class = node_mapping_log(G, node) 
-    if "node_added" in session_state["history_changes"][f"iter_{iter}"][key]:
-        node2 = session_state["history_changes"][f"iter_{iter}"][key]["node_added"]
+    if "node_added" in session_state["history_changes"][f"iter_{iteration}"][key]:
+        node2 = session_state["history_changes"][f"iter_{iteration}"][key]["node_added"]
         fig = img_log(G, [node, node2], node_mapping, node_class)
     else:
         fig = img_log(G, [node], node_mapping, node_class)
     fig.write_html(img_path, full_html=True, auto_open=False)
     
-    #print_INFO_message_timestamp(f'new edges: {session_state["history_changes"][f"iter_{iter}"][key]["new_edges"]}', log_file_path)
-    #print_INFO_message_timestamp(f'edges to delete: {session_state["history_changes"][f"iter_{iter}"][key]["edges_to_delete"]}', log_file_path)
+    #print_INFO_message_timestamp(f'new edges: {session_state["history_changes"][f"iter_{iteration}"][key]["new_edges"]}', log_file_path)
+    #print_INFO_message_timestamp(f'edges to delete: {session_state["history_changes"][f"iter_{iteration}"][key]["edges_to_delete"]}', log_file_path)
     
     session_state["is_form2_disabled"] = True
     session_state["is_form1_disabled"] = False
@@ -398,7 +398,7 @@ def split_the_node_func(G, session_state, node, node_mapping):
     
     return node_mapping, new_edge
             
-def split_two_way_roads(G, origin, session_state, iter,
+def split_two_way_roads(G, origin, session_state, iteration,
                         split_the_node_form_placeholder,
                         add_and_delete_form_placeholder,
                         count=0, count_max=1, 
@@ -461,7 +461,7 @@ def split_two_way_roads(G, origin, session_state, iter,
                         if key not in session_state.keys():
                             resume_processing = False
                         else:
-                            if "new_edges" not in session_state["history_changes"][f"iter_{iter}"][key].keys():
+                            if "new_edges" not in session_state["history_changes"][f"iter_{iteration}"][key].keys():
                                 resume_processing = True
                             
                         if check_manually or is_crossroad or resume_processing: 
@@ -469,12 +469,12 @@ def split_two_way_roads(G, origin, session_state, iter,
                             fig = img_log(G, [node], node_mapping, node_class)
                             fig.write_html(img_path, full_html=True, auto_open=False)
                                 
-                            if key in session_state["history_changes"][f"iter_{iter}"].keys() and \
-                                ("split_the_node" in session_state["history_changes"][f"iter_{iter}"][key].keys() 
-                                    and "selected_predecessor" in session_state["history_changes"][f"iter_{iter}"][key].keys() 
-                                        and "selected_successor" in session_state["history_changes"][f"iter_{iter}"][key].keys()):
-                                if session_state["history_changes"][f"iter_{iter}"][key]['split_the_node']:
-                                    node_mapping, new_edge = split_the_node_func(G, session_state["history_changes"][f"iter_{iter}"], node, node_mapping)
+                            if key in session_state["history_changes"][f"iter_{iteration}"].keys() and \
+                                ("split_the_node" in session_state["history_changes"][f"iter_{iteration}"][key].keys() 
+                                    and "selected_predecessor" in session_state["history_changes"][f"iter_{iteration}"][key].keys() 
+                                        and "selected_successor" in session_state["history_changes"][f"iter_{iteration}"][key].keys()):
+                                if session_state["history_changes"][f"iter_{iteration}"][key]['split_the_node']:
+                                    node_mapping, new_edge = split_the_node_func(G, session_state["history_changes"][f"iter_{iteration}"], node, node_mapping)
                                     fig = img_log(G, [node, new_edge[0]], node_mapping, node_class)
                                     fig.write_html(img_path, full_html=True, auto_open=False)
                                     
@@ -490,12 +490,12 @@ def split_two_way_roads(G, origin, session_state, iter,
                                 while True:
                                     t.sleep(1)
                                         
-                            if key in session_state["history_changes"][f"iter_{iter}"].keys() and \
-                                ("new_edges" in session_state["history_changes"][f"iter_{iter}"][key].keys() and \
-                                 "edges_to_delete" in session_state["history_changes"][f"iter_{iter}"][key].keys()):
-                                    for e in session_state["history_changes"][f"iter_{iter}"][key]['new_edges']:
+                            if key in session_state["history_changes"][f"iter_{iteration}"].keys() and \
+                                ("new_edges" in session_state["history_changes"][f"iter_{iteration}"][key].keys() and \
+                                 "edges_to_delete" in session_state["history_changes"][f"iter_{iteration}"][key].keys()):
+                                    for e in session_state["history_changes"][f"iter_{iteration}"][key]['new_edges']:
                                         add_edge(e, G)
-                                    for e in session_state["history_changes"][f"iter_{iter}"][key]['edges_to_delete']:
+                                    for e in session_state["history_changes"][f"iter_{iteration}"][key]['edges_to_delete']:
                                         G.remove_edge(e[0], e[1])
                             else:
                                 add_and_deleted_edges_input(G, node, session_state, 
@@ -510,7 +510,7 @@ def split_two_way_roads(G, origin, session_state, iter,
                                 
                         break
     
-            r = split_two_way_roads(G, node, session_state, iter,
+            r = split_two_way_roads(G, node, session_state, iteration,
                                     split_the_node_form_placeholder,
                                     add_and_delete_form_placeholder,
                                     count+1, count_max, 

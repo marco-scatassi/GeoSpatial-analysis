@@ -225,7 +225,7 @@ def update_split_the_node_input(session_state, node, node_mapping, predecessors_
     session_state["predecessors_id"] = predecessors_id
     session_state["successors_id"] = successors_id
 
-def on_submit_split_the_node_form(session_state, G, node, node_class, img_path, LOG_FILE_PATH2):
+def on_submit_split_the_node_form(session_state, iteration,  G, node, node_class, img_path, LOG_FILE_PATH2):
     node_mapping = session_state["node_mapping"]
     node_mapping_r = session_state["node_mapping_r"]
     key = str(node)
@@ -293,7 +293,7 @@ def split_the_node_input(node, G, node_mapping, node_class, session_state, split
                                        on_click=on_submit_split_the_node_form, 
                                        args=(session_state, G, node, node_class, img_path, LOG_FILE_PATH2))
       
-def on_submit_add_and_delete_edges_form(session_state, G, node, node_mapping_r, img_path, log_file_path):
+def on_submit_add_and_delete_edges_form(session_state, iteration, G, node, node_mapping_r, img_path, log_file_path):
     edges_to_add = session_state[f"edges_to_add_{node}"]
     distances_to_add = session_state[f"distances_to_add_{node}"]
     edges_to_delete = session_state[f"edges_to_delete_{node}"]

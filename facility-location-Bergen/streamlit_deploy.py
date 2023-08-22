@@ -64,10 +64,9 @@ HTML_IMG_PATH = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/i
 GRAPH_MANIPULATION_SEED=8797
 # --------------------------------------------- UTILITY AND CALLBACK --------------------------------------------
 def initialize_session_state_attributes(from_graph_button_load=False):
-    keys = ["node", "modified_graph", "history_changes", "node_mapping", 
-            "predecessors_id", "successors_id", 
-            "stop_and_clear", "button_load", 
-            "is_form1_disabled", "is_form2_disabled"]
+    keys = ["node", "modified_graph", "history_changes", 
+            "node_mapping", "predecessors_id", "successors_id", 
+            "stop_and_clear", "button_load", "is_form1_disabled", "is_form2_disabled"]
     
     default = ["___", None, {}, {}, [], [], False, False, False, True]
     
@@ -127,9 +126,8 @@ def graph_manipulation_load_data(session_state, TIMES):
             path = project_path+"/"+retrieve_average_graph_path(time, connected=True)
             with open(path, "rb") as f:
                 average_graphs[time] = pkl.load(f)
-        
+
         session_state[f"average_graphs"] = average_graphs
-        session_state["modified_graph"] = deepcopy(session_state[f"average_graphs"]["all_day"])
     
     session_state["history_changes"] = {}
 
@@ -138,12 +136,12 @@ def graph_manipulation_load_data(session_state, TIMES):
 def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED, 
                                split_the_node_form_placeholder, add_and_delete_form_placeholder):
     
-    #session_state["modified_graph"] = deepcopy(session_state[f"average_graphs"]["all_day"])
+    session_state["modified_graph"] = deepcopy(session_state[f"average_graphs"]["all_day"])
     
     nodes = list(session_state[f"average_graphs"]["all_day"].nodes())
     seed = random.seed(GRAPH_MANIPULATION_SEED)
 
-    origin = random.choice(nodes)                           
+    origin = random.choice(nodes)
     print_INFO_message_timestamp("Splitting two way roads")
     for _ in range(3):
         split_two_way_roads(session_state["modified_graph"], 
@@ -155,8 +153,7 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
                                     count_max=80, 
                                     log_file_path=LOG_FILE_PATH,
                                     log_file_path2=LOG_FILE_PATH2, 
-                                    img_path=HTML_IMG_PATH,
-                                    G_original=session_state[f"average_graphs"]["all_day"])
+                                    img_path=HTML_IMG_PATH,)
         origin = random.choice(nodes)
 
     

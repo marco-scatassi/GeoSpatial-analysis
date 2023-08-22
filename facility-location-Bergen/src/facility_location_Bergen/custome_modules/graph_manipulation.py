@@ -379,22 +379,23 @@ def reconnect_predecessors(G, origin, log_file_path, node, new_edge):
                     G.add_edge(p, new_edge[0], **e[2])
                     break
                 
-def split_the_node_func(G, session_state, node, node_mapping):
+def split_the_node_func(G, session_state, node, node_mapping, execute_split=False):
     key = str(node)
     selected_predecessor = session_state[key]['selected_predecessor']
     selected_successor = session_state[key]['selected_successor']
     new_edge = traslate_path([(node[0], node[1]), (selected_successor[0], selected_successor[1])], 0.00007, True)
     node_mapping[new_edge[0]] = max(list(node_mapping.values()))+1
-    for e in G.edges((selected_predecessor, node), data=True):
-        if e[0] == selected_predecessor and e[1] == node:
-            G.add_edge(selected_predecessor, new_edge[0], **e[2])
-            G.remove_edge(selected_predecessor, node)
-            break
-    for e in G.edges((node, selected_successor), data=True):
-        if e[0] == node and e[1] == selected_successor:
-            G.add_edge(new_edge[0], selected_successor, **e[2])
-            G.remove_edge(node, selected_successor)
-            break
+    if execute_split:
+        for e in G.edges((selected_predecessor, node), data=True):
+            if e[0] == selected_predecessor and e[1] == node:
+                G.add_edge(selected_predecessor, new_edge[0], **e[2])
+                G.remove_edge(selected_predecessor, node)
+                break
+        for e in G.edges((node, selected_successor), data=True):
+            if e[0] == node and e[1] == selected_successor:
+                G.add_edge(new_edge[0], selected_successor, **e[2])
+                G.remove_edge(node, selected_successor)
+                break
     
     return node_mapping, new_edge
             
@@ -474,7 +475,7 @@ def split_two_way_roads(G, origin, session_state,
                                     and "selected_predecessor" in session_state["history_changes"][key].keys() 
                                         and "selected_successor" in session_state["history_changes"][key].keys()):
                                 if session_state["history_changes"][key]['split_the_node']:
-                                    node_mapping, new_edge = split_the_node_func(G, session_state["history_changes"], node, node_mapping)
+                                    node_mapping, new_edge = split_the_node_func(G, session_state["history_changes"], node, node_mapping, True)
                                     fig = img_log(G, [node, new_edge[0]], node_mapping, node_class)
                                     fig.write_html(img_path, full_html=True, auto_open=False)
                                     

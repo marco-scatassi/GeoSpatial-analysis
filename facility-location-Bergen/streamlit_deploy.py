@@ -128,6 +128,7 @@ def graph_manipulation_load_data(session_state, TIMES):
                 average_graphs[time] = pkl.load(f)
 
         session_state[f"average_graphs"] = average_graphs
+        session_state["modified_graph"] = deepcopy(session_state[f"average_graphs"]["all_day"])
     
     session_state["history_changes"] = {}
 
@@ -136,7 +137,7 @@ def graph_manipulation_load_data(session_state, TIMES):
 def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED, 
                                split_the_node_form_placeholder, add_and_delete_form_placeholder):
     
-    session_state["modified_graph"] = deepcopy(session_state[f"average_graphs"]["all_day"])
+    #session_state["modified_graph"] = deepcopy(session_state[f"average_graphs"]["all_day"])
     
     nodes = list(session_state[f"average_graphs"]["all_day"].nodes())
     seed = random.seed(GRAPH_MANIPULATION_SEED)

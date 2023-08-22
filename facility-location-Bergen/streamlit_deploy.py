@@ -64,11 +64,13 @@ HTML_IMG_PATH = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/i
 GRAPH_MANIPULATION_SEED=8797
 # --------------------------------------------- UTILITY AND CALLBACK --------------------------------------------
 def initialize_session_state_attributes(from_graph_button_load=False):
-    keys = ["node", "modified_graph", "history_changes", 
-            "node_mapping", "predecessors_id", "successors_id", 
-            "stop_and_clear", "button_load", "is_form1_disabled", "is_form2_disabled"]
+    keys = ["node", "modified_graph", "last_node",
+            "history_changes", "node_mapping", 
+            "predecessors_id", "successors_id", 
+            "stop_and_clear", "button_load", 
+            "is_form1_disabled", "is_form2_disabled"]
     
-    default = ["___", None, {}, {}, [], [], False, False, False, True]
+    default = ["___", None, {}, None, {}, [], [], False, False, False, True]
     
     for key, value in zip(keys, default):
         if key not in st.session_state:
@@ -142,11 +144,14 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
     nodes = list(session_state[f"average_graphs"]["all_day"].nodes())
     seed = random.seed(GRAPH_MANIPULATION_SEED)
 
-    origin = random.choice(nodes)
+    if session_state["last_node"] is None:
+        origin = random.choice(nodes)
+        session_state["last_node"] = origin
+                                   
     print_INFO_message_timestamp("Splitting two way roads")
     for _ in range(3):
         split_two_way_roads(session_state["modified_graph"], 
-                                    origin=origin, 
+                                    origin=session_state["last_node"], 
                                     session_state=session_state,
                                     split_the_node_form_placeholder=split_the_node_form_placeholder,
                                     add_and_delete_form_placeholder=add_and_delete_form_placeholder,
@@ -155,7 +160,7 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
                                     log_file_path=LOG_FILE_PATH,
                                     log_file_path2=LOG_FILE_PATH2, 
                                     img_path=HTML_IMG_PATH,)
-        origin = random.choice(nodes)
+        session_state["last_node"] = random.choice(nodes)
 
     
     

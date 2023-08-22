@@ -128,8 +128,9 @@ def graph_manipulation_load_data(session_state, TIMES):
             path = project_path+"/"+retrieve_average_graph_path(time, connected=True)
             with open(path, "rb") as f:
                 average_graphs[time] = pkl.load(f)
-
+        
         session_state[f"average_graphs"] = average_graphs
+        session_state["last_node"] = None
         session_state["modified_graph"] = deepcopy(session_state[f"average_graphs"]["all_day"])
     
     session_state["history_changes"] = {}

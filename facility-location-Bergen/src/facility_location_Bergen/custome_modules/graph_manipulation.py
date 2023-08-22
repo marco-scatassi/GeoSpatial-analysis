@@ -251,7 +251,6 @@ def on_submit_split_the_node_form(session_state, G, node, node_class, img_path, 
     #print_INFO_message(f'selected predecessor: {session_state["history_changes"][key]["selected_predecessor"]}', LOG_FILE_PATH2)
     #print_INFO_message(f'selected successor: {session_state["history_changes"][key]["selected_successor"]}', LOG_FILE_PATH2)
 
-    session_state["last_node"] = node
     session_state["is_form1_disabled"] = True
     session_state["is_form2_disabled"] = False
               
@@ -331,7 +330,6 @@ def on_submit_add_and_delete_edges_form(session_state, G, node, node_mapping_r, 
     #print_INFO_message_timestamp(f'new edges: {session_state["history_changes"][key]["new_edges"]}', log_file_path)
     #print_INFO_message_timestamp(f'edges to delete: {session_state["history_changes"][key]["edges_to_delete"]}', log_file_path)
 
-    session_state["last_node"] = node
     session_state["is_form2_disabled"] = True
     session_state["is_form1_disabled"] = False
 
@@ -511,8 +509,9 @@ def split_two_way_roads(G, origin, session_state,
                                     t.sleep(1)
                                 
                         break
-    
-            r = split_two_way_roads(G, node, session_state,
+
+            session_state["last_node"] = node
+            r = split_two_way_roads(G, session_state["last_node"], session_state,
                                     split_the_node_form_placeholder,
                                     add_and_delete_form_placeholder,
                                     count+1, count_max, 

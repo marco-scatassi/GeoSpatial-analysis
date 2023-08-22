@@ -155,7 +155,8 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
                                     count_max=80, 
                                     log_file_path=LOG_FILE_PATH,
                                     log_file_path2=LOG_FILE_PATH2, 
-                                    img_path=HTML_IMG_PATH,)
+                                    img_path=HTML_IMG_PATH,
+                                    G_original=session_state[f"average_graphs"]["all_day"])
         origin = random.choice(nodes)
 
     

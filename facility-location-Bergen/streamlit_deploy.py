@@ -138,8 +138,9 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
 
     if "checkpoint" not in session_state.keys():
         session_state["checkpoint"] = {}
-        
-    session_state["checkpoint"][0] = deepcopy(session_state[f"average_graphs"]["all_day"])                          
+
+    session_state["modified_graph"] = deepcopy(session_state[f"average_graphs"]["all_day"])    
+    session_state["checkpoint"][0] = deepcopy(session_state["modified_graph"])                          
     
     nodes = list(session_state[f"average_graphs"]["all_day"].nodes())
     seed = random.seed(GRAPH_MANIPULATION_SEED)
@@ -148,7 +149,7 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
     print_INFO_message_timestamp("Splitting two way roads")
     for i in range(1, 3):
         if i not in session_state["checkpoint"].keys():
-            split_two_way_roads(session_state["checkpoint"][i-1], 
+            split_two_way_roads(session_state["modified_graph"], 
                                         origin=origin, 
                                         session_state=session_state,
                                         split_the_node_form_placeholder=split_the_node_form_placeholder,
@@ -160,7 +161,7 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
                                         img_path=HTML_IMG_PATH,)
             session_state["checkpoint"][i] = deepcopy(session_state["modified_graph"])
         else:
-            continue
+            session_state["modified_graph"] = session_state["checkpoint"][i]
         
         origin = random.choice(nodes)
 

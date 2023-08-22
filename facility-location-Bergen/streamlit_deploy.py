@@ -64,11 +64,11 @@ HTML_IMG_PATH = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/i
 GRAPH_MANIPULATION_SEED=8797
 # --------------------------------------------- UTILITY AND CALLBACK --------------------------------------------
 def initialize_session_state_attributes(from_graph_button_load=False):
-    keys = ["node", "modified_graph", "history_changes", "checkpoint",
+    keys = ["node", "modified_graph", "history_changes", 
             "node_mapping", "predecessors_id", "successors_id", 
             "stop_and_clear", "button_load", "is_form1_disabled", "is_form2_disabled"]
     
-    default = ["___", None, {}, {}, {}, [], [], False, False, False, True]
+    default = ["___", None, {}, {}, [], [], False, False, False, True]
     
     for key, value in zip(keys, default):
         if key not in st.session_state:
@@ -135,7 +135,10 @@ def graph_manipulation_load_data(session_state, TIMES):
 
 def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED, 
                                split_the_node_form_placeholder, add_and_delete_form_placeholder):
-    
+
+    if "checkpoint" not in session_state.keys():
+        session_state["checkpoint"] = {}
+        
     session_state["checkpoint"][0] = deepcopy(session_state[f"average_graphs"]["all_day"])                          
     
     nodes = list(session_state[f"average_graphs"]["all_day"].nodes())

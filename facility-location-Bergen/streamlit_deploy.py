@@ -70,7 +70,7 @@ def initialize_session_state_attributes(from_graph_button_load=False):
             "stop_and_clear", "button_load", 
             "is_form1_disabled", "is_form2_disabled"]
     
-    default = ["___", None, {}, None, {}, [], [], False, False, False, True]
+    default = ["___", None, None, {}, {}, [], [], False, False, False, True]
     
     for key, value in zip(keys, default):
         if key not in st.session_state:

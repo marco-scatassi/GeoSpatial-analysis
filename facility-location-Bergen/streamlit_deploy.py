@@ -137,8 +137,8 @@ def graph_manipulation_load_data(session_state, TIMES):
 def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED, 
                                split_the_node_form_placeholder, add_and_delete_form_placeholder):
 
-    if "checkpoint" not in session_state.keys():
-        session_state["checkpoint"] = {}
+    # if "checkpoint" not in session_state.keys():
+    #     session_state["checkpoint"] = {}
 
     session_state["modified_graph"] = deepcopy(session_state[f"average_graphs"]["all_day"])                
     
@@ -148,22 +148,19 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
     origin = random.choice(nodes)
     print_INFO_message_timestamp("Splitting two way roads")
     for i in range(3):
-        if i not in session_state["checkpoint"].keys():
-            split_two_way_roads(session_state["modified_graph"], 
+        split_two_way_roads(session_state["modified_graph"], 
                                         origin=origin, 
                                         session_state=session_state,
                                         split_the_node_form_placeholder=split_the_node_form_placeholder,
                                         add_and_delete_form_placeholder=add_and_delete_form_placeholder,
                                         count=0,
-                                        count_max=23, 
+                                        count_max=80, 
                                         log_file_path=LOG_FILE_PATH,
                                         log_file_path2=LOG_FILE_PATH2, 
                                         img_path=HTML_IMG_PATH,)
-            session_state["checkpoint"][i] = deepcopy(session_state["modified_graph"])
-            st.session_state["is_form1_disabled"] = False
-            st.session_state["is_form2_disabled"] = True
-        else:
-            session_state["modified_graph"] = session_state["checkpoint"][i]
+        #     session_state["checkpoint"][i] = deepcopy(session_state["modified_graph"])
+        # else:
+        #     session_state["modified_graph"] = session_state["checkpoint"][i]
         
         origin = random.choice(nodes)
 

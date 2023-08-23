@@ -147,7 +147,7 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
 
     origin = random.choice(nodes)
     print_INFO_message_timestamp("Splitting two way roads")
-    for i in range(3):
+    for i in range(4):
         split_two_way_roads(session_state["modified_graph"], 
                                         origin=origin, 
                                         session_state=session_state,

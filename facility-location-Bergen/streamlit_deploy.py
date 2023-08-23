@@ -164,7 +164,7 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
                                         log_file_path2=LOG_FILE_PATH2, 
                                         img_path=HTML_IMG_PATH,)
         
-            session_state["checkpoint"][i] = deepcopy(session_state["modified_graph"])
+        session_state["checkpoint"][i] = deepcopy(session_state["modified_graph"])
         #     session_state["checkpoint"][i] = deepcopy(session_state["modified_graph"])
         # else:
         #     session_state["modified_graph"] = session_state["checkpoint"][i]

@@ -24,12 +24,12 @@ def add_edge(node, G, only_successors=False, only_predecessors=False):
     free_flow_speeds = []
 
     if only_predecessors and only_successors:
-        print_INFO_message(f"at least one of only_predecessors and only_successors must be False")
+        # print_INFO_message(f"at least one of only_predecessors and only_successors must be False")
         raise ValueError
     
     if not only_successors:
         predecessors = list(G.predecessors(node[0]))
-        print_INFO_message(f"predecessors of {node[0]} is {predecessors}")
+        # print_INFO_message(f"predecessors of {node[0]} is {predecessors}")
         for predecessor in predecessors:
             edge = (predecessor, node[0])
             speeds.append(list(G.edges(edge, data=True))[0][2]["speed"])
@@ -38,7 +38,7 @@ def add_edge(node, G, only_successors=False, only_predecessors=False):
     if not only_predecessors:
         if G.has_node(node[1]):
             successors = list(G.successors(node[1]))
-            print_INFO_message(f"successors of {node[1]} is {successors}")
+            # print_INFO_message(f"successors of {node[1]} is {successors}")
             for successor in successors:
                 edge = (node[1], successor)
                 speeds.append(list(G.edges(edge, data=True))[1][2]["speed"])
@@ -48,8 +48,8 @@ def add_edge(node, G, only_successors=False, only_predecessors=False):
     avg_free_flow_speed = np.mean(free_flow_speeds)
     weight = node[2] / avg_speed
     weight2 = node[2] / avg_free_flow_speed
-    print_INFO_message(f"average speed is {avg_speed}")
-    print_INFO_message(f"weight is {weight}")
+    # print_INFO_message(f"average speed is {avg_speed}")
+    # print_INFO_message(f"weight is {weight}")
     G.add_edge(node[0],
                 node[1],
                 weight=weight,

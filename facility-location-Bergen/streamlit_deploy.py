@@ -154,7 +154,7 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
                                         split_the_node_form_placeholder=split_the_node_form_placeholder,
                                         add_and_delete_form_placeholder=add_and_delete_form_placeholder,
                                         count=0,
-                                        count_max=10, 
+                                        count_max=12, 
                                         log_file_path=LOG_FILE_PATH,
                                         log_file_path2=LOG_FILE_PATH2, 
                                         img_path=HTML_IMG_PATH,)

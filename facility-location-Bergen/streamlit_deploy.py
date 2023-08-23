@@ -78,6 +78,7 @@ def initialize_session_state_attributes(from_graph_button_load=False):
         st.session_state["button_load"] = True
         st.session_state["is_form1_disabled"] = False
         st.session_state["is_form2_disabled"] = True
+        st.session_state["checkpoint"] = {}
         if st.session_state["upload_button_1"] is not None:
             st.session_state["history_changes"] = pkl.load(st.session_state["upload_button_1"])
         
@@ -160,6 +161,8 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
                                         img_path=HTML_IMG_PATH,)
             session_state["checkpoint"][i] = deepcopy(session_state["modified_graph"])
         else:
+            st.session_state["is_form1_disabled"] = False
+            st.session_state["is_form2_disabled"] = True
             session_state["modified_graph"] = session_state["checkpoint"][i]
         
         origin = random.choice(nodes)

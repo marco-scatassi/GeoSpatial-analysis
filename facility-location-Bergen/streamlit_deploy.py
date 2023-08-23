@@ -148,16 +148,23 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
     origin = random.choice(nodes)
     print_INFO_message_timestamp("Splitting two way roads")
     for i in range(3):
+        if i in session_state["checkpoint"].keys():
+            session_state["modified_graph"] = session_state["checkpoint"][i]
+            c_max = -1
+        else:
+            c_max = 80
         split_two_way_roads(session_state["modified_graph"], 
                                         origin=origin, 
                                         session_state=session_state,
                                         split_the_node_form_placeholder=split_the_node_form_placeholder,
                                         add_and_delete_form_placeholder=add_and_delete_form_placeholder,
                                         count=0,
-                                        count_max=80, 
+                                        count_max=c_max, 
                                         log_file_path=LOG_FILE_PATH,
                                         log_file_path2=LOG_FILE_PATH2, 
                                         img_path=HTML_IMG_PATH,)
+        
+        session_state["checkpoint"][i] = deepcopy(session_state["modified_graph"])
         #     session_state["checkpoint"][i] = deepcopy(session_state["modified_graph"])
         # else:
         #     session_state["modified_graph"] = session_state["checkpoint"][i]

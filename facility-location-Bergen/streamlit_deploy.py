@@ -108,9 +108,12 @@ def clear_log_files():
                 </html>""")
     
 def stop_and_clear_callback():
+    keys = ["node", "modified_graph", "history_changes", 
+            "node_mapping", "predecessors_id", "successors_id", 
+            "stop_and_clear", "button_load", "is_form1_disabled", "is_form2_disabled"]
     st.session_state["stop_and_clear"] = True
     st.session_state["button_load"] = False
-    for key in st.session_state.keys():
+    for key in keys:
         if key != "stop_and_clear" and key != "button_load":
             del st.session_state[key]
 
@@ -262,13 +265,13 @@ def graph_manipulation(session_state, TIMES):
             graph_manipulation_process_template(session_state, TIMES, 
                                    LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED)
         
-    if session_state["button_load"]:
-        placeholder.warning("Process interrupted", icon="❌")
-    elif session_state["stop_and_clear"]:
-        placeholder.warning("Process interrupted and state cleared", icon="❌")
-    else:
-        placeholder.success("Process completed: changes has been saved. Download data using the download button", icon="✅")
-            
+        if session_state["button_load"]:
+            placeholder.warning("Process interrupted", icon="❌")
+        elif session_state["stop_and_clear"]:
+            placeholder.warning("Process interrupted and state cleared", icon="❌")
+        else:
+            placeholder.success("Process completed: changes has been saved. Download data using the download button", icon="✅")
+                
        
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------
 def deterministic_load_data(session_state, TIMES, facilities_number):

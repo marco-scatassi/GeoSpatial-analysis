@@ -258,8 +258,6 @@ def graph_manipulation(session_state, TIMES):
         for att in ["node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
             if att not in st.session_state:
                 return st.error("Please load data first!", icon="🚨")
-                
-        session_state["button_load"] = False
         
         with placeholder:
             graph_manipulation_process_template(session_state, TIMES, 

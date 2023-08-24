@@ -76,6 +76,7 @@ def initialize_session_state_attributes(from_graph_button_load=False):
     
     if from_graph_button_load:
         st.session_state["button_load"] = True
+        session_state["stop_and_clear"] = False
         st.session_state["is_form1_disabled"] = False
         st.session_state["is_form2_disabled"] = True
         st.session_state["checkpoint"] = {}
@@ -108,9 +109,12 @@ def clear_log_files():
                 </html>""")
     
 def stop_and_clear_callback():
+    keys = ["node", "modified_graph", "history_changes", 
+            "node_mapping", "predecessors_id", "successors_id", 
+            "stop_and_clear", "button_load", "is_form1_disabled", "is_form2_disabled"]
     st.session_state["stop_and_clear"] = True
     st.session_state["button_load"] = False
-    for key in st.session_state.keys():
+    for key in keys:
         if key != "stop_and_clear" and key != "button_load":
             del st.session_state[key]
 
@@ -225,7 +229,6 @@ def graph_manipulation_process_template(session_state, TIMES,
                                split_the_node_form_placeholder, add_and_delete_form_placeholder)
     else:
         print_INFO_message_timestamp("Stop and clear state")
-        session_state["stop_and_clear"] = False
         return
 
 def graph_manipulation(session_state, TIMES):
@@ -255,20 +258,18 @@ def graph_manipulation(session_state, TIMES):
         for att in ["node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
             if att not in st.session_state:
                 return st.error("Please load data first!", icon="🚨")
-                
-        session_state["button_load"] = False
         
         with placeholder:
             graph_manipulation_process_template(session_state, TIMES, 
                                    LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED)
         
         if session_state["button_load"]:
-            placeholder.warning("Process interrupted", icon="❌")
+            placeholder.warning("Process interrupted (load the data to start again)", icon="❌")
         elif session_state["stop_and_clear"]:
-            placeholder.warning("Process interrupted and state cleared", icon="❌")
+            placeholder.warning("Process interrupted and state cleared (load the data to start again)", icon="❌")
         else:
             placeholder.success("Process completed: changes has been saved. Download data using the download button", icon="✅")
-            
+                
        
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------
 def deterministic_load_data(session_state, TIMES, facilities_number):

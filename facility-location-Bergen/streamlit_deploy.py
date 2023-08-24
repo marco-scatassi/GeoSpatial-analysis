@@ -228,7 +228,6 @@ def graph_manipulation_process_template(session_state, TIMES,
                                split_the_node_form_placeholder, add_and_delete_form_placeholder)
     else:
         print_INFO_message_timestamp("Stop and clear state")
-        session_state["stop_and_clear"] = False
         return
 
 def graph_manipulation(session_state, TIMES):

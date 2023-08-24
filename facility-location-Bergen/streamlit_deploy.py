@@ -76,6 +76,7 @@ def initialize_session_state_attributes(from_graph_button_load=False):
     
     if from_graph_button_load:
         st.session_state["button_load"] = True
+        session_state["stop_and_clear"] = False
         st.session_state["is_form1_disabled"] = False
         st.session_state["is_form2_disabled"] = True
         st.session_state["checkpoint"] = {}

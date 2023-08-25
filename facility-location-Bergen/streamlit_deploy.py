@@ -151,7 +151,7 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
 
     origin = random.choice(nodes)
     print_INFO_message_timestamp("Splitting two way roads")
-    for i in range(15):
+    for i in range(20):
         if i in session_state["checkpoint"].keys():
             session_state["modified_graph"] = session_state["checkpoint"][i]
             c_max = -1
@@ -227,6 +227,10 @@ def graph_manipulation_process_template(session_state, TIMES,
     if not stop_and_clear_button and not session_state["stop_and_clear"]:
         graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED, 
                                split_the_node_form_placeholder, add_and_delete_form_placeholder)
+        
+        session_state["button_load"] = False
+        session_state["stop_and_clear"] = False
+        return
     else:
         print_INFO_message_timestamp("Stop and clear state")
         return
@@ -262,8 +266,6 @@ def graph_manipulation(session_state, TIMES):
         with placeholder:
             graph_manipulation_process_template(session_state, TIMES, 
                                    LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED)
-            session_state["button_load"] = False
-            session_state["stop_and_clear"] = False
         if session_state["button_load"]:
             placeholder.warning("Process interrupted (load the data to start again)", icon="❌")
         elif session_state["stop_and_clear"]:

@@ -153,7 +153,7 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
     print_INFO_message_timestamp("Splitting two way roads")
     check_list = list(session_state["checkpoint"].keys())
     initial_i = check_list[-1] if len(check_list) > 0 else 0
-    for i in range(140):
+    for i in range(160):
         if i in session_state["checkpoint"].keys():
             session_state["modified_graph"] = session_state["checkpoint"][i]
             c_max = -1

@@ -259,7 +259,7 @@ def graph_manipulation(session_state, TIMES):
     
     ############################################## MODIFY GRAPH ##############################################    
     if button_manipulation:
-        for att in ["node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
+        for att in ["average_graphs", "node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
             if att not in st.session_state:
                 return st.error("Please load data first!", icon="🚨")
         
@@ -278,7 +278,7 @@ def graph_manipulation(session_state, TIMES):
 
     ############################################## REFINE GRAPH ############################################## 
     if button_refine:
-        for att in ["node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
+        for att in ["average_graphs", "node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
             if att not in st.session_state:
                 return st.error("Please load data first!", icon="🚨")
                 

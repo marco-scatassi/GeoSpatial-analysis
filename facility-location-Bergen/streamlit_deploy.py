@@ -155,8 +155,8 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
 
     origin = random.choice(nodes)
     print_INFO_message_timestamp("Splitting two way roads")
-    for i in range(350):
-        if i%3 == 0 and i in session_state["checkpoint"].keys():
+    for i in range(100):
+        if i%1 == 0 and i in session_state["checkpoint"].keys():
             session_state["modified_graph"] = session_state["checkpoint"][i]
             c_max = -1
         else:
@@ -172,7 +172,7 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
                                         log_file_path2=LOG_FILE_PATH2, 
                                         img_path=HTML_IMG_PATH,)
 
-        if i%3 == 0:
+        if i%1 == 0:
             session_state["checkpoint"][i] = deepcopy(session_state["modified_graph"])
         #     session_state["checkpoint"][i] = deepcopy(session_state["modified_graph"])
         # else:
@@ -295,7 +295,19 @@ def graph_manipulation(session_state, TIMES):
         fig, _ = show_graph(CCs_)
 
         with placeholder:
-            st.plotly_chart(fig)
+            form_col, graph_col = st.columns(2)
+            with form_col:
+                add_and_delete_form_placeholder = st.empty()           
+                add_and_delete_form = add_and_delete_form_placeholder.form(f"add and delete form refine")
+                with add_and_delete_form:
+                    st.write(f"**Form**: add and delete edges")               
+                    st.multiselect("edges to add", [], disabled=True)
+                    st.multiselect("edges to delete", [], disabled=True)
+                            
+                    st.form_submit_button("submit", disabled=True)
+            
+            with graph_col:
+                st.plotly_chart(fig)
         
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------
 def deterministic_load_data(session_state, TIMES, facilities_number):

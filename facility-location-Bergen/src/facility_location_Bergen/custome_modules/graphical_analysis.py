@@ -242,7 +242,7 @@ def show_graph(F):
     lat = nodes.geometry.y,
     lon = nodes.geometry.x,
     mode='markers',
-    marker=dict(size=3 if i==0 else 6, color="black", opacity=opacity),
+    marker=dict(size=3, color="black", opacity=opacity),
     showlegend=False,
   ))
 

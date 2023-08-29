@@ -735,7 +735,7 @@ if __name__ == '__main__':
                                pkl.dumps(session_state["history_changes"]),
                               file_name="history_changes.pkl")
             st.slider("**Choose the number of strongly cc to be displayed",
-                     min_value=1,
+                     min_value=0,
                      max_value=st.session_state["n_strongly_cc"])
             
     if section not in ["Project description", "Theoretical Framework"]:

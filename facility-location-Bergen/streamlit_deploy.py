@@ -297,7 +297,7 @@ def graph_manipulation(session_state, TIMES):
         with placeholder:
             form_col, graph_col = st.columns(2)
             with form_col:
-                for i in range(4):
+                for i in range(5):
                     st.write("#")
                 add_and_delete_form_placeholder = st.empty()           
                 add_and_delete_form = add_and_delete_form_placeholder.form(f"add and delete form refine")

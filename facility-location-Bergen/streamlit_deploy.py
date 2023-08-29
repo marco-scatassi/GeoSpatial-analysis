@@ -736,13 +736,15 @@ if __name__ == '__main__':
                     label_visibility="collapsed",)
             
         if section == "Graph manipulation":
-            st.subheader("Save state or restore the old one")
+            st.subheader("Restore the old state")
             uploaded_file = st.file_uploader("**Upload graph**", 
                                              type=["pkl", "bin"], 
                                              key="upload_button_0",)
             uploaded_file = st.file_uploader("**Upload history changes**", 
                                              type=["pkl", "bin"], 
                                              key="upload_button_1",)
+            
+            st.subheader("Save the current state")
             st.download_button("download modified graph",
                                pkl.dumps(session_state["modified_graph"]),
                               file_name="graph.pkl")

@@ -725,6 +725,7 @@ if __name__ == '__main__':
                     label_visibility="collapsed",)
             
         if section == "Graph manipulation":
+            st.subheader("Utiliy to save the graph current state or restore the old one")
             uploaded_file = st.file_uploader("**Upload history changes**", 
                                              type=["pkl", "bin"], 
                                              key="upload_button_1",)
@@ -734,7 +735,8 @@ if __name__ == '__main__':
             st.download_button("download history changes",
                                pkl.dumps(session_state["history_changes"]),
                               file_name="history_changes.pkl")
-            st.slider("**Choose the number of strongly cc to be displayed",
+            st.subheader('Enabled only when "Refine modified graph" is selected')
+            st.slider("**Choose the number of strongly cc to be displayed**",
                      min_value=0,
                      max_value=st.session_state["n_strongly_cc"])
             

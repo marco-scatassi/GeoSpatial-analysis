@@ -82,6 +82,8 @@ def initialize_session_state_attributes(from_graph_button_load=False):
         st.session_state["is_form1_disabled"] = False
         st.session_state["is_form2_disabled"] = True
         st.session_state["checkpoint"] = {}
+        if st.session_state["upload_button_0"] is not None:
+            st.session_state["modified_graph"] = pkl.load(st.session_state["upload_button_0"])
         if st.session_state["upload_button_1"] is not None:
             st.session_state["history_changes"] = pkl.load(st.session_state["upload_button_1"])
         
@@ -735,6 +737,9 @@ if __name__ == '__main__':
             
         if section == "Graph manipulation":
             st.subheader("Save state or restore the old one")
+            uploaded_file = st.file_uploader("**Upload graph**", 
+                                             type=["pkl", "bin"], 
+                                             key="upload_button_0",)
             uploaded_file = st.file_uploader("**Upload history changes**", 
                                              type=["pkl", "bin"], 
                                              key="upload_button_1",)

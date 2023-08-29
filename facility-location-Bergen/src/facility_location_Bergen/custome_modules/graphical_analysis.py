@@ -2,8 +2,10 @@ import folium
 import numpy as np
 import pandas as pd
 import networkx as nx
+import geopandas as gpd
 import plotly.graph_objects as go
 from sklearn.utils import resample
+from shapely.geometry import Point
 from plotly.subplots import make_subplots
 
 def rand_jitter(list):
@@ -179,6 +181,95 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
                         xaxis_title="time of the day",)
 
     return fig
+
+def show_graph(F):
+  if type(F) != list:
+    F = [F]
+  
+  # assumption: the first graph is the global graph and the rest are the cc
+  node_mapping = {}
+  i = 0
+  for node in F[0].nodes():
+    node_mapping[node] = i
+    i += 1
+  
+  F_list = []
+  
+  for i, f in enumerate(F):
+    if len(f.nodes) > 1:
+      F_list.append(f)
+    else:
+      break
+    
+  index_start = i
+  if index_start < len(F) - 1:
+    F_list.append(nx.union_all(F[index_start:]))
+  
+  colors = ["red", "blue", "green", "yellow", "orange", "purple", "brown"]
+  total_nodes = sum([len(f.nodes) for f in F])
+  
+  fig = go.Figure()
+
+  for i, f in enumerate(F_list):
+    if i < len(colors):
+      color = colors[i]
+    else:
+      color = "white"
+    
+    opacity = 1 - len(f.nodes)/total_nodes if len(F) > 1 else 1
+    
+    nodes_lon = []
+    nodes_lat = []
+    weights = []
+    for edge in f.edges(data=True):
+          x0, y0 = edge[0]
+          x1, y1 = edge[1]
+          weight = edge[2]["weight"]
+          nodes_lon.append(x0)
+          nodes_lon.append(x1)
+          nodes_lon.append(None)
+          nodes_lat.append(y0)
+          nodes_lat.append(y1)
+          nodes_lat.append(None)
+          weights.append(weight)
+      
+    fig.add_trace(go.Scattermapbox(
+        lat=nodes_lat,
+        lon=nodes_lon,
+        mode='lines',
+        line=dict(width=1, color=color),
+        showlegend=False,
+    ))
+
+    nodes = f.nodes()
+    nodes = gpd.GeoDataFrame(pd.Series(list(nodes())).apply(lambda x: Point(x)), columns=["geometry"], crs="EPSG:4326")
+
+    text = []
+    for n in nodes.geometry:
+      text.append("")
+      text[-1] += str(node_mapping[(n.x, n.y)])
+                
+                
+    fig.add_trace(go.Scattermapbox(
+    lat = nodes.geometry.y,
+    lon = nodes.geometry.x,
+    mode='markers',
+    text=text,
+    marker=dict(size=3, color="black", opacity=opacity),
+    showlegend=False,
+  ))
+
+  fig.update_layout(title="<b>Graph visualization<b>",
+                      mapbox=dict(
+                        style="open-street-map",
+                        center=dict(lat=60.366746, lon=5.336089),
+                        zoom=9
+                        ),
+                      title_pad_l=260,
+                      height=700,
+                      width=1000,)
+
+  return  fig, node_mapping
 
 def visualize_longest_paths(dfs, average_graphs):
     # ------------------------------ prepare the data ----------------------------------#

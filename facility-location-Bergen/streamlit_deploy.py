@@ -11,6 +11,7 @@ import random
 import time as ptime
 from copy import deepcopy
 from pathlib import Path
+import networkx as nx
 
 import folium
 import pandas as pd
@@ -44,6 +45,7 @@ from src.facility_location_Bergen.custome_modules.graphical_analysis import (
     outsample_evaluation_relative_differences,
     travel_times_distribution_under_different_cases,
     visualize_longest_paths,
+    show_graph
 )
 from streamlit_folium import st_folium
 
@@ -64,11 +66,11 @@ HTML_IMG_PATH = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/i
 GRAPH_MANIPULATION_SEED=8797
 # --------------------------------------------- UTILITY AND CALLBACK --------------------------------------------
 def initialize_session_state_attributes(from_graph_button_load=False):
-    keys = ["node", "modified_graph", "history_changes", 
+    keys = ["node", "modified_graph", "n_strongly_cc", "history_changes", 
             "node_mapping", "predecessors_id", "successors_id", 
             "stop_and_clear", "button_load", "is_form1_disabled", "is_form2_disabled"]
     
-    default = ["___", None, {}, {}, [], [], False, False, False, True]
+    default = ["___", None, 1, {}, {}, [], [], False, False, False, True]
     
     for key, value in zip(keys, default):
         if key not in st.session_state:
@@ -80,6 +82,8 @@ def initialize_session_state_attributes(from_graph_button_load=False):
         st.session_state["is_form1_disabled"] = False
         st.session_state["is_form2_disabled"] = True
         st.session_state["checkpoint"] = {}
+        if st.session_state["upload_button_0"] is not None:
+            st.session_state["modified_graph"] = pkl.load(st.session_state["upload_button_0"])
         if st.session_state["upload_button_1"] is not None:
             st.session_state["history_changes"] = pkl.load(st.session_state["upload_button_1"])
         
@@ -237,12 +241,14 @@ def graph_manipulation_process_template(session_state, TIMES,
         return
 
 def graph_manipulation(session_state, TIMES):
-    col1, col2, _, _ = st.columns(4)
+    col1, col2, col3, _ = st.columns(4)
     
     with col1:
         button_load = st.button("Load data for graph manipulation")
     with col2:
         button_manipulation = st.button("Start graph manipulation process")
+    with col3:
+        button_refine = st.button("Refine modified graph")
 
     st.markdown("---")
     
@@ -258,9 +264,9 @@ def graph_manipulation(session_state, TIMES):
         if button_manipulation:
             st.session_state["stop_and_clear"] = True
     
-    ############################################## GENERATE VIZ ##############################################    
+    ############################################## MODIFY GRAPH ##############################################    
     if button_manipulation:
-        for att in ["node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
+        for att in ["average_graphs", "node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
             if att not in st.session_state:
                 return st.error("Please load data first!", icon="🚨")
         
@@ -276,8 +282,39 @@ def graph_manipulation(session_state, TIMES):
             placeholder.warning("Process interrupted and state cleared (load the data to start again)", icon="❌")
         else:
             placeholder.success("Process completed: changes has been saved. Download data using the download button", icon="✅")
+
+    ############################################## REFINE GRAPH ############################################## 
+    if button_refine:
+        for att in ["average_graphs", "node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
+            if att not in st.session_state:
+                return st.error("Please load data first!", icon="🚨")
                 
-       
+        G1 = session_state["modified_graph"]
+        G2 = session_state["average_graphs"]["all_day"]
+        G = G1 if G1 is not None else G2
+        
+        session_state["n_strongly_cc"] = nx.number_strongly_connected_components(G) 
+        CCs = build_cc(G, strong=True)
+        CCs_ = [G]+CCs[1:]
+        fig, _ = show_graph(CCs_)
+
+        with placeholder:
+            graph_col, form_col = st.columns([2,1])
+            with form_col:
+                for i in range(5):
+                    st.write("#")
+                add_and_delete_form_placeholder = st.empty()           
+                add_and_delete_form = add_and_delete_form_placeholder.form(f"add and delete form refine")
+                with add_and_delete_form:
+                    st.write(f"**Form**: add and delete edges")               
+                    st.multiselect("edges to add", [], disabled=True)
+                    st.multiselect("edges to delete", [], disabled=True)
+                            
+                    st.form_submit_button("submit", disabled=True)
+            
+            with graph_col:
+                st.plotly_chart(fig, use_container_width=True)
+        
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------
 def deterministic_load_data(session_state, TIMES, facilities_number):
     c = 0
@@ -717,15 +754,27 @@ if __name__ == '__main__':
                     label_visibility="collapsed",)
             
         if section == "Graph manipulation":
+            st.subheader("Restore the old state")
+            uploaded_file = st.file_uploader("**Upload graph**", 
+                                             type=["pkl", "bin"], 
+                                             key="upload_button_0",)
             uploaded_file = st.file_uploader("**Upload history changes**", 
                                              type=["pkl", "bin"], 
                                              key="upload_button_1",)
+            
+            st.subheader("Save the current state")
             st.download_button("download modified graph",
                                pkl.dumps(session_state["modified_graph"]),
                               file_name="graph.pkl")
             st.download_button("download history changes",
                                pkl.dumps(session_state["history_changes"]),
                               file_name="history_changes.pkl")
+            # st.subheader('Parameters for the refine procedure')
+            # st.slider("**Choose the number of strongly cc to be displayed**",
+            #          min_value=0,
+            #          max_value=st.session_state["n_strongly_cc"],
+            #          value=st.session_state["n_strongly_cc"],
+            #          key = "slider_strong_cc")
             
     if section not in ["Project description", "Theoretical Framework"]:
         st.title("Facility Location dashboard")

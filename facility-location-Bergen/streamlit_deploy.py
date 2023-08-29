@@ -289,7 +289,7 @@ def graph_manipulation(session_state, TIMES):
         
         session_state["n_strongly_cc"] = nx.number_strongly_connected_components(G) 
         CCs = build_cc(G, strong=True)
-        CCs_ = [G]+CCs
+        CCs_ = [G]+CCs[1:st.session_state["slider_strong_cc"]]
         fig = show_graph(CCs_)
         st.plotly_chart(fig)
         
@@ -745,7 +745,9 @@ if __name__ == '__main__':
             st.subheader('Parameters for the refine procedure')
             st.slider("**Choose the number of strongly cc to be displayed**",
                      min_value=0,
-                     max_value=st.session_state["n_strongly_cc"])
+                     max_value=st.session_state["n_strongly_cc"],
+                     value=st.session_state["n_strongly_cc"],
+                     key = "slider_strong_cc")
             
     if section not in ["Project description", "Theoretical Framework"]:
         st.title("Facility Location dashboard")

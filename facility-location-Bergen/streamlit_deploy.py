@@ -295,7 +295,7 @@ def graph_manipulation(session_state, TIMES):
         fig, _ = show_graph(CCs_)
 
         with placeholder:
-            form_col, graph_col = st.columns([1,2])
+            graph_col, form_col = st.columns([2,1])
             with form_col:
                 for i in range(5):
                     st.write("#")

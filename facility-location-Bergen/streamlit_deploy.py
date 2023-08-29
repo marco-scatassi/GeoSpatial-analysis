@@ -151,7 +151,7 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
 
     origin = random.choice(nodes)
     print_INFO_message_timestamp("Splitting two way roads")
-    for i in range(300):
+    for i in range(400):
         if i%3 == 0 and i in session_state["checkpoint"].keys():
             session_state["modified_graph"] = session_state["checkpoint"][i]
             c_max = -1

@@ -292,7 +292,7 @@ def graph_manipulation(session_state, TIMES):
         session_state["n_strongly_cc"] = nx.number_strongly_connected_components(G) 
         CCs = build_cc(G, strong=True)
         CCs_ = [G]+CCs[1:]
-        fig = show_graph(CCs_)
+        fig, _ = show_graph(CCs_)
 
         with placeholder:
             st.plotly_chart(fig)

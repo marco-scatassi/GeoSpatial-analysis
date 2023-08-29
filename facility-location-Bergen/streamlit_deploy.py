@@ -297,6 +297,7 @@ def graph_manipulation(session_state, TIMES):
         with placeholder:
             form_col, graph_col = st.columns(2)
             with form_col:
+                st.write("#")
                 add_and_delete_form_placeholder = st.empty()           
                 add_and_delete_form = add_and_delete_form_placeholder.form(f"add and delete form refine")
                 with add_and_delete_form:
@@ -307,7 +308,7 @@ def graph_manipulation(session_state, TIMES):
                     st.form_submit_button("submit", disabled=True)
             
             with graph_col:
-                st.plotly_chart(fig)
+                st.plotly_chart(fig, use_container_width=True)
         
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------
 def deterministic_load_data(session_state, TIMES, facilities_number):

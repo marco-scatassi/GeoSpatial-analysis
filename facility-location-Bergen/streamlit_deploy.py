@@ -45,6 +45,7 @@ from src.facility_location_Bergen.custome_modules.graphical_analysis import (
     outsample_evaluation_relative_differences,
     travel_times_distribution_under_different_cases,
     visualize_longest_paths,
+    show_graph
 )
 from streamlit_folium import st_folium
 
@@ -282,9 +283,15 @@ def graph_manipulation(session_state, TIMES):
             if att not in st.session_state:
                 return st.error("Please load data first!", icon="🚨")
                 
-        G = session_state["modified_graph"]
-        F = session_state["average_graphs"]["all_day"]
-        session_state["n_strongly_cc"] = nx.number_strongly_connected_components(G) if G is not None else nx.number_strongly_connected_components(F)
+        G1 = session_state["modified_graph"]
+        G2 = session_state["average_graphs"]["all_day"]
+        G = G1 if G1 is not None else G2
+        
+        session_state["n_strongly_cc"] = nx.number_strongly_connected_components(G) 
+        CCs = build_cc(G, strong=True)
+        CCs_ = [G]+CCs
+        fig = show_graph(CCs_)
+        st.plotly_chart(fig)
         
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------
 def deterministic_load_data(session_state, TIMES, facilities_number):

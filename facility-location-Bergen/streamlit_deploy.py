@@ -151,10 +151,8 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
 
     origin = random.choice(nodes)
     print_INFO_message_timestamp("Splitting two way roads")
-    check_list = list(session_state["checkpoint"].keys())
-    initial_i = check_list[-1] if len(check_list) > 0 else 0
     for i in range(220):
-        if i in session_state["checkpoint"].keys():
+        if i%2 == 0 and i in session_state["checkpoint"].keys():
             session_state["modified_graph"] = session_state["checkpoint"][i]
             c_max = -1
         else:
@@ -169,8 +167,9 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
                                         log_file_path=LOG_FILE_PATH,
                                         log_file_path2=LOG_FILE_PATH2, 
                                         img_path=HTML_IMG_PATH,)
-        
-        session_state["checkpoint"][i] = deepcopy(session_state["modified_graph"])
+
+        if i%2 == 0:
+            session_state["checkpoint"][i] = deepcopy(session_state["modified_graph"])
         #     session_state["checkpoint"][i] = deepcopy(session_state["modified_graph"])
         # else:
         #     session_state["modified_graph"] = session_state["checkpoint"][i]

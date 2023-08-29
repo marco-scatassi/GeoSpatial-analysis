@@ -267,6 +267,9 @@ def graph_manipulation(session_state, TIMES):
         with placeholder:
             graph_manipulation_process_template(session_state, TIMES, 
                                    LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED)
+            session_state["button_load"] = False
+            session_state["stop_and_clear"] = False
+            
         if session_state["button_load"]:
             placeholder.warning("Process interrupted (load the data to start again)", icon="❌")
         elif session_state["stop_and_clear"]:

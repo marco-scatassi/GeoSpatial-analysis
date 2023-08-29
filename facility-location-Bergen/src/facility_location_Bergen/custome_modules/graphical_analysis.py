@@ -186,6 +186,13 @@ def show_graph(F):
   if type(F) != list:
     F = [F]
   
+  # assumption: the first graph is the global graph and the rest are the cc
+  node_mapping = {}
+  i = 0
+  for node in F[0].nodes():
+    node_mapping[node] = i
+    i += 1
+  
   F_list = []
   
   for i, f in enumerate(F):
@@ -237,11 +244,17 @@ def show_graph(F):
     nodes = f.nodes()
     nodes = gpd.GeoDataFrame(pd.Series(list(nodes())).apply(lambda x: Point(x)), columns=["geometry"], crs="EPSG:4326")
 
-
+    text = []
+    for n in nodes.geometry:
+      text.append("")
+      text[-1] += str(node_mapping[(n.x, n.y)])
+                
+                
     fig.add_trace(go.Scattermapbox(
     lat = nodes.geometry.y,
     lon = nodes.geometry.x,
     mode='markers',
+    text=text,
     marker=dict(size=3, color="black", opacity=opacity),
     showlegend=False,
   ))
@@ -256,7 +269,7 @@ def show_graph(F):
                       height=700,
                       width=1000,)
 
-  return  fig      
+  return  fig, node_mapping
 
 def visualize_longest_paths(dfs, average_graphs):
     # ------------------------------ prepare the data ----------------------------------#

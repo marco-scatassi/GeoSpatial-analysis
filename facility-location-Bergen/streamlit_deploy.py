@@ -11,6 +11,7 @@ import random
 import time as ptime
 from copy import deepcopy
 from pathlib import Path
+import networkx as nx
 
 import folium
 import pandas as pd
@@ -64,11 +65,11 @@ HTML_IMG_PATH = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/i
 GRAPH_MANIPULATION_SEED=8797
 # --------------------------------------------- UTILITY AND CALLBACK --------------------------------------------
 def initialize_session_state_attributes(from_graph_button_load=False):
-    keys = ["node", "modified_graph", "history_changes", 
+    keys = ["node", "modified_graph", "n_strongly_cc", "history_changes", 
             "node_mapping", "predecessors_id", "successors_id", 
             "stop_and_clear", "button_load", "is_form1_disabled", "is_form2_disabled"]
     
-    default = ["___", None, {}, {}, [], [], False, False, False, True]
+    default = ["___", None, 1, {}, {}, [], [], False, False, False, True]
     
     for key, value in zip(keys, default):
         if key not in st.session_state:
@@ -233,12 +234,14 @@ def graph_manipulation_process_template(session_state, TIMES,
         return
 
 def graph_manipulation(session_state, TIMES):
-    col1, col2, _, _ = st.columns(4)
+    col1, col2, col3, _ = st.columns(4)
     
     with col1:
         button_load = st.button("Load data for graph manipulation")
     with col2:
         button_manipulation = st.button("Start graph manipulation process")
+    with col3:
+        button_refine = st.button("Refine modified graph")
 
     st.markdown("---")
     
@@ -254,7 +257,7 @@ def graph_manipulation(session_state, TIMES):
         if button_manipulation:
             st.session_state["stop_and_clear"] = True
     
-    ############################################## GENERATE VIZ ##############################################    
+    ############################################## MODIFY GRAPH ##############################################    
     if button_manipulation:
         for att in ["node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
             if att not in st.session_state:
@@ -272,8 +275,17 @@ def graph_manipulation(session_state, TIMES):
             placeholder.warning("Process interrupted and state cleared (load the data to start again)", icon="❌")
         else:
             placeholder.success("Process completed: changes has been saved. Download data using the download button", icon="✅")
+
+    ############################################## REFINE GRAPH ############################################## 
+    if button_refine:
+        for att in ["node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
+            if att not in st.session_state:
+                return st.error("Please load data first!", icon="🚨")
                 
-       
+        G = session_state["modified_graph"]
+        F = session_state["average_graphs"]["all_day"]
+        session_state["n_strongly_cc"] = nx.number_strongly_connected_components(G) if G is not None else nx.number_strongly_connected_components(F)
+        
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------
 def deterministic_load_data(session_state, TIMES, facilities_number):
     c = 0
@@ -722,6 +734,9 @@ if __name__ == '__main__':
             st.download_button("download history changes",
                                pkl.dumps(session_state["history_changes"]),
                               file_name="history_changes.pkl")
+            st.slider("**Choose the number of strongly cc to be displayed",
+                     min_value=1,
+                     max_value=st.session_state["n_strongly_cc"])
             
     if section not in ["Project description", "Theoretical Framework"]:
         st.title("Facility Location dashboard")

@@ -530,8 +530,8 @@ def on_submit_refine_form(session_state, G, node_mapping_r):
     edges_to_delete_input = session_state[f"edges_to_delete"]
     
     dist = distances_to_add_input.replace(" ", "").split(",")
-    add = edges_to_add_input.replace(" ", "").replace(")", "))").split("),")
-    delete = edges_to_delete_input.replace(" ", "").replace(")", "))").split("),")
+    add = (edges_to_add_input.replace(" ", "").replace(")", "))")+",").split("),")[:-1]
+    delete = (edges_to_delete_input.replace(" ", "").replace(")", "))")+",").split("),")[:-1]
     
     add = [eval(e) for e in add]
     delete = [eval(e) for e in delete]
@@ -552,6 +552,7 @@ def on_submit_refine_form(session_state, G, node_mapping_r):
         add_edge(e, G)
     for e in deleted_edges:
         G.remove_edge(e[0], e[1])
+            
             
 def refine_graph(G, form_placeholder, session_state):    
     node_mapping = {}

@@ -523,7 +523,7 @@ def split_two_way_roads(G, origin, session_state,
 
         return False
             
-def refine_graph(G, form_placeholder, session_state):    
+def refine_graph(G, form_placeholder, session_state, exit=False):    
     node_mapping = {}
     i = 0
     for node in G.nodes():
@@ -533,4 +533,5 @@ def refine_graph(G, form_placeholder, session_state):
     if "graph" not in session_state.keys():
         session_state["history_changes"]["graph"] = {}
     
-    add_and_deleted_edges_input(G, "graph", session_state, node_mapping, form_placeholder)
+    while not exit:
+        add_and_deleted_edges_input(G, "graph", session_state, node_mapping, form_placeholder)

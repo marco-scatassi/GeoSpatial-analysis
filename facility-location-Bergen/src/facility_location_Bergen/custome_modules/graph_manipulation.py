@@ -532,6 +532,10 @@ def on_submit_refine_form(session_state, G, node_mapping_r):
     dist = distances_to_add_input.replace(" ", "").split(",")
     add = edges_to_add_input.replace(" ", "").replace(")", "))").split("),")
     delete = edges_to_delete_input.replace(" ", "").replace(")", "))").split("),")
+    
+    add = [eval(e) for e in add]
+    delete = [eval(e) for e in delete]
+    
     if len(edges_to_add_input) != len(dist) and dist != [""]:
         st.error(f"the number of edges to add and the number of distances provided are different\n{edges_to_add_input}\n{dist}")
     

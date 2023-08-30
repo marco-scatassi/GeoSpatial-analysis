@@ -66,11 +66,11 @@ HTML_IMG_PATH = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/i
 GRAPH_MANIPULATION_SEED=8797
 # --------------------------------------------- UTILITY AND CALLBACK --------------------------------------------
 def initialize_session_state_attributes(from_graph_button_load=False):
-    keys = ["node", "modified_graph", "n_strongly_cc", "history_changes", 
+    keys = ["node", "modified_graph", "refine_graph", "history_changes", 
             "node_mapping", "predecessors_id", "successors_id", 
             "stop_and_clear", "button_load", "is_form1_disabled", "is_form2_disabled"]
     
-    default = ["___", None, 1, {}, {}, [], [], False, False, False, True]
+    default = ["___", None, {}, {}, {}, [], [], False, False, False, True]
     
     for key, value in zip(keys, default):
         if key not in st.session_state:
@@ -118,6 +118,7 @@ def stop_and_clear_callback():
             "stop_and_clear", "button_load", "is_form1_disabled", "is_form2_disabled"]
     st.session_state["stop_and_clear"] = True
     st.session_state["button_load"] = False
+    st.session_state["refine_graph"]["is_submitted"] = False
     for key in keys:
         if key != "stop_and_clear" and key != "button_load":
             del st.session_state[key]
@@ -126,6 +127,9 @@ def on_submit_refine(placeholder):
     for att in ["average_graphs", "node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
         if att not in st.session_state:
             return st.error("Please load data first!", icon="🚨")
+
+    if "refine_graph" not in session_state:
+        session_state["refine_graph"] = {}
                 
     G1 = session_state["modified_graph"]
     G2 = session_state["average_graphs"]["all_day"]
@@ -136,25 +140,8 @@ def on_submit_refine(placeholder):
     CCs_ = [G]+CCs[1:]
     fig, _ = show_graph(CCs_)
 
-    with placeholder:
-        graph_col, form_col = st.columns([2,1])
-                        
-        with graph_col:
-            st.plotly_chart(fig, use_container_width=True)
-                
-        with form_col:
-            for i in range(5):
-                st.write("#")
-            refine_form_placeholder = st.empty()           
-            # add_and_delete_form = add_and_delete_form_placeholder.form(f"add and delete form refine")
-            # with add_and_delete_form:
-            #     st.write(f"**Form**: add and delete edges")               
-            #     st.multiselect("edges to add", [], disabled=True)
-            #     st.multiselect("edges to delete", [], disabled=True)
-                            
-            #     st.form_submit_button("submit", disabled=True)
-
-            # refine_graph(G, refine_form_placeholder, session_state)
+    session_state["refine_graph"]["is_submitted"] = True
+    session_state["refine_graph"]["fig"] = fig
 
 
 # --------------------------------------------- GRAPH MANIPULATION ----------------------------------------------
@@ -315,7 +302,27 @@ def graph_manipulation(session_state, TIMES):
         else:
             placeholder.success("Process completed: changes has been saved. Download data using the download button", icon="✅")
 
-
+    ############################################## REFINE GRAPH ############################################## 
+    if session_state["refine_graph"]["is_submitted"]:
+        with placeholder:
+            graph_col, form_col = st.columns([2,1])
+                            
+            with graph_col:
+                st.plotly_chart(session_state["refine_graph"]["fig"], use_container_width=True)
+                    
+            with form_col:
+                for i in range(5):
+                    st.write("#")
+                refine_form_placeholder = st.empty()           
+                # add_and_delete_form = add_and_delete_form_placeholder.form(f"add and delete form refine")
+                # with add_and_delete_form:
+                #     st.write(f"**Form**: add and delete edges")               
+                #     st.multiselect("edges to add", [], disabled=True)
+                #     st.multiselect("edges to delete", [], disabled=True)
+                                
+                #     st.form_submit_button("submit", disabled=True)
+    
+                # refine_graph(G, refine_form_placeholder, session_state)
 
         
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------

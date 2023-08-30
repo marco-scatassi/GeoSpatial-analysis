@@ -122,6 +122,41 @@ def stop_and_clear_callback():
         if key != "stop_and_clear" and key != "button_load":
             del st.session_state[key]
 
+def on_submit_refine():
+    for att in ["average_graphs", "node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
+        if att not in st.session_state:
+            return st.error("Please load data first!", icon="🚨")
+                
+    G1 = session_state["modified_graph"]
+    G2 = session_state["average_graphs"]["all_day"]
+    G = G1 if G1 is not None else G2
+        
+    session_state["n_strongly_cc"] = nx.number_strongly_connected_components(G) 
+    CCs = build_cc(G, strong=True)
+    CCs_ = [G]+CCs[1:]
+    fig, _ = show_graph(CCs_)
+
+    with placeholder:
+        graph_col, form_col = st.columns([2,1])
+                        
+        with graph_col:
+            st.plotly_chart(fig, use_container_width=True)
+                
+        with form_col:
+            for i in range(5):
+                st.write("#")
+            refine_form_placeholder = st.empty()           
+            # add_and_delete_form = add_and_delete_form_placeholder.form(f"add and delete form refine")
+            # with add_and_delete_form:
+            #     st.write(f"**Form**: add and delete edges")               
+            #     st.multiselect("edges to add", [], disabled=True)
+            #     st.multiselect("edges to delete", [], disabled=True)
+                            
+            #     st.form_submit_button("submit", disabled=True)
+
+            # refine_graph(G, refine_form_placeholder, session_state)
+
+
 # --------------------------------------------- GRAPH MANIPULATION ----------------------------------------------
 def graph_manipulation_load_data(session_state, TIMES):
     progress_bar = st.progress(0, "Loading data...")
@@ -279,40 +314,7 @@ def graph_manipulation(session_state, TIMES):
         else:
             placeholder.success("Process completed: changes has been saved. Download data using the download button", icon="✅")
 
-    ############################################## REFINE GRAPH ############################################## 
-    def on_submit_refine():
-        for att in ["average_graphs", "node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
-            if att not in st.session_state:
-                return st.error("Please load data first!", icon="🚨")
-                
-        G1 = session_state["modified_graph"]
-        G2 = session_state["average_graphs"]["all_day"]
-        G = G1 if G1 is not None else G2
-        
-        session_state["n_strongly_cc"] = nx.number_strongly_connected_components(G) 
-        CCs = build_cc(G, strong=True)
-        CCs_ = [G]+CCs[1:]
-        fig, _ = show_graph(CCs_)
 
-        with placeholder:
-            graph_col, form_col = st.columns([2,1])
-                        
-            with graph_col:
-                st.plotly_chart(fig, use_container_width=True)
-                
-            with form_col:
-                for i in range(5):
-                    st.write("#")
-                refine_form_placeholder = st.empty()           
-                # add_and_delete_form = add_and_delete_form_placeholder.form(f"add and delete form refine")
-                # with add_and_delete_form:
-                #     st.write(f"**Form**: add and delete edges")               
-                #     st.multiselect("edges to add", [], disabled=True)
-                #     st.multiselect("edges to delete", [], disabled=True)
-                            
-                #     st.form_submit_button("submit", disabled=True)
-
-                # refine_graph(G, refine_form_placeholder, session_state)
 
         
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------

@@ -326,26 +326,7 @@ def graph_manipulation(session_state, TIMES):
                                     
                     #     st.form_submit_button("submit", disabled=True)
                     G = session_state["refine_graph"]["G"]
-                    # refine_graph(G, refine_form_placeholder, session_state)
-                    node_mapping = {}
-                    i = 0
-                    for node in G.nodes():
-                        node_mapping[node] = i
-                        i += 1
-    
-                    node_mapping_r = {v: k for k, v in node_mapping.items()}
-    
-                    if "graph" not in session_state.keys():
-                        session_state["history_changes"]["graph"] = {}
-                    
-                    edge_list_add = []
-                    edge_list_delete = []
-                    for node1 in node_mapping.keys():
-                        for node2 in node_mapping.keys():
-                            if G.has_edge(node1, node2):
-                                edge_list_delete.append((node_mapping[node1], node_mapping[node2]))
-                            else:
-                                edge_list_add.append((node_mapping[node1], node_mapping[node2]))
+                    refine_graph(G, refine_form_placeholder, session_state)
 
         
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------

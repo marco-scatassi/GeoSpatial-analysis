@@ -280,7 +280,7 @@ def graph_manipulation(session_state, TIMES):
             placeholder.success("Process completed: changes has been saved. Download data using the download button", icon="✅")
 
     ############################################## REFINE GRAPH ############################################## 
-    def on_submit_refine()
+    def on_submit_refine():
         for att in ["average_graphs", "node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
             if att not in st.session_state:
                 return st.error("Please load data first!", icon="🚨")

@@ -523,21 +523,24 @@ def split_two_way_roads(G, origin, session_state,
 
         return False
             
+               
 def on_submit_refine_form(session_state, G, node_mapping_r):
     edges_to_add_input = session_state[f"edges_to_add"]
     distances_to_add_input = session_state[f"distances_to_add"]
     edges_to_delete_input = session_state[f"edges_to_delete"]
     
     dist = distances_to_add_input.replace(" ", "").split(",")
+    add = edges_to_add_input.replace(" ", "").replace(")", "))").split("),")
+    delete = edges_to_delete_input.replace(" ", "").replace(")", "))").split("),")
     if len(edges_to_add_input) != len(dist) and dist != [""]:
         st.error(f"the number of edges to add and the number of distances provided are different\n{edges_to_add_input}\n{dist}")
     
-    if len(edges_to_add_input) > 0:
-        new_edges = [(node_mapping_r[e[0]], node_mapping_r[e[1]], int(d)) for e, d  in zip(edges_to_add_input, dist)]
+    if len(add) > 0:
+        new_edges = [(node_mapping_r[e[0]], node_mapping_r[e[1]], int(d)) for e, d  in zip(add, dist)]
     else:
         new_edges = []
-    if len(edges_to_delete_input) > 0:
-        deleted_edges = [(node_mapping_r[e[0]], node_mapping_r[e[1]]) for e in edges_to_delete_input]
+    if len(delete) > 0:
+        deleted_edges = [(node_mapping_r[e[0]], node_mapping_r[e[1]]) for e in delete]
     else:
         deleted_edges = []
         
@@ -546,7 +549,7 @@ def on_submit_refine_form(session_state, G, node_mapping_r):
     for e in deleted_edges:
         G.remove_edge(e[0], e[1])
             
-def refine_graph(G, form_placeholder, session_state, exit=False):    
+def refine_graph(G, form_placeholder, session_state):    
     node_mapping = {}
     i = 0
     for node in G.nodes():
@@ -557,31 +560,21 @@ def refine_graph(G, form_placeholder, session_state, exit=False):
     
     if "graph" not in session_state.keys():
         session_state["history_changes"]["graph"] = {}
-    
-    edge_list_add = []
-    edge_list_delete = []
-    for node1 in node_mapping.keys():
-        for node2 in node_mapping.keys():
-            if G.has_edge(node1, node2):
-                edge_list_delete.append((node_mapping[node1], node_mapping[node2]))
-            else:
-                edge_list_add.append((node_mapping[node1], node_mapping[node2]))
         
-    # form_placeholder.empty()
-    # refine_form = form_placeholder.form(key=f"refine_form")
-    # with refine_form:
-    #     st.write(f"**Form**: add and delete edges")
-    #     st.multiselect("edges to add", 
-    #                    edge_list_add, 
-    #                    key=f"edges_to_add")
-    #     st.text_input("in order, for each edge added, provide its lenght (m)",
-    #                   placeholder="d1, d2, d3, ...", 
-    #                   key=f"distances_to_add")
-    #     st.multiselect("edges to delete", 
-    #                    edge_list_delete, 
-    #                    key=f"edges_to_delete")
-    #     st.form_submit_button("submit", 
-    #                           on_click=on_submit_refine_form,
-    #                           args=(session_state, G, node, node_mapping_r))
-
-    return
+    form_placeholder.empty()
+    refine_form = form_placeholder.form(key=f"refine_form")
+    with refine_form:
+        st.write(f"**Form**: add and delete edges")
+        st.text_input("edges to add", 
+                       placeholder="(node1, node2), (node3, node4), ...",
+                       key=f"edges_to_add")
+        st.text_input("in order, for each edge added, provide its lenght (m)",
+                      placeholder="d1, d2, d3, ...", 
+                      key=f"distances_to_add")
+        st.text_input("edges to delete", 
+                       placeholder="(node1, node2), (node3, node4), ...",
+                       key=f"edges_to_delete")
+        st.form_submit_button("submit", 
+                              on_click=on_submit_refine_form,
+                              args=(session_state, G, node, node_mapping_r))
+      

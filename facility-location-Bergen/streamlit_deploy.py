@@ -122,7 +122,7 @@ def stop_and_clear_callback():
         if key != "stop_and_clear" and key != "button_load":
             del st.session_state[key]
 
-def on_submit_refine():
+def on_submit_refine(placeholder):
     for att in ["average_graphs", "node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
         if att not in st.session_state:
             return st.error("Please load data first!", icon="🚨")
@@ -272,18 +272,20 @@ def graph_manipulation_process_template(session_state, TIMES,
         return
 
 def graph_manipulation(session_state, TIMES):
-    col1, col2, col3, _ = st.columns(4)
-    
-    with col1:
-        button_load = st.button("Load data for graph manipulation")
-    with col2:
-        button_manipulation = st.button("Start graph manipulation process")
-    with col3:
-        button_refine = st.button("Refine modified graph", on_click=on_submit_refine)
-
     st.markdown("---")
-    
+
+    placeholder_button = st.container()
     placeholder = st.empty()
+
+    with placeholder_button:
+            col1, col2, col3, _ = st.columns(4)
+    
+        with col1:
+            button_load = st.button("Load data for graph manipulation")
+        with col2:
+            button_manipulation = st.button("Start graph manipulation process")
+        with col3:
+            button_refine = st.button("Refine modified graph", on_click=on_submit_refine)
     
     ############################################## LOAD DATA ##############################################
     if button_load:

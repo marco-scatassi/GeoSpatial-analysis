@@ -303,26 +303,27 @@ def graph_manipulation(session_state, TIMES):
             placeholder.success("Process completed: changes has been saved. Download data using the download button", icon="✅")
 
     ############################################## REFINE GRAPH ############################################## 
-    if session_state["refine_graph"]["is_submitted"]:
-        with placeholder:
-            graph_col, form_col = st.columns([2,1])
-                            
-            with graph_col:
-                st.plotly_chart(session_state["refine_graph"]["fig"], use_container_width=True)
-                    
-            with form_col:
-                for i in range(5):
-                    st.write("#")
-                refine_form_placeholder = st.empty()           
-                # add_and_delete_form = add_and_delete_form_placeholder.form(f"add and delete form refine")
-                # with add_and_delete_form:
-                #     st.write(f"**Form**: add and delete edges")               
-                #     st.multiselect("edges to add", [], disabled=True)
-                #     st.multiselect("edges to delete", [], disabled=True)
+    if "is_submitted" in session_state["refine_graph"].keys():
+        if session_state["refine_graph"]["is_submitted"]:
+            with placeholder:
+                graph_col, form_col = st.columns([2,1])
                                 
-                #     st.form_submit_button("submit", disabled=True)
-    
-                # refine_graph(G, refine_form_placeholder, session_state)
+                with graph_col:
+                    st.plotly_chart(session_state["refine_graph"]["fig"], use_container_width=True)
+                        
+                with form_col:
+                    for i in range(5):
+                        st.write("#")
+                    refine_form_placeholder = st.empty()           
+                    # add_and_delete_form = add_and_delete_form_placeholder.form(f"add and delete form refine")
+                    # with add_and_delete_form:
+                    #     st.write(f"**Form**: add and delete edges")               
+                    #     st.multiselect("edges to add", [], disabled=True)
+                    #     st.multiselect("edges to delete", [], disabled=True)
+                                    
+                    #     st.form_submit_button("submit", disabled=True)
+        
+                    # refine_graph(G, refine_form_placeholder, session_state)
 
         
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------

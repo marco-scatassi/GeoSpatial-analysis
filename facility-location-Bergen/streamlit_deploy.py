@@ -325,7 +325,7 @@ def graph_manipulation(session_state, TIMES):
                     #     st.multiselect("edges to delete", [], disabled=True)
                                     
                     #     st.form_submit_button("submit", disabled=True)
-        
+                    G = session_state["refine_graph"]["G"]
                     refine_graph(G, refine_form_placeholder, session_state)
 
         

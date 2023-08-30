@@ -293,7 +293,7 @@ def split_the_node_input(node, G, node_mapping, node_class, session_state, split
                                        on_click=on_submit_split_the_node_form, 
                                        args=(session_state, G, node, node_class, img_path, LOG_FILE_PATH2))
       
-def on_submit_add_and_delete_edges_form(session_state, G, node, node_mapping_r, img_path, log_file_path):
+def on_submit_add_and_delete_edges_form(session_state, G, node, node_mapping_r, img_path=None, log_file_path=None):
     edges_to_add = session_state[f"edges_to_add_{node}"]
     distances_to_add = session_state[f"distances_to_add_{node}"]
     edges_to_delete = session_state[f"edges_to_delete_{node}"]
@@ -319,14 +319,15 @@ def on_submit_add_and_delete_edges_form(session_state, G, node, node_mapping_r, 
     for e in session_state["history_changes"][key]['edges_to_delete']:
         G.remove_edge(e[0], e[1])
     
-    node_mapping, node_class = node_mapping_log(G, node) 
-    if "node_added" in session_state["history_changes"][key]:
-        node2 = session_state["history_changes"][key]["node_added"]
-        fig = img_log(G, [node, node2], node_mapping, node_class)
-    else:
-        fig = img_log(G, [node], node_mapping, node_class)
-    fig.write_html(img_path, full_html=True, auto_open=False)
-    
+    if img_path is not None:
+        node_mapping, node_class = node_mapping_log(G, node) 
+        if "node_added" in session_state["history_changes"][key]:
+            node2 = session_state["history_changes"][key]["node_added"]
+            fig = img_log(G, [node, node2], node_mapping, node_class)
+        else:
+            fig = img_log(G, [node], node_mapping, node_class)
+        fig.write_html(img_path, full_html=True, auto_open=False)
+        
     #print_INFO_message_timestamp(f'new edges: {session_state["history_changes"][key]["new_edges"]}', log_file_path)
     #print_INFO_message_timestamp(f'edges to delete: {session_state["history_changes"][key]["edges_to_delete"]}', log_file_path)
     
@@ -335,7 +336,7 @@ def on_submit_add_and_delete_edges_form(session_state, G, node, node_mapping_r, 
 
 def add_and_deleted_edges_input(G, node, session_state, node_mapping, 
                                 add_and_delete_form_placeholder,   
-                                img_path, log_file_path):
+                                img_path=None, log_file_path=None):
     node_mapping_r = {v: k for k, v in node_mapping.items()}
     edge_list_add = []
     edge_list_delete = []
@@ -366,7 +367,7 @@ def add_and_deleted_edges_input(G, node, session_state, node_mapping,
                               disabled=session_state["is_form2_disabled"],
                               on_click=on_submit_add_and_delete_edges_form,
                               args=(session_state, G, node, node_mapping_r, img_path, log_file_path))
-        
+      
 def reconnect_predecessors(G, origin, log_file_path, node, new_edge):
     #print_INFO_message(f"replacing edge {origin}-{node}", log_file_path)
     predecessors = list(G.predecessors(origin))
@@ -501,7 +502,6 @@ def split_two_way_roads(G, origin, session_state,
                                 add_and_deleted_edges_input(G, node, session_state, 
                                                             node_mapping, 
                                                             add_and_delete_form_placeholder,
-                                                             
                                                             img_path,
                                                             log_file_path2)
     
@@ -523,6 +523,14 @@ def split_two_way_roads(G, origin, session_state,
 
         return False
             
-
-        
+def refine_graph(G, form_placeholder, session_state):    
+    node_mapping = {}
+    i = 0
+    for node in G.nodes():
+        node_mapping[node] = i
+        i += 1
     
+    if "graph" not in session_state.keys():
+        session_state["history_changes"]["graph"] = {}
+    
+    add_and_deleted_edges_input(G, "graph", session_state, node_mapping, form_placeholder)

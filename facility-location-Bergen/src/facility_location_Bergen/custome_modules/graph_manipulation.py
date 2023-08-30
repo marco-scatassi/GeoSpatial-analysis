@@ -555,6 +555,14 @@ def on_submit_refine_form(session_state, G, node_mapping_r):
         add_edge(e, G)
     for e in deleted_edges:
         G.remove_edge(e[0], e[1])
+
+    CCs = build_cc(G, strong=True)
+    CCs_ = [G]+CCs[1:]
+    fig, _ = show_graph(CCs_)
+
+    session_state["refine_graph"]["is_submitted"] = True
+    session_state["refine_graph"]["G"] = G
+    session_state["refine_graph"]["fig"] = fig
             
             
 def refine_graph(G, form_placeholder, session_state):    

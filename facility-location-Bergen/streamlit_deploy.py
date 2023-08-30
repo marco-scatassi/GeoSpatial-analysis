@@ -296,22 +296,24 @@ def graph_manipulation(session_state, TIMES):
 
         with placeholder:
             graph_col, form_col = st.columns([2,1])
+                        
+            with graph_col:
+                st.plotly_chart(fig, use_container_width=True)
+                
             with form_col:
                 for i in range(5):
                     st.write("#")
-                add_and_delete_form_placeholder = st.empty()           
-                add_and_delete_form = add_and_delete_form_placeholder.form(f"add and delete form refine")
-                with add_and_delete_form:
-                    st.write(f"**Form**: add and delete edges")               
-                    st.multiselect("edges to add", [], disabled=True)
-                    st.multiselect("edges to delete", [], disabled=True)
+                # add_and_delete_form_placeholder = st.empty()           
+                # add_and_delete_form = add_and_delete_form_placeholder.form(f"add and delete form refine")
+                # with add_and_delete_form:
+                #     st.write(f"**Form**: add and delete edges")               
+                #     st.multiselect("edges to add", [], disabled=True)
+                #     st.multiselect("edges to delete", [], disabled=True)
                             
-                    st.form_submit_button("submit", disabled=True)
+                #     st.form_submit_button("submit", disabled=True)
 
                 refine_graph(G, add_and_delete_form_placeholder, session_state)
-            
-            with graph_col:
-                st.plotly_chart(fig, use_container_width=True)
+
         
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------
 def deterministic_load_data(session_state, TIMES, facilities_number):

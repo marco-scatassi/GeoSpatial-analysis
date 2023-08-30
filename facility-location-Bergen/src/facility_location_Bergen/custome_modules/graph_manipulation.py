@@ -549,8 +549,10 @@ def on_submit_refine_form(session_state, G, node_mapping_r):
     else:
         deleted_edges = []
 
-    session_state["history_changes"]["graph"]["new_edges"].append(new_edges)
-    session_state["history_changes"]["graph"]["edges_to_delete"].append(deleted_edges)
+    if new_edges != []:
+        session_state["history_changes"]["graph"]["new_edges"] += new_edges
+    if deleted_edges != []:
+        session_state["history_changes"]["graph"]["edges_to_delete"] += deleted_edges
         
     for e in new_edges:
         add_edge(e, G)

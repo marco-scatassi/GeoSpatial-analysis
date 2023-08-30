@@ -272,9 +272,8 @@ def graph_manipulation_process_template(session_state, TIMES,
         return
 
 def graph_manipulation(session_state, TIMES):
-    st.markdown("---")
-
     placeholder_button = st.container()
+    st.markdown("---")
     placeholder = st.empty()
 
     with placeholder_button:
@@ -285,7 +284,7 @@ def graph_manipulation(session_state, TIMES):
         with col2:
             button_manipulation = st.button("Start graph manipulation process")
         with col3:
-            button_refine = st.button("Refine modified graph", on_click=on_submit_refine, args=(placeholder))
+            button_refine = st.button("Refine modified graph", on_click=on_submit_refine, args=(placeholder,))
     
     ############################################## LOAD DATA ##############################################
     if button_load:

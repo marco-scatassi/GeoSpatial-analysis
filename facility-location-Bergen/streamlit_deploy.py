@@ -278,14 +278,14 @@ def graph_manipulation(session_state, TIMES):
     placeholder = st.empty()
 
     with placeholder_button:
-            col1, col2, col3, _ = st.columns(4)
+        col1, col2, col3, _ = st.columns(4)
     
         with col1:
             button_load = st.button("Load data for graph manipulation")
         with col2:
             button_manipulation = st.button("Start graph manipulation process")
         with col3:
-            button_refine = st.button("Refine modified graph", on_click=on_submit_refine)
+            button_refine = st.button("Refine modified graph", on_click=on_submit_refine, args=(placeholder))
     
     ############################################## LOAD DATA ##############################################
     if button_load:

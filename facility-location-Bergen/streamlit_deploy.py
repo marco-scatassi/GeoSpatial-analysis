@@ -318,13 +318,6 @@ def graph_manipulation(session_state, TIMES):
                     for i in range(5):
                         st.write("#")
                     refine_form_placeholder = st.empty()           
-                    # add_and_delete_form = add_and_delete_form_placeholder.form(f"add and delete form refine")
-                    # with add_and_delete_form:
-                    #     st.write(f"**Form**: add and delete edges")               
-                    #     st.multiselect("edges to add", [], disabled=True)
-                    #     st.multiselect("edges to delete", [], disabled=True)
-                                    
-                    #     st.form_submit_button("submit", disabled=True)
                     G = session_state["refine_graph"]["G"]
                     refine_graph(G, refine_form_placeholder, session_state)
 

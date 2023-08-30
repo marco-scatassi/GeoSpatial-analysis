@@ -125,7 +125,8 @@ def stop_and_clear_callback():
             del st.session_state[key]
 
 def on_submit_refine(placeholder):
-    stop_and_clear_callback()
+    st.session_state["stop_and_clear"] = True
+    st.session_state["button_load"] = False
     for att in ["average_graphs", "node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
         if att not in st.session_state:
             return st.error("Please load data first!", icon="🚨")

@@ -143,6 +143,7 @@ def on_submit_refine(placeholder):
     fig, _ = show_graph(CCs_)
 
     session_state["refine_graph"]["is_submitted"] = True
+    session_state["refine_graph"]["G"] = G
     session_state["refine_graph"]["fig"] = fig
 
 

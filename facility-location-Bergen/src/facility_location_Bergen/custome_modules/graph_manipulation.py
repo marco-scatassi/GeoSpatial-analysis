@@ -576,5 +576,5 @@ def refine_graph(G, form_placeholder, session_state):
                        key=f"edges_to_delete")
         st.form_submit_button("submit", 
                               on_click=on_submit_refine_form,
-                              args=(session_state, G, node, node_mapping_r))
+                              args=(session_state, G, node_mapping_r))
       

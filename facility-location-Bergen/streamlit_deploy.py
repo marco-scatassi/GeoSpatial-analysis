@@ -307,6 +307,8 @@ def graph_manipulation(session_state, TIMES):
                     st.multiselect("edges to delete", [], disabled=True)
                             
                     st.form_submit_button("submit", disabled=True)
+
+                refine_graph(G, add_and_delete_form_placeholder, session_state)
             
             with graph_col:
                 st.plotly_chart(fig, use_container_width=True)

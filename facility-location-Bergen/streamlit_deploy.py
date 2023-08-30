@@ -303,7 +303,7 @@ def graph_manipulation(session_state, TIMES):
             with form_col:
                 for i in range(5):
                     st.write("#")
-                # add_and_delete_form_placeholder = st.empty()           
+                refine_form_placeholder = st.empty()           
                 # add_and_delete_form = add_and_delete_form_placeholder.form(f"add and delete form refine")
                 # with add_and_delete_form:
                 #     st.write(f"**Form**: add and delete edges")               
@@ -312,7 +312,7 @@ def graph_manipulation(session_state, TIMES):
                             
                 #     st.form_submit_button("submit", disabled=True)
 
-                refine_graph(G, add_and_delete_form_placeholder, session_state)
+                refine_graph(G, refine_form_placeholder, session_state)
 
         
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------

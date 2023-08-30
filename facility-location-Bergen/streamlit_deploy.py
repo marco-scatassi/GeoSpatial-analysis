@@ -244,7 +244,7 @@ def graph_manipulation(session_state, TIMES):
     with col2:
         button_manipulation = st.button("Start graph manipulation process")
     with col3:
-        button_refine = st.button("Refine modified graph")
+        button_refine = st.button("Refine modified graph", on_click=on_submit_refine)
 
     st.markdown("---")
     
@@ -280,7 +280,7 @@ def graph_manipulation(session_state, TIMES):
             placeholder.success("Process completed: changes has been saved. Download data using the download button", icon="✅")
 
     ############################################## REFINE GRAPH ############################################## 
-    if button_refine:
+    def on_submit_refine()
         for att in ["average_graphs", "node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
             if att not in st.session_state:
                 return st.error("Please load data first!", icon="🚨")
@@ -312,7 +312,7 @@ def graph_manipulation(session_state, TIMES):
                             
                 #     st.form_submit_button("submit", disabled=True)
 
-                refine_graph(G, refine_form_placeholder, session_state)
+                # refine_graph(G, refine_form_placeholder, session_state)
 
         
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------

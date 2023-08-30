@@ -308,7 +308,7 @@ def graph_manipulation(session_state, TIMES):
     if "is_submitted" in session_state["refine_graph"].keys():
         if session_state["refine_graph"]["is_submitted"]:
             with placeholder:
-                graph_col, form_col = st.columns([2,1])
+                graph_col, _, form_col = st.columns([2,0.25,1])
                                 
                 with graph_col:
                     st.plotly_chart(session_state["refine_graph"]["fig"], use_container_width=True)
@@ -325,7 +325,7 @@ def graph_manipulation(session_state, TIMES):
                                     
                     #     st.form_submit_button("submit", disabled=True)
         
-                    # refine_graph(G, refine_form_placeholder, session_state)
+                    refine_graph(G, refine_form_placeholder, session_state)
 
         
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------

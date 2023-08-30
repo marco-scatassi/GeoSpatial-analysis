@@ -125,6 +125,7 @@ def stop_and_clear_callback():
             del st.session_state[key]
 
 def on_submit_refine(placeholder):
+    stop_and_clear_callback()
     for att in ["average_graphs", "node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
         if att not in st.session_state:
             return st.error("Please load data first!", icon="🚨")
@@ -306,7 +307,6 @@ def graph_manipulation(session_state, TIMES):
 
     ############################################## REFINE GRAPH ############################################## 
     if "is_submitted" in session_state["refine_graph"].keys():
-        stop_and_clear_callback()
         if session_state["refine_graph"]["is_submitted"]:
             with placeholder:
                 graph_col, _, form_col = st.columns([2,0.25,1])

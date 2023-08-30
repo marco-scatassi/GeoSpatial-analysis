@@ -82,6 +82,8 @@ def initialize_session_state_attributes(from_graph_button_load=False):
         st.session_state["is_form1_disabled"] = False
         st.session_state["is_form2_disabled"] = True
         st.session_state["checkpoint"] = {}
+        if "is_submitted" in st.session_state["refine_graph"].keys(): 
+            st.session_state["refine_graph"]["is_submitted"] = False
         if st.session_state["upload_button_0"] is not None:
             st.session_state["modified_graph"] = pkl.load(st.session_state["upload_button_0"])
         if st.session_state["upload_button_1"] is not None:

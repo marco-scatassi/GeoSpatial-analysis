@@ -9,6 +9,7 @@ from shapely.geometry import Point
 from functools import partial
 import time as t
 from copy import deepcopy
+from graphical_analysis import show_graph
 
 def build_cc(G, strong=False):
     if not strong:

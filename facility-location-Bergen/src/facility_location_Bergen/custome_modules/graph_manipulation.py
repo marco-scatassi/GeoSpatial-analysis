@@ -9,6 +9,7 @@ from shapely.geometry import Point
 from functools import partial
 import time as t
 from copy import deepcopy
+from graphical_analysis import show_graph
 
 def build_cc(G, strong=False):
     if not strong:
@@ -293,7 +294,7 @@ def split_the_node_input(node, G, node_mapping, node_class, session_state, split
                                        on_click=on_submit_split_the_node_form, 
                                        args=(session_state, G, node, node_class, img_path, LOG_FILE_PATH2))
       
-def on_submit_add_and_delete_edges_form(session_state, G, node, node_mapping_r, img_path, log_file_path):
+def on_submit_add_and_delete_edges_form(session_state, G, node, node_mapping_r, img_path=None, log_file_path=None):
     edges_to_add = session_state[f"edges_to_add_{node}"]
     distances_to_add = session_state[f"distances_to_add_{node}"]
     edges_to_delete = session_state[f"edges_to_delete_{node}"]
@@ -319,14 +320,15 @@ def on_submit_add_and_delete_edges_form(session_state, G, node, node_mapping_r, 
     for e in session_state["history_changes"][key]['edges_to_delete']:
         G.remove_edge(e[0], e[1])
     
-    node_mapping, node_class = node_mapping_log(G, node) 
-    if "node_added" in session_state["history_changes"][key]:
-        node2 = session_state["history_changes"][key]["node_added"]
-        fig = img_log(G, [node, node2], node_mapping, node_class)
-    else:
-        fig = img_log(G, [node], node_mapping, node_class)
-    fig.write_html(img_path, full_html=True, auto_open=False)
-    
+    if img_path is not None:
+        node_mapping, node_class = node_mapping_log(G, node) 
+        if "node_added" in session_state["history_changes"][key]:
+            node2 = session_state["history_changes"][key]["node_added"]
+            fig = img_log(G, [node, node2], node_mapping, node_class)
+        else:
+            fig = img_log(G, [node], node_mapping, node_class)
+        fig.write_html(img_path, full_html=True, auto_open=False)
+        
     #print_INFO_message_timestamp(f'new edges: {session_state["history_changes"][key]["new_edges"]}', log_file_path)
     #print_INFO_message_timestamp(f'edges to delete: {session_state["history_changes"][key]["edges_to_delete"]}', log_file_path)
     
@@ -335,7 +337,7 @@ def on_submit_add_and_delete_edges_form(session_state, G, node, node_mapping_r, 
 
 def add_and_deleted_edges_input(G, node, session_state, node_mapping, 
                                 add_and_delete_form_placeholder,   
-                                img_path, log_file_path):
+                                img_path=None, log_file_path=None):
     node_mapping_r = {v: k for k, v in node_mapping.items()}
     edge_list_add = []
     edge_list_delete = []
@@ -366,7 +368,7 @@ def add_and_deleted_edges_input(G, node, session_state, node_mapping,
                               disabled=session_state["is_form2_disabled"],
                               on_click=on_submit_add_and_delete_edges_form,
                               args=(session_state, G, node, node_mapping_r, img_path, log_file_path))
-        
+      
 def reconnect_predecessors(G, origin, log_file_path, node, new_edge):
     #print_INFO_message(f"replacing edge {origin}-{node}", log_file_path)
     predecessors = list(G.predecessors(origin))
@@ -501,7 +503,6 @@ def split_two_way_roads(G, origin, session_state,
                                 add_and_deleted_edges_input(G, node, session_state, 
                                                             node_mapping, 
                                                             add_and_delete_form_placeholder,
-                                                             
                                                             img_path,
                                                             log_file_path2)
     
@@ -523,6 +524,78 @@ def split_two_way_roads(G, origin, session_state,
 
         return False
             
-
-        
+               
+def on_submit_refine_form(session_state, G, node_mapping_r):
+    edges_to_add_input = session_state[f"edges_to_add"]
+    distances_to_add_input = session_state[f"distances_to_add"]
+    edges_to_delete_input = session_state[f"edges_to_delete"]
     
+    dist = distances_to_add_input.replace(" ", "").split(",")
+    add = (edges_to_add_input.replace(" ", "").replace(")", "))")+",").split("),")[:-1]
+    delete = (edges_to_delete_input.replace(" ", "").replace(")", "))")+",").split("),")[:-1]
+    
+    add = [eval(e) for e in add]
+    delete = [eval(e) for e in delete]
+    
+    if len(add) != len(dist) and dist != [""]:
+        st.error(f"the number of edges to add and the number of distances provided are different\n{add}\n{dist}")
+    
+    if len(add) > 0:
+        new_edges = [(node_mapping_r[e[0]], node_mapping_r[e[1]], int(d)) for e, d  in zip(add, dist)]
+    else:
+        new_edges = []
+    if len(delete) > 0:
+        deleted_edges = [(node_mapping_r[e[0]], node_mapping_r[e[1]]) for e in delete]
+    else:
+        deleted_edges = []
+
+    if new_edges != []:
+        session_state["history_changes"]["graph"]["new_edges"] += new_edges
+    if deleted_edges != []:
+        session_state["history_changes"]["graph"]["edges_to_delete"] += deleted_edges
+        
+    for e in new_edges:
+        add_edge(e, G)
+    for e in deleted_edges:
+        G.remove_edge(e[0], e[1])
+
+    CCs = build_cc(G, strong=True)
+    CCs_ = [G]+CCs[1:]
+    fig, _ = show_graph(CCs_)
+
+    session_state["refine_graph"]["is_submitted"] = True
+    session_state["refine_graph"]["G"] = G
+    session_state["refine_graph"]["fig"] = fig
+            
+            
+def refine_graph(G, form_placeholder, session_state):    
+    node_mapping = {}
+    i = 0
+    for node in G.nodes():
+        node_mapping[node] = i
+        i += 1
+    
+    node_mapping_r = {v: k for k, v in node_mapping.items()}
+    
+    if "graph" not in session_state["history_changes"].keys():
+        session_state["history_changes"]["graph"] = {}
+        session_state["history_changes"]["graph"]["new_edges"] = []
+        session_state["history_changes"]["graph"]["edges_to_delete"] = []
+        
+    form_placeholder.empty()
+    refine_form = form_placeholder.form(key=f"refine_form")
+    with refine_form:
+        st.write(f"**Form**: add and delete edges")
+        st.text_input("edges to add", 
+                       placeholder="(node1, node2), (node3, node4), ...",
+                       key=f"edges_to_add")
+        st.text_input("in order, for each edge added, provide its lenght (m)",
+                      placeholder="d1, d2, d3, ...", 
+                      key=f"distances_to_add")
+        st.text_input("edges to delete", 
+                       placeholder="(node1, node2), (node3, node4), ...",
+                       key=f"edges_to_delete")
+        st.form_submit_button("submit", 
+                              on_click=on_submit_refine_form,
+                              args=(session_state, G, node_mapping_r))
+      

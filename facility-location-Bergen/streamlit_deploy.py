@@ -132,7 +132,9 @@ def on_submit_refine(placeholder):
     with placeholder:
         for att in ["average_graphs", "node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
             if att not in st.session_state:
-                return st.error("Please load data first!", icon="🚨")
+                st.error("Please load data first!", icon="🚨")
+                ptime.sleep(2000)
+                return 
 
     if "refine_graph" not in session_state:
         session_state["refine_graph"] = {}
@@ -157,7 +159,9 @@ def on_submit_apply(placeholder):
     with placeholder:
         for att in ["average_graphs", "node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
             if att not in st.session_state:
-                return st.error("Please load data first!", icon="🚨")
+                st.error("Please load data first!", icon="🚨")
+                ptime.sleep(2000)
+                return 
  
 
 

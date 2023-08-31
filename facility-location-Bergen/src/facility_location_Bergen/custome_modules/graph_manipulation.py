@@ -70,9 +70,6 @@ def traslate_path(path, factor=0.01, traslate_first_node=False):
         if  (m_n<0 and m_d<0) or (m_d<0 and m_n>0):
             p0 = np.array((path[n][0], path[n][1]+factor))
             p1 = np.array((path[n+1][0], path[n+1][1]+factor))
-        elif m_n == 0 and m_d == 0:
-            p0 = np.array((path[n][0]-factor, path[n][1]))
-            p1 = np.array((path[n+1][0]-factor, path[n+1][1]))
         else:
             p0 = np.array((path[n][0], path[n][1]-factor))
             p1 = np.array((path[n+1][0], path[n+1][1]-factor))

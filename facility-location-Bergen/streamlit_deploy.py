@@ -67,10 +67,10 @@ GRAPH_MANIPULATION_SEED=8797
 # --------------------------------------------- UTILITY AND CALLBACK --------------------------------------------
 def initialize_session_state_attributes(from_graph_button_load=False):
     keys = ["node", "modified_graph", "refine_graph", "history_changes", 
-            "node_mapping", "predecessors_id", "successors_id", 
+            "node_mapping", "predecessors_id", "successors_id", "apply_graph_modification",
             "stop_and_clear", "button_load", "is_form1_disabled", "is_form2_disabled"]
     
-    default = ["___", None, {}, {}, {}, [], [], False, False, False, True]
+    default = ["___", None, {}, {}, {}, [], [], False, False, False, False, True]
     
     for key, value in zip(keys, default):
         if key not in st.session_state:
@@ -78,9 +78,10 @@ def initialize_session_state_attributes(from_graph_button_load=False):
     
     if from_graph_button_load:
         st.session_state["button_load"] = True
-        session_state["stop_and_clear"] = False
+        st.session_state["stop_and_clear"] = False
         st.session_state["is_form1_disabled"] = False
         st.session_state["is_form2_disabled"] = True
+        st.session_state["apply_graph_modification"] = False
         st.session_state["checkpoint"] = {}
         if "is_submitted" in st.session_state["refine_graph"].keys(): 
             st.session_state["refine_graph"]["is_submitted"] = False
@@ -120,6 +121,7 @@ def stop_and_clear_callback():
     st.session_state["stop_and_clear"] = True
     st.session_state["button_load"] = False
     st.session_state["refine_graph"]["is_submitted"] = False
+    st.session_state["apply_graph_modification"] = False
     for key in keys:
         if key != "stop_and_clear" and key != "button_load":
             del st.session_state[key]
@@ -146,6 +148,14 @@ def on_submit_refine(placeholder):
     session_state["refine_graph"]["is_submitted"] = True
     session_state["refine_graph"]["G"] = G
     session_state["refine_graph"]["fig"] = fig
+
+def on_submit_apply():
+    st.session_state["stop_and_clear"] = True
+    st.session_state["button_load"] = False
+    for att in ["average_graphs", "node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
+        if att not in st.session_state:
+            return st.error("Please load data first!", icon="🚨")
+    session_state["apply_graph_modification"] = True
 
 
 # --------------------------------------------- GRAPH MANIPULATION ----------------------------------------------
@@ -268,7 +278,7 @@ def graph_manipulation(session_state, TIMES):
     placeholder = st.empty()
 
     with placeholder_button:
-        col1, col2, col3, _ = st.columns(4)
+        col1, col2, col3, col4 = st.columns(4)
     
         with col1:
             button_load = st.button("Load data for graph manipulation")
@@ -276,6 +286,8 @@ def graph_manipulation(session_state, TIMES):
             button_manipulation = st.button("Start graph manipulation process")
         with col3:
             button_refine = st.button("Refine modified graph", on_click=on_submit_refine, args=(placeholder,))
+        with col4:
+            button_apply = st.button("Apply modification to all graphs", on_click=on_submit_apply)
     
     ############################################## LOAD DATA ##############################################
     if button_load:
@@ -322,6 +334,9 @@ def graph_manipulation(session_state, TIMES):
                     G = session_state["refine_graph"]["G"]
                     refine_graph(G, refine_form_placeholder, session_state)
 
+    ############################################## APPLY GRAPH CHANGES ##############################################
+    if st.session_state["apply_graph_modification"]:
+        st.write("fin qui tutto bene")
         
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------
 def deterministic_load_data(session_state, TIMES, facilities_number):

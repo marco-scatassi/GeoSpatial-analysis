@@ -565,8 +565,7 @@ def on_submit_refine_form(session_state, G, node_mapping_r):
     session_state["refine_graph"]["is_submitted"] = True
     session_state["refine_graph"]["G"] = G
     session_state["refine_graph"]["fig"] = fig
-            
-            
+                        
 def refine_graph(G, form_placeholder, session_state):    
     node_mapping = {}
     i = 0
@@ -576,7 +575,7 @@ def refine_graph(G, form_placeholder, session_state):
     
     node_mapping_r = {v: k for k, v in node_mapping.items()}
     
-    if "graph" not in session_state.keys():
+    if "graph" not in session_state["history_changes"].keys():
         session_state["history_changes"]["graph"] = {}
         session_state["history_changes"]["graph"]["new_edges"] = []
         session_state["history_changes"]["graph"]["edges_to_delete"] = []

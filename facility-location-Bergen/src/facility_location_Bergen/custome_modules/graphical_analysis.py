@@ -354,7 +354,7 @@ def show_graph(F):
                       height=700,
                       width=1000,)
 
-  return  fig   
+  return  fig, node_mapping  
 
 def compute_rel_diff(fls_exact, dfs, dfs_worst, time):
     df_min = get_minimum_distances(dfs[("all-day-free-flow", time.replace("_", "-"), "weight")])

@@ -1,7 +1,7 @@
 import sys
 
 # Get the directory path to add to PYTHONPATH
-directory_path = r"\\Pund\Stab$\guest801951\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\src\facility_location_Bergen\custome_modules"
+directory_path = r"\\Pund\Stab$\guest801968\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\src\facility_location_Bergen\custome_modules"
 if directory_path not in sys.path:
     sys.path.append(directory_path)
     
@@ -11,24 +11,26 @@ import random
 import time as ptime
 from copy import deepcopy
 from pathlib import Path
+import networkx as nx
 
 import folium
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
+import yaml
 from facility_location import (
     FacilityLocation,
     FacilityLocationReport,
     StochasticFacilityLocation,
 )
 from graph_manipulation import *
-
-# from kedro.framework.project import find_pipelines
-# from kedro.framework.session import KedroSession
+from kedro.framework.project import find_pipelines
+from kedro.framework.session import KedroSession
 from kedro.framework.startup import bootstrap_project
-# from kedro.pipeline import Pipeline, pipeline
-# from kedro.runner import SequentialRunner
+from kedro.pipeline import Pipeline, pipeline
+from kedro.runner import SequentialRunner
 from log import print_INFO_message, print_INFO_message_timestamp
+from PIL import Image
 from retrieve_global_parameters import (
     retrieve_average_graph_path,
     retrieve_light_solution_path,
@@ -43,33 +45,34 @@ from src.facility_location_Bergen.custome_modules.graphical_analysis import (
     outsample_evaluation_relative_differences,
     travel_times_distribution_under_different_cases,
     visualize_longest_paths,
+    show_graph
 )
 from streamlit_folium import st_folium
+
 
 st.set_page_config(layout = "wide")
 session_state = st.session_state
 
-project_path = r"\/Pund/Stab$/guest801951/Documents/GitHub/GeoSpatial-analysis/facility-location-Bergen"
+project_path = r"\/Pund/Stab$/guest801968/Documents/GitHub/GeoSpatial-analysis/facility-location-Bergen"
 metadata = bootstrap_project(project_path)
 
 TIMES = ["all_day_free_flow", "all_day", "morning", "midday", "afternoon"]
 FACILITIES_NUMBER = [1,2,3]
 
-LOG_FILE_PATH = r"\\Pund\Stab$\guest801951\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\logs\split_roads.log"
-LOG_FILE_PATH2 = r"\\Pund\Stab$\guest801951\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\logs\split_roads_changes.log"
-HTML_IMG_PATH = r"\\Pund\Stab$\guest801951\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\logs\img_split_roads.html"
-
-PROCESSED_DATA_ROOT_PATH = r"\\Pund\Stab$\guest801951\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\data\05_model_input"
+LOG_FILE_PATH = r"\\Pund\Stab$\guest801968\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\logs\split_roads.log"
+LOG_FILE_PATH2 = r"\\Pund\Stab$\guest801968\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\logs\split_roads_changes.log"
+HTML_IMG_PATH = r"\\Pund\Stab$\guest801968\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\logs\img_split_roads.html"
+PROCESSED_DATA_ROOT_PATH = r"\\Pund\Stab$\guest801968\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\data\05_model_input"
 
 GRAPH_MANIPULATION_SEED=8797
-
 # --------------------------------------------- UTILITY AND CALLBACK --------------------------------------------
 def initialize_session_state_attributes(from_graph_button_load=False):
-    keys = ["node", "modified_graph", "history_changes", 
-            "node_mapping", "predecessors_id", "successors_id", 
-            "stop_and_save", "button_load", "is_form1_disabled", "is_form2_disabled"]
+    keys = ["node", "modified_graph", "refine_graph", "history_changes", 
+            "history_changes_refine", "load_data_error","node_mapping", "predecessors_id", 
+            "successors_id", "apply_graph_modification","stop_and_clear", "button_load", 
+            "is_form1_disabled", "is_form2_disabled"]
     
-    default = ["___", None, {}, {}, [], [], False, False, False, True]
+    default = ["___", None, {}, {}, {}, False, {}, [], [], False, False, False, False, True]
     
     for key, value in zip(keys, default):
         if key not in st.session_state:
@@ -77,14 +80,29 @@ def initialize_session_state_attributes(from_graph_button_load=False):
     
     if from_graph_button_load:
         st.session_state["button_load"] = True
+        st.session_state["stop_and_clear"] = False
+        st.session_state["load_data_error"] = False
         st.session_state["is_form1_disabled"] = False
         st.session_state["is_form2_disabled"] = True
+        st.session_state["apply_graph_modification"] = False
+        st.session_state["checkpoint"] = {}
+        if "is_submitted" in st.session_state["refine_graph"].keys(): 
+            st.session_state["refine_graph"]["is_submitted"] = False
+        if "is_submitted2" in st.session_state["refine_graph"].keys():
+            st.session_state["refine_graph"]["is_submitted2"] = False
+        if st.session_state["upload_button_0"] is not None:
+            st.session_state["modified_graph"] = pkl.load(st.session_state["upload_button_0"])
+        if st.session_state["upload_button_1"] is not None:
+            st.session_state["history_changes"] = pkl.load(st.session_state["upload_button_1"])
+        
  
 def clear_log_files():
     with open(LOG_FILE_PATH, "w") as f:
-        f.write("")    
+        f.write("")
+    
     with open(LOG_FILE_PATH2, "w") as f:
-        f.write("") 
+        f.write("")
+        
     with open(HTML_IMG_PATH, "w") as f:
         f.write("""<!DOCTYPE html>
                 <html>
@@ -98,16 +116,64 @@ def clear_log_files():
                 
                 <body>
                 <h1>Graph visualization</h1>
-                <p>Click the refresh image button to update the image</p>
+                <p>Click the refresh button to update the image</p>
                 </body>
                 </html>""")
     
-def stop_and_save_callback():
-    st.session_state["stop_and_save"] = True
+def stop_and_clear_callback():
+    keys = ["node", "node_mapping", "predecessors_id", "successors_id", 
+            "stop_and_clear", "button_load", "is_form1_disabled", "is_form2_disabled"]
+    st.session_state["stop_and_clear"] = True
     st.session_state["button_load"] = False
-    
-    clear_log_files()
-    
+    st.session_state["refine_graph"]["is_submitted"] = False
+    st.session_state["apply_graph_modification"] = False
+    st.session_state["load_data_error"] = False
+    for key in keys:
+        if key != "stop_and_clear" and key != "button_load":
+            del st.session_state[key]
+
+def on_submit_refine(placeholder):
+    st.session_state["apply_graph_modification"] = False
+    st.session_state["stop_and_clear"] = True
+    st.session_state["button_load"] = False
+    with placeholder:
+        for att in ["average_graphs", "node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
+            if att not in st.session_state:
+                st.session_state["load_data_error"] = True
+                return st.error("Please load data first!", icon="🚨")
+                
+
+    if "refine_graph" not in session_state:
+        session_state["refine_graph"] = {}
+                
+    G1 = session_state["modified_graph"]
+    G2 = session_state["average_graphs"]["all_day"]
+    G = G1 if G1 is not None else G2
+        
+    session_state["n_strongly_cc"] = nx.number_strongly_connected_components(G) 
+    CCs = build_cc(G, strong=True)
+    CCs_ = [G]+CCs[1:]
+    fig, _ = show_graph(CCs_)
+
+    session_state["refine_graph"]["is_submitted"] = True
+    session_state["refine_graph"]["G"] = G
+    session_state["refine_graph"]["fig"] = fig
+
+def on_submit_apply(placeholder):
+    st.session_state["apply_graph_modification"] = True
+    session_state["refine_graph"]["is_submitted"] = False
+    st.session_state["stop_and_clear"] = True
+    st.session_state["button_load"] = False
+    with placeholder:
+        for att in ["average_graphs", "node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
+            if att not in st.session_state:
+                st.session_state["load_data_error"] = True
+                return st.error("Please load data first!", icon="🚨")
+            
+def on_submit_apply2():
+    session_state["refine_graph"]["is_submitted2"] = True
+
+
 # --------------------------------------------- GRAPH MANIPULATION ----------------------------------------------
 def graph_manipulation_load_data(session_state, TIMES):
     progress_bar = st.progress(0, "Loading data...")
@@ -123,31 +189,52 @@ def graph_manipulation_load_data(session_state, TIMES):
                 average_graphs[time] = pkl.load(f)
 
         session_state[f"average_graphs"] = average_graphs
+    
+    session_state["history_changes"] = {}
 
     progress_bar.progress(100, "Loading data completed!")
 
 def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED, 
-                               split_the_node_form_placeholder, add_and_delete_form_placeholder):
+                               split_the_node_form_placeholder, add_and_delete_form_placeholder, key_="all_day"):
+
+    # if "checkpoint" not in session_state.keys():
+    #     session_state["checkpoint"] = {}
+
+    session_state["modified_graph"] = deepcopy(session_state[f"average_graphs"][key_])                
     
-    session_state["modified_graph"] = deepcopy(session_state[f"average_graphs"]["all_day"])
-    
-    nodes = list(session_state["modified_graph"].nodes())
+    nodes = list(session_state[f"average_graphs"][key_].nodes())
     seed = random.seed(GRAPH_MANIPULATION_SEED)
-    
+
     origin = random.choice(nodes)
-    
     print_INFO_message_timestamp("Splitting two way roads")
-    split_two_way_roads(session_state["modified_graph"], 
-                            origin=origin, 
-                            session_state=session_state,
-                            split_the_node_form_placeholder=split_the_node_form_placeholder,
-                            add_and_delete_form_placeholder=add_and_delete_form_placeholder,
-                            count=0,
-                            count_max=100, 
-                            log_file_path=LOG_FILE_PATH,
-                            log_file_path2=LOG_FILE_PATH2, 
-                            img_path=HTML_IMG_PATH,)
-       
+    for i in range(600):
+        print_INFO_message(f"iteration {i}")
+        if i%5 == 0 and i in session_state["checkpoint"].keys():
+            session_state["modified_graph"] = session_state["checkpoint"][i]
+            c_max = -1
+        else:
+            c_max = 80
+        split_two_way_roads(session_state["modified_graph"], 
+                                        origin=origin, 
+                                        session_state=session_state,
+                                        split_the_node_form_placeholder=split_the_node_form_placeholder,
+                                        add_and_delete_form_placeholder=add_and_delete_form_placeholder,
+                                        count=0,
+                                        count_max=c_max, 
+                                        log_file_path=LOG_FILE_PATH,
+                                        log_file_path2=LOG_FILE_PATH2, 
+                                        img_path=HTML_IMG_PATH,)
+
+        if i%5 == 0:
+            session_state["checkpoint"][i] = deepcopy(session_state["modified_graph"])
+        #     session_state["checkpoint"][i] = deepcopy(session_state["modified_graph"])
+        # else:
+        #     session_state["modified_graph"] = session_state["checkpoint"][i]
+        
+        origin = random.choice(nodes)
+
+    
+    
 def graph_manipulation_process_template(session_state, TIMES, 
                                LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED):
     
@@ -157,14 +244,12 @@ def graph_manipulation_process_template(session_state, TIMES,
     
     with img_col:
         st.components.v1.html(html_img, height=600)
-        _, refresh_col, _, stop_and_save_col, _ = st.columns(5)
+        _, refresh_col, _, stop_and_clear_col, _ = st.columns(5)
         with refresh_col:
             st.button("refresh image")
-        with stop_and_save_col:
-            with open(PROCESSED_DATA_ROOT_PATH+"\history_changes.pkl", "wb") as f:
-                stop_and_save_button = st.button("Stop and save changes", 
-                                                 on_click=stop_and_save_callback,
-                                                 args=(f))
+        with stop_and_clear_col:
+            stop_and_clear_button = st.button("Stop process and clear memory", 
+                                             on_click=stop_and_clear_callback,)
             
     with text_col:
         split_the_node_form_placeholder = st.empty()
@@ -197,52 +282,121 @@ def graph_manipulation_process_template(session_state, TIMES,
                             
             st.form_submit_button("submit", disabled=True)
     
-    if not session_state["stop_and_save"] and not stop_and_save_button:
+    if not stop_and_clear_button and not session_state["stop_and_clear"]:
         graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED, 
                                split_the_node_form_placeholder, add_and_delete_form_placeholder)
     else:
-        print_INFO_message_timestamp("Stop and save changes")
-        session_state["stop_and_save"] = False
-        return 
+        print_INFO_message_timestamp("Stop and clear state")
+        return
 
 def graph_manipulation(session_state, TIMES):
-    col1, col2, _, _ = st.columns(4)
-    
-    with col1:
-        button_load = st.button("Load data for graph manipulation")
-    with col2:
-        button_manipulation = st.button("Start graph manipulation process")
-
+    placeholder_button = st.container()
     st.markdown("---")
-    
+    placeholder_error = st.empty()
     placeholder = st.empty()
+
+    with placeholder_button:
+        col1, col2, col3, col4 = st.columns(4)
+    
+        with col1:
+            button_load = st.button("Load data for graph manipulation")
+        with col2:
+            button_manipulation = st.button("Start graph manipulation process")
+        with col3:
+            button_refine = st.button("Refine modified graph", on_click=on_submit_refine, args=(placeholder,))
+        with col4:
+            button_apply = st.button("Apply modification to all graphs", on_click=on_submit_apply, args=(placeholder,))
+
+    ############################################## ERROR SECTION ##############################################
+    with placeholder_error:
+        if st.session_state["load_data_error"]:
+            st.error("Please load data first!", icon="🚨")
+        else:
+            st.write("")
     
     ############################################## LOAD DATA ##############################################
     if button_load:
+        placeholder_error.empty()
         graph_manipulation_load_data(session_state, TIMES)
         initialize_session_state_attributes(True)
         clear_log_files()
         session_state["button_load"] = True
         
         if button_manipulation:
-            st.session_state["stop_and_save"] = True
+            st.session_state["stop_and_clear"] = True
     
-    ############################################## GENERATE VIZ ##############################################    
-    if button_manipulation:
-        for att in ["node", "node_mapping", "predecessors_id", "successors_id", "stop_and_save", "button_load"]:
+    ############################################## MODIFY GRAPH ##############################################    
+    if button_manipulation and not st.session_state["load_data_error"]:
+        for att in ["average_graphs", "node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
             if att not in st.session_state:
                 return st.error("Please load data first!", icon="🚨")
         
         with placeholder:
             graph_manipulation_process_template(session_state, TIMES, 
                                    LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED)
+            session_state["button_load"] = False
+            session_state["stop_and_clear"] = False
         
         if session_state["button_load"]:
-            placeholder.warning("Process interrupted", icon="❌")
+            placeholder.warning("Process interrupted (load the data to start again)", icon="❌")
+        elif session_state["stop_and_clear"]:
+            placeholder.warning("Process interrupted and state cleared (load the data to start again)", icon="❌")
         else:
             placeholder.success("Process completed: changes has been saved. Download data using the download button", icon="✅")
 
+    ############################################## REFINE GRAPH ############################################## 
+    if "is_submitted" in session_state["refine_graph"].keys() and not st.session_state["load_data_error"]:
+        if session_state["refine_graph"]["is_submitted"]:
+            with placeholder:
+                graph_col, _, form_col = st.columns([2,0.25,1])
+                                
+                with graph_col:
+                    st.plotly_chart(session_state["refine_graph"]["fig"], use_container_width=True)
+                        
+                with form_col:
+                    for i in range(5):
+                        st.write("#")
+                    refine_form_placeholder = st.empty()           
+                    G = session_state["refine_graph"]["G"]
+                    refine_graph(G, refine_form_placeholder, session_state)
+
+    ############################################## APPLY GRAPH CHANGES ##############################################
+    if st.session_state["apply_graph_modification"] and not st.session_state["load_data_error"]:
+        with placeholder:
+            st.subheader("Load history changes data")
+            col1, _, col2, _ = st.columns([1,0.25,1, 0.25])
+            with col1:
+                manipulation_data = st.file_uploader("**Upload history changes (from manipulation section)**", 
+                                             type=["pkl", "bin"], 
+                                             key="upload_button_manipulation",)
+                
+                if st.session_state["upload_button_manipulation"] is not None:
+                    st.session_state["history_changes"] = pkl.load(st.session_state["upload_button_manipulation"])
+            with col2:
+                refine_data = st.file_uploader("**Upload history changes (from refine section)**", 
+                                             type=["pkl", "bin"], 
+                                             key="upload_button_refine",)
+                if st.session_state["upload_button_refine"] is not None:
+                    st.session_state["history_changes_refine"] = pkl.load(st.session_state["upload_button_refine"])
+        
+        for i in range(3):
+            st.write("#")
+        st.button("Apply changes", on_click=on_submit_apply2)    
+        
+    if "is_submitted2" in session_state["refine_graph"].keys() and not st.session_state["load_data_error"]:
+        if session_state["refine_graph"]["is_submitted2"]:
+            for key in session_state[f"average_graphs"].keys():
+                print(key)
+                session_state["checkpoint"] = {}
+                graph_manipulation_process(st.session_state, 
+                                    LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED,
+                                    st.empty(), st.empty(), key_=key)
+                if "modified_graphs" not in st.session_state: 
+                    st.session_state["modified_graphs"] = {}
+                st.session_state["modified_graphs"][key] = deepcopy(st.session_state["modified_graph"])
             
+        
+        
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------
 def deterministic_load_data(session_state, TIMES, facilities_number):
     c = 0
@@ -682,15 +836,27 @@ if __name__ == '__main__':
                     label_visibility="collapsed",)
             
         if section == "Graph manipulation":
-            uploaded_file = st.file_uploader("Upload history changes", type=["pkl", "bin"])
-            if uploaded_file is not None:
-                session_state["history_changes"] = pkl.load(uploaded_file)
+            st.subheader("Restore the old state")
+            uploaded_file = st.file_uploader("**Upload graph**", 
+                                             type=["pkl", "bin"], 
+                                             key="upload_button_0",)
+            uploaded_file = st.file_uploader("**Upload history changes**", 
+                                             type=["pkl", "bin"], 
+                                             key="upload_button_1",)
+            
+            st.subheader("Save the current state")
             st.download_button("download modified graph",
                                pkl.dumps(session_state["modified_graph"]),
                               file_name="graph.pkl")
             st.download_button("download history changes",
                                pkl.dumps(session_state["history_changes"]),
                               file_name="history_changes.pkl")
+            # st.subheader('Parameters for the refine procedure')
+            # st.slider("**Choose the number of strongly cc to be displayed**",
+            #          min_value=0,
+            #          max_value=st.session_state["n_strongly_cc"],
+            #          value=st.session_state["n_strongly_cc"],
+            #          key = "slider_strong_cc")
             
     if section not in ["Project description", "Theoretical Framework"]:
         st.title("Facility Location dashboard")

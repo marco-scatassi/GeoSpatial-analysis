@@ -66,11 +66,11 @@ HTML_IMG_PATH = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/i
 GRAPH_MANIPULATION_SEED=8797
 # --------------------------------------------- UTILITY AND CALLBACK --------------------------------------------
 def initialize_session_state_attributes(from_graph_button_load=False):
-    keys = ["node", "modified_graph", "refine_graph", "history_changes", 
+    keys = ["node", "modified_graph", "refine_graph", "history_changes", "load_data_error",
             "node_mapping", "predecessors_id", "successors_id", "apply_graph_modification",
             "stop_and_clear", "button_load", "is_form1_disabled", "is_form2_disabled"]
     
-    default = ["___", None, {}, {}, {}, [], [], False, False, False, False, True]
+    default = ["___", None, {}, {}, False, {}, [], [], False, False, False, False, True]
     
     for key, value in zip(keys, default):
         if key not in st.session_state:
@@ -79,6 +79,7 @@ def initialize_session_state_attributes(from_graph_button_load=False):
     if from_graph_button_load:
         st.session_state["button_load"] = True
         st.session_state["stop_and_clear"] = False
+        st.session_state["load_data_error"] = False
         st.session_state["is_form1_disabled"] = False
         st.session_state["is_form2_disabled"] = True
         st.session_state["apply_graph_modification"] = False
@@ -122,6 +123,7 @@ def stop_and_clear_callback():
     st.session_state["button_load"] = False
     st.session_state["refine_graph"]["is_submitted"] = False
     st.session_state["apply_graph_modification"] = False
+    st.session_state["load_data_error"] = False
     for key in keys:
         if key != "stop_and_clear" and key != "button_load":
             del st.session_state[key]
@@ -132,9 +134,9 @@ def on_submit_refine(placeholder):
     with placeholder:
         for att in ["average_graphs", "node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
             if att not in st.session_state:
-                st.error("Please load data first!", icon="🚨")
-                ptime.sleep(2000)
-                return 
+                st.session_state["load_data_error"] = True
+                return st.error("Please load data first!", icon="🚨")
+                
 
     if "refine_graph" not in session_state:
         session_state["refine_graph"] = {}
@@ -159,9 +161,9 @@ def on_submit_apply(placeholder):
     with placeholder:
         for att in ["average_graphs", "node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
             if att not in st.session_state:
-                st.error("Please load data first!", icon="🚨")
-                ptime.sleep(2000)
-                return 
+                st.session_state["load_data_error"] = True
+                return st.error("Please load data first!", icon="🚨")
+                 
  
 
 
@@ -295,6 +297,11 @@ def graph_manipulation(session_state, TIMES):
             button_refine = st.button("Refine modified graph", on_click=on_submit_refine, args=(placeholder,))
         with col4:
             button_apply = st.button("Apply modification to all graphs", on_click=on_submit_apply, args=(placeholder,))
+
+    ############################################## ERROR SECTION ##############################################
+    if st.session_state["load_data_error"]:
+        with placeholder:
+            st.error("Please load data first!", icon="🚨")
     
     ############################################## LOAD DATA ##############################################
     if button_load:

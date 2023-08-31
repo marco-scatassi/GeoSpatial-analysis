@@ -126,12 +126,13 @@ def stop_and_clear_callback():
         if key != "stop_and_clear" and key != "button_load":
             del st.session_state[key]
 
-def on_submit_refine():
+def on_submit_refine(placeholder):
     st.session_state["stop_and_clear"] = True
     st.session_state["button_load"] = False
-    for att in ["average_graphs", "node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
-        if att not in st.session_state:
-            return st.error("Please load data first!", icon="🚨")
+    with placeholder:
+        for att in ["average_graphs", "node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
+            if att not in st.session_state:
+                return st.error("Please load data first!", icon="🚨")
 
     if "refine_graph" not in session_state:
         session_state["refine_graph"] = {}
@@ -149,13 +150,15 @@ def on_submit_refine():
     session_state["refine_graph"]["G"] = G
     session_state["refine_graph"]["fig"] = fig
 
-def on_submit_apply():
+def on_submit_apply(placeholder):
+    st.session_state["apply_graph_modification"] = True
     st.session_state["stop_and_clear"] = True
     st.session_state["button_load"] = False
-    for att in ["average_graphs", "node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
-        if att not in st.session_state:
-            return st.error("Please load data first!", icon="🚨")
-    session_state["apply_graph_modification"] = True
+    with placeholder:
+        for att in ["average_graphs", "node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
+            if att not in st.session_state:
+                return st.error("Please load data first!", icon="🚨")
+ 
 
 
 # --------------------------------------------- GRAPH MANIPULATION ----------------------------------------------
@@ -285,9 +288,9 @@ def graph_manipulation(session_state, TIMES):
         with col2:
             button_manipulation = st.button("Start graph manipulation process")
         with col3:
-            button_refine = st.button("Refine modified graph", on_click=on_submit_refine)
+            button_refine = st.button("Refine modified graph", on_click=on_submit_refine, args=(placeholder,))
         with col4:
-            button_apply = st.button("Apply modification to all graphs", on_click=on_submit_apply)
+            button_apply = st.button("Apply modification to all graphs", on_click=on_submit_apply, args=(placeholder,))
     
     ############################################## LOAD DATA ##############################################
     if button_load:

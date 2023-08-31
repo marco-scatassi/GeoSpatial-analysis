@@ -66,11 +66,12 @@ HTML_IMG_PATH = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/i
 GRAPH_MANIPULATION_SEED=8797
 # --------------------------------------------- UTILITY AND CALLBACK --------------------------------------------
 def initialize_session_state_attributes(from_graph_button_load=False):
-    keys = ["node", "modified_graph", "refine_graph", "history_changes", "load_data_error",
-            "node_mapping", "predecessors_id", "successors_id", "apply_graph_modification",
-            "stop_and_clear", "button_load", "is_form1_disabled", "is_form2_disabled"]
+    keys = ["node", "modified_graph", "refine_graph", "history_changes", 
+            "history_changes_refine", "load_data_error","node_mapping", "predecessors_id", 
+            "successors_id", "apply_graph_modification","stop_and_clear", "button_load", 
+            "is_form1_disabled", "is_form2_disabled"]
     
-    default = ["___", None, {}, {}, False, {}, [], [], False, False, False, False, True]
+    default = ["___", None, {}, {}, {}, False, {}, [], [], False, False, False, False, True]
     
     for key, value in zip(keys, default):
         if key not in st.session_state:
@@ -86,6 +87,8 @@ def initialize_session_state_attributes(from_graph_button_load=False):
         st.session_state["checkpoint"] = {}
         if "is_submitted" in st.session_state["refine_graph"].keys(): 
             st.session_state["refine_graph"]["is_submitted"] = False
+        if "is_submitted2" in st.session_state["refine_graph"].keys():
+            st.session_state["refine_graph"]["is_submitted2"] = False
         if st.session_state["upload_button_0"] is not None:
             st.session_state["modified_graph"] = pkl.load(st.session_state["upload_button_0"])
         if st.session_state["upload_button_1"] is not None:
@@ -129,6 +132,7 @@ def stop_and_clear_callback():
             del st.session_state[key]
 
 def on_submit_refine(placeholder):
+    st.session_state["apply_graph_modification"] = False
     st.session_state["stop_and_clear"] = True
     st.session_state["button_load"] = False
     with placeholder:
@@ -156,6 +160,7 @@ def on_submit_refine(placeholder):
 
 def on_submit_apply(placeholder):
     st.session_state["apply_graph_modification"] = True
+    session_state["refine_graph"]["is_submitted"] = False
     st.session_state["stop_and_clear"] = True
     st.session_state["button_load"] = False
     with placeholder:
@@ -163,8 +168,9 @@ def on_submit_apply(placeholder):
             if att not in st.session_state:
                 st.session_state["load_data_error"] = True
                 return st.error("Please load data first!", icon="🚨")
-                 
- 
+            
+def on_submit_apply2():
+    session_state["refine_graph"]["is_submitted2"] = True
 
 
 # --------------------------------------------- GRAPH MANIPULATION ----------------------------------------------
@@ -188,19 +194,20 @@ def graph_manipulation_load_data(session_state, TIMES):
     progress_bar.progress(100, "Loading data completed!")
 
 def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED, 
-                               split_the_node_form_placeholder, add_and_delete_form_placeholder):
+                               split_the_node_form_placeholder, add_and_delete_form_placeholder, key_="all_day"):
 
     # if "checkpoint" not in session_state.keys():
     #     session_state["checkpoint"] = {}
 
-    session_state["modified_graph"] = deepcopy(session_state[f"average_graphs"]["all_day"])                
+    session_state["modified_graph"] = deepcopy(session_state[f"average_graphs"][key_])                
     
-    nodes = list(session_state[f"average_graphs"]["all_day"].nodes())
+    nodes = list(session_state[f"average_graphs"][key_].nodes())
     seed = random.seed(GRAPH_MANIPULATION_SEED)
 
     origin = random.choice(nodes)
     print_INFO_message_timestamp("Splitting two way roads")
-    for i in range(700):
+    for i in range(600):
+        print_INFO_message(f"iteration {i}")
         if i%5 == 0 and i in session_state["checkpoint"].keys():
             session_state["modified_graph"] = session_state["checkpoint"][i]
             c_max = -1
@@ -284,6 +291,7 @@ def graph_manipulation_process_template(session_state, TIMES,
 def graph_manipulation(session_state, TIMES):
     placeholder_button = st.container()
     st.markdown("---")
+    placeholder_error = st.empty()
     placeholder = st.empty()
 
     with placeholder_button:
@@ -299,12 +307,15 @@ def graph_manipulation(session_state, TIMES):
             button_apply = st.button("Apply modification to all graphs", on_click=on_submit_apply, args=(placeholder,))
 
     ############################################## ERROR SECTION ##############################################
-    if st.session_state["load_data_error"]:
-        with placeholder:
+    with placeholder_error:
+        if st.session_state["load_data_error"]:
             st.error("Please load data first!", icon="🚨")
+        else:
+            st.write("")
     
     ############################################## LOAD DATA ##############################################
     if button_load:
+        placeholder_error.empty()
         graph_manipulation_load_data(session_state, TIMES)
         initialize_session_state_attributes(True)
         clear_log_files()
@@ -351,7 +362,37 @@ def graph_manipulation(session_state, TIMES):
     ############################################## APPLY GRAPH CHANGES ##############################################
     if st.session_state["apply_graph_modification"] and not st.session_state["load_data_error"]:
         with placeholder:
-            st.write("fin qui tutto bene")
+            st.subheader("Load history changes data")
+            col1, _, col2, _ = st.columns([1,0.25,1, 0.25])
+            with col1:
+                manipulation_data = st.file_uploader("**Upload history changes (from manipulation section)**", 
+                                             type=["pkl", "bin"], 
+                                             key="upload_button_manipulation",)
+                
+                if st.session_state["upload_button_manipulation"] is not None:
+                    st.session_state["history_changes"] = pkl.load(st.session_state["upload_button_manipulation"])
+            with col2:
+                refine_data = st.file_uploader("**Upload history changes (from refine section)**", 
+                                             type=["pkl", "bin"], 
+                                             key="upload_button_refine",)
+                if st.session_state["upload_button_refine"] is not None:
+                    st.session_state["history_changes_refine"] = pkl.load(st.session_state["upload_button_refine"])
+        
+        for i in range(3):
+            st.write("#")
+        st.button("Apply changes", on_click=on_submit_apply2)    
+        
+    if "is_submitted2" in session_state["refine_graph"].keys() and not st.session_state["load_data_error"]:
+        if session_state["refine_graph"]["is_submitted2"]:
+            for key in session_state[f"average_graphs"].keys():
+                print(key)
+                session_state["checkpoint"] = {}
+                graph_manipulation_process(st.session_state, 
+                                    LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED,
+                                    st.empty(), st.empty(), key_=key)
+                if "modified_graphs" not in st.session_state: 
+                    st.session_state["modified_graphs"] = {}
+                st.session_state["modified_graphs"][key] = deepcopy(st.session_state["modified_graph"])
         
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------
 def deterministic_load_data(session_state, TIMES, facilities_number):

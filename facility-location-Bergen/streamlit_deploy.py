@@ -314,7 +314,7 @@ def graph_manipulation(session_state, TIMES):
             st.session_state["stop_and_clear"] = True
     
     ############################################## MODIFY GRAPH ##############################################    
-    if button_manipulation:
+    if button_manipulation and not st.session_state["load_data_error"]:
         for att in ["average_graphs", "node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
             if att not in st.session_state:
                 return st.error("Please load data first!", icon="🚨")
@@ -333,7 +333,7 @@ def graph_manipulation(session_state, TIMES):
             placeholder.success("Process completed: changes has been saved. Download data using the download button", icon="✅")
 
     ############################################## REFINE GRAPH ############################################## 
-    if "is_submitted" in session_state["refine_graph"].keys():
+    if "is_submitted" in session_state["refine_graph"].keys() and not st.session_state["load_data_error"]:
         if session_state["refine_graph"]["is_submitted"]:
             with placeholder:
                 graph_col, _, form_col = st.columns([2,0.25,1])
@@ -349,7 +349,7 @@ def graph_manipulation(session_state, TIMES):
                     refine_graph(G, refine_form_placeholder, session_state)
 
     ############################################## APPLY GRAPH CHANGES ##############################################
-    if st.session_state["apply_graph_modification"]:
+    if st.session_state["apply_graph_modification"] and not st.session_state["load_data_error"]:
         with placeholder:
             st.write("fin qui tutto bene")
         

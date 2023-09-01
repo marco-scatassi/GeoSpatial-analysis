@@ -204,7 +204,7 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
     if apply_to_all:
         session_state["modified_graph"] = {}
         session_state["checkpoint"] = {}
-        for key in session_state[f"average_graphs"]:
+        for key in session_state[f"average_graphs"].keys():
             session_state["modified_graph"][key] = deepcopy(session_state[f"average_graphs"][key])     
             session_state["checkpoint"][key] = {}
     else:
@@ -220,7 +220,7 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
         if progress_bar_placeholder is not None:
             progress_bar.progress((i+1)*1/600, f"Splitting two way roads... {i+1}/600")
             
-        if i%10 == 0 and i in session_state["checkpoint"].keys():
+        if i%15 == 0 and i in session_state["checkpoint"].keys():
             if apply_to_all:
                for key in session_state["modified_graph"].keys():
                    session_state["modified_graph"][key] = session_state["checkpoint"][key][i]
@@ -239,7 +239,7 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
                                         log_file_path2=LOG_FILE_PATH2, 
                                         img_path=HTML_IMG_PATH,)
 
-        if i%10 == 0:
+        if i%15 == 0:
             if apply_to_all:
                 for key in session_state["modified_graph"].keys():
                     session_state["checkpoint"][key][i] = deepcopy(session_state["modified_graph"][key])

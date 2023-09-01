@@ -397,7 +397,7 @@ def graph_manipulation(session_state, TIMES):
                     session_state["checkpoint"] = {}
                     graph_manipulation_process(st.session_state, 
                                         LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED,
-                                        st.empty(), st.empty(), key_=key, progress_bar=progress_bar_sub_placeholder)
+                                        st.empty(), st.empty(), key_=key, progress_bar_placeholder=progress_bar_sub_placeholder)
                     if "modified_graphs" not in st.session_state: 
                         st.session_state["modified_graphs"] = {}
                     st.session_state["modified_graphs"][key] = deepcopy(st.session_state["modified_graph"])

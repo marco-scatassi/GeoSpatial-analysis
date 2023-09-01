@@ -221,10 +221,10 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
             progress_bar.progress((i+1)*1/600, f"Splitting two way roads... {i+1}/600")
             
         if i%10 == 0 and i in session_state["checkpoint"].keys():
-           if apply_to_all:
-                for key in session_state["modified_graph"].keys():
-                    session_state["modified_graph"][key] = session_state["checkpoint"][key][i]
-            
+            if apply_to_all:
+               for key in session_state["modified_graph"].keys():
+                   session_state["modified_graph"][key] = session_state["checkpoint"][key][i]
+                   
             c_max = -1
         else:
             c_max = 80

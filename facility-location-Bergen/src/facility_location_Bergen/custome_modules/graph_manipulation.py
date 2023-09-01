@@ -400,13 +400,19 @@ def split_the_node_func(G, session_state, node, node_mapping):
     
     return node_mapping, new_edge
             
-def split_two_way_roads(G, origin, session_state,
+def split_two_way_roads(G_dict, origin, session_state,
                         split_the_node_form_placeholder,
                         add_and_delete_form_placeholder,
                         count=0, count_max=1, 
                         log_file_path=None, log_file_path2 = None, 
                         clear_log_file=True, img_path=None, G_original=None):
 
+    if type(G_dict) != dict:
+        G_dict = {0: G_dict}
+    
+    G_dict_keys = list(G_dict.keys())
+    G = G_dict[G_dict_keys[0]]
+    
     if G_original == None:
         G_original = deepcopy(G)
     r=True
@@ -441,12 +447,13 @@ def split_two_way_roads(G, origin, session_state,
                 for e in G.edges((origin, node), data=True):
                     if e[0] == origin and e[1] == node:   
                         key = str(node)
-                        reconnect_predecessors(G, origin, log_file_path, node, new_edge)
-                            
-                        #print_INFO_message(f"old edge is {(origin, node)}", log_file_path)
-                        #print_INFO_message(f"new edge is {(new_edge[0], node)}", log_file_path)   
-                        G.remove_edge(origin, node) 
-                        G.add_edge(new_edge[0], node, **e[2])
+                        for H in G_dict.values():
+                            reconnect_predecessors(H, origin, log_file_path, node, new_edge)
+                                
+                            #print_INFO_message(f"old edge is {(origin, node)}", log_file_path)
+                            #print_INFO_message(f"new edge is {(new_edge[0], node)}", log_file_path)   
+                            H.remove_edge(origin, node) 
+                            H.add_edge(new_edge[0], node, **e[2])
                                 
                         successors, no_double_sense = check_double_sense_continues(G, node)
                         predecessors = list(G.predecessors(node))
@@ -476,7 +483,8 @@ def split_two_way_roads(G, origin, session_state,
                                     and "selected_predecessor" in session_state["history_changes"][key].keys() 
                                         and "selected_successor" in session_state["history_changes"][key].keys()):
                                 if session_state["history_changes"][key]['split_the_node']:
-                                    node_mapping, new_edge = split_the_node_func(G, session_state["history_changes"], node, node_mapping)
+                                    for H in G_dict.values():
+                                        node_mapping, new_edge = split_the_node_func(H, session_state["history_changes"], node, node_mapping)
                                     fig = img_log(G, [node, new_edge[0]], node_mapping, node_class)
                                     fig.write_html(img_path, full_html=True, auto_open=False)
                                     
@@ -495,10 +503,11 @@ def split_two_way_roads(G, origin, session_state,
                             if key in session_state["history_changes"].keys() and \
                                 ("new_edges" in session_state["history_changes"][key].keys() and \
                                  "edges_to_delete" in session_state["history_changes"][key].keys()):
-                                    for e in session_state["history_changes"][key]['new_edges']:
-                                        add_edge(e, G)
-                                    for e in session_state["history_changes"][key]['edges_to_delete']:
-                                        G.remove_edge(e[0], e[1])
+                                    for H in G_dict.values():
+                                        for e in session_state["history_changes"][key]['new_edges']:
+                                            add_edge(e, H)
+                                        for e in session_state["history_changes"][key]['edges_to_delete']:
+                                            H.remove_edge(e[0], e[1])
                             else:
                                 add_and_deleted_edges_input(G, node, session_state, 
                                                             node_mapping, 
@@ -511,7 +520,7 @@ def split_two_way_roads(G, origin, session_state,
                                 
                         break
     
-            r = split_two_way_roads(G, node, session_state,
+            r = split_two_way_roads(G_dict, node, session_state,
                                     split_the_node_form_placeholder,
                                     add_and_delete_form_placeholder,
                                     count+1, count_max, 
@@ -549,9 +558,9 @@ def on_submit_refine_form(session_state, G, node_mapping_r):
         deleted_edges = []
 
     if new_edges != []:
-        session_state["history_changes"]["graph"]["new_edges"] += new_edges
+        session_state["history_changes_refine"]["graph"]["new_edges"] += new_edges
     if deleted_edges != []:
-        session_state["history_changes"]["graph"]["edges_to_delete"] += deleted_edges
+        session_state["history_changes_refine"]["graph"]["edges_to_delete"] += deleted_edges
         
     for e in new_edges:
         add_edge(e, G)
@@ -566,7 +575,13 @@ def on_submit_refine_form(session_state, G, node_mapping_r):
     session_state["refine_graph"]["G"] = G
     session_state["refine_graph"]["fig"] = fig
                         
-def refine_graph(G, form_placeholder, session_state):    
+def refine_graph(G_dict, form_placeholder, session_state, apply_to_all=False):    
+    if type(G_dict) != dict:
+        G_dict = {0: G_dict}
+    
+    G_dict_keys = list(G_dict.keys())
+    G = G_dict[G_dict_keys[0]]
+    
     node_mapping = {}
     i = 0
     for node in G.nodes():
@@ -575,25 +590,32 @@ def refine_graph(G, form_placeholder, session_state):
     
     node_mapping_r = {v: k for k, v in node_mapping.items()}
     
-    if "graph" not in session_state["history_changes"].keys():
-        session_state["history_changes"]["graph"] = {}
-        session_state["history_changes"]["graph"]["new_edges"] = []
-        session_state["history_changes"]["graph"]["edges_to_delete"] = []
-        
-    form_placeholder.empty()
-    refine_form = form_placeholder.form(key=f"refine_form")
-    with refine_form:
-        st.write(f"**Form**: add and delete edges")
-        st.text_input("edges to add", 
-                       placeholder="(node1, node2), (node3, node4), ...",
-                       key=f"edges_to_add")
-        st.text_input("in order, for each edge added, provide its lenght (m)",
-                      placeholder="d1, d2, d3, ...", 
-                      key=f"distances_to_add")
-        st.text_input("edges to delete", 
-                       placeholder="(node1, node2), (node3, node4), ...",
-                       key=f"edges_to_delete")
-        st.form_submit_button("submit", 
-                              on_click=on_submit_refine_form,
-                              args=(session_state, G, node_mapping_r))
+    if "graph" not in session_state["history_changes_refine"].keys():
+        session_state["history_changes_refine"]["graph"] = {}
+        session_state["history_changes_refine"]["graph"]["new_edges"] = []
+        session_state["history_changes_refine"]["graph"]["edges_to_delete"] = []
+
+    if not apply_to_all:
+        form_placeholder.empty()
+        refine_form = form_placeholder.form(key=f"refine_form")
+        with refine_form:
+            st.write(f"**Form**: add and delete edges")
+            st.text_input("edges to add", 
+                        placeholder="(node1, node2), (node3, node4), ...",
+                        key=f"edges_to_add")
+            st.text_input("in order, for each edge added, provide its lenght (m)",
+                        placeholder="d1, d2, d3, ...", 
+                        key=f"distances_to_add")
+            st.text_input("edges to delete", 
+                        placeholder="(node1, node2), (node3, node4), ...",
+                        key=f"edges_to_delete")
+            st.form_submit_button("submit", 
+                                on_click=on_submit_refine_form,
+                                args=(session_state, G, node_mapping_r))
+    else:
+        for H in G_dict.values():
+            for e in session_state["history_changes_refine"]["graph"]["new_edges"]:
+                add_edge(e, H)
+            for e in session_state["history_changes_refine"]["graph"]["edges_to_delete"]:
+                H.remove_edge(e[0], e[1])
       

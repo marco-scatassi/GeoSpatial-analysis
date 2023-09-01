@@ -568,7 +568,13 @@ def on_submit_refine_form(session_state, G, node_mapping_r):
     session_state["refine_graph"]["fig"] = fig
             
             
-def refine_graph(G, form_placeholder, session_state):    
+def refine_graph(G_dict, form_placeholder, session_state, apply_to_all=False):    
+    if type(G_dict) != dict:
+        G_dict = {0: G_dict}
+    
+    G_dict_keys = list(G_dict.keys())
+    G = G_dict[G_dict_keys[0]]
+    
     node_mapping = {}
     i = 0
     for node in G.nodes():
@@ -577,25 +583,33 @@ def refine_graph(G, form_placeholder, session_state):
     
     node_mapping_r = {v: k for k, v in node_mapping.items()}
     
-    if "graph" not in session_state["history_changes"].keys():
-        session_state["history_changes"]["graph"] = {}
-        session_state["history_changes"]["graph"]["new_edges"] = []
-        session_state["history_changes"]["graph"]["edges_to_delete"] = []
-        
-    form_placeholder.empty()
-    refine_form = form_placeholder.form(key=f"refine_form")
-    with refine_form:
-        st.write(f"**Form**: add and delete edges")
-        st.text_input("edges to add", 
-                       placeholder="(node1, node2), (node3, node4), ...",
-                       key=f"edges_to_add")
-        st.text_input("in order, for each edge added, provide its lenght (m)",
-                      placeholder="d1, d2, d3, ...", 
-                      key=f"distances_to_add")
-        st.text_input("edges to delete", 
-                       placeholder="(node1, node2), (node3, node4), ...",
-                       key=f"edges_to_delete")
-        st.form_submit_button("submit", 
-                              on_click=on_submit_refine_form,
-                              args=(session_state, G, node_mapping_r))
+    if "graph" not in session_state["history_changes_refine"].keys():
+        session_state["history_changes_refine"]["graph"] = {}
+        session_state["history_changes_refine"]["graph"]["new_edges"] = []
+        session_state["history_changes_refine"]["graph"]["edges_to_delete"] = []
+
+    if not apply_to_all:
+        form_placeholder.empty()
+        refine_form = form_placeholder.form(key=f"refine_form")
+        with refine_form:
+            st.write(f"**Form**: add and delete edges")
+            st.text_input("edges to add", 
+                        placeholder="(node1, node2), (node3, node4), ...",
+                        key=f"edges_to_add")
+            st.text_input("in order, for each edge added, provide its lenght (m)",
+                        placeholder="d1, d2, d3, ...", 
+                        key=f"distances_to_add")
+            st.text_input("edges to delete", 
+                        placeholder="(node1, node2), (node3, node4), ...",
+                        key=f"edges_to_delete")
+            st.form_submit_button("submit", 
+                                on_click=on_submit_refine_form,
+                                args=(session_state, G, node_mapping_r))
+    else:
+        for H in G_dict.values():
+            for e in session_state["history_changes_refine"]["graph"]["new_edges"]:
+                add_edge(e, H)
+            for e in session_state["history_changes_refine"]["graph"]["edges_to_delete"]:
+                H.remove_edge(e[0], e[1])
+      
       

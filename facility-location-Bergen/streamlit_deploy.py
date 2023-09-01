@@ -194,10 +194,12 @@ def graph_manipulation_load_data(session_state, TIMES):
     progress_bar.progress(100, "Loading data completed!")
 
 def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED, 
-                               split_the_node_form_placeholder, add_and_delete_form_placeholder, key_="all_day"):
+                               split_the_node_form_placeholder, add_and_delete_form_placeholder, key_="all_day", progress_bar_placeholder=None):
 
     # if "checkpoint" not in session_state.keys():
     #     session_state["checkpoint"] = {}
+    if progress_bar_placeholder is not None:
+        progress_bar = progress_bar_placeholder.progress(0, "Splitting two way roads...")
 
     session_state["modified_graph"] = deepcopy(session_state[f"average_graphs"][key_])                
     
@@ -209,6 +211,8 @@ def graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTM
     for i in range(600):
         print_INFO_message(f"iteration {i}")
         if i%5 == 0 and i in session_state["checkpoint"].keys():
+            if progress_bar_placeholder is not None:
+                progress_bar.progress((i+1)*1/600, f"Splitting two way roads... {i+1}/600")
             session_state["modified_graph"] = session_state["checkpoint"][i]
             c_max = -1
         else:
@@ -384,15 +388,21 @@ def graph_manipulation(session_state, TIMES):
         
     if "is_submitted2" in session_state["refine_graph"].keys() and not st.session_state["load_data_error"]:
         if session_state["refine_graph"]["is_submitted2"]:
-            for key in session_state[f"average_graphs"].keys():
-                print(key)
-                session_state["checkpoint"] = {}
-                graph_manipulation_process(st.session_state, 
-                                    LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED,
-                                    st.empty(), st.empty(), key_=key)
-                if "modified_graphs" not in st.session_state: 
-                    st.session_state["modified_graphs"] = {}
-                st.session_state["modified_graphs"][key] = deepcopy(st.session_state["modified_graph"])
+            progress_bar = st.progress(0, "Apply changes...")
+            progress_bar_sub_placeholder = st.empty()
+            for i, key in enumerate(session_state[f"average_graphs"].keys()):
+                if key != "all_day":
+                    progress_bar.progress((i+1)*1/(len(session_state[f"average_graphs"].keys())-1), f"Apply changes to {key}")
+                    print(key)
+                    session_state["checkpoint"] = {}
+                    graph_manipulation_process(st.session_state, 
+                                        LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED,
+                                        st.empty(), st.empty(), key_=key, progress_bar=progress_bar_sub_placeholder)
+                    if "modified_graphs" not in st.session_state: 
+                        st.session_state["modified_graphs"] = {}
+                    st.session_state["modified_graphs"][key] = deepcopy(st.session_state["modified_graph"])
+            
+        
         
 # -------------------------------------------- DETEMINISTIC ANALYSIS --------------------------------------------
 def deterministic_load_data(session_state, TIMES, facilities_number):

@@ -34,7 +34,7 @@ from retrieve_global_parameters import (
 
 def build_adj_matrix(time):
     finished = False
-    average_graph_path = retrieve_average_graph_path(time)
+    average_graph_path = retrieve_average_graph_path(time, True, True, True, False)
 
     with open(average_graph_path, "rb") as f:
         average_graph = pickle.load(f)
@@ -59,7 +59,7 @@ def build_adj_matrix(time):
         adj_matrix_path = retrieve_adj_matrix_path(time, free_flow=True)
         dataset_adj_matrix = PickleDataSet(adj_matrix_path)
         dataset_adj_matrix.save(adj_matrix)
-
+    
     sp = dict(nx.all_pairs_dijkstra_path_length(average_graph))
     adj_matrix = np.zeros((len(sp), len(sp)))
 

@@ -66,16 +66,27 @@ def retrieve_gdf_worst_average_path(time):
     return saving_path
 
 
-def retrieve_average_graph_path(time, connected=True):
+def retrieve_average_graph_path(time, connected=True, splitted=False, firstSCC=False, backslah=False):
     if connected:
-        saving_path = f"data/03_primary/average_graph_{time}_connected.pkl"
+        saving_path = rf"data/03_primary/average_graph_{time}_connected.pkl"
+        if splitted:
+            saving_path = rf"data/03_primary/average_graph_{time}_connected_splitted.pkl"
+            if firstSCC:
+                saving_path = rf"data/03_primary/average_graph_{time}_connected_splitted_firstSCC.pkl"
     else:
-        saving_path = f"data/03_primary/average_graph_{time}_original.pkl"
+        saving_path = rf"data/03_primary/average_graph_{time}_original.pkl"
+    if backslah:
+        saving_path = saving_path.replace("/", "\\")
     return saving_path
 
 
-def retrieve_worst_average_graph_path(time):
-    saving_path = f"data/03_primary/worst_average_graph_{time}.pkl"
+def retrieve_worst_average_graph_path(time, connected=True, backslah=False):
+    if connected:
+        saving_path = rf"data/03_primary/worst_average_graph_{time}_connected.pkl"
+    else:
+        saving_path = rf"data/03_primary/worst_average_graph_{time}.pkl"
+    if backslah:
+        saving_path = saving_path.replace("/", "\\")
     return saving_path
 
 

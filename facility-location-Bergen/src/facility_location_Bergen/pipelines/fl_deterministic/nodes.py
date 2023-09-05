@@ -57,7 +57,7 @@ def verify_problem_already_solved(fl_data):
 def set_up_fl_problems(fl_data, already_solved):
     if not already_solved:
         print_INFO_message_timestamp("STARTING SCRIPT")
-        times = ["all_day", "morning"]#, "midday", "afternoon"]
+        times = ["all_day", "morning", "midday", "afternoon"]
         average_graphs = {}
 
         print_INFO_message("Loading average graphs")
@@ -169,8 +169,8 @@ def solve_fl_problems(fls_exact, fl_data):
     # for time, fl_gon_plus in fls_gon_plus.items():
     #     print_INFO_message(f"{time}: {round(fl_gon_plus.solution_value/60, 3)} minutes")
 
-    # solve_list = ["all_day_free_flow", "all_day", "morning", "midday", "afternoon"]
-    solve_list = ["morning"]#, "midday", "afternoon"]
+    solve_list = ["all_day_free_flow", "all_day", "morning", "midday", "afternoon"]
+    # solve_list = ["morning"]#, "midday", "afternoon"]
     
     if fls_exact != {}:
         for i, (time, fl_exact) in enumerate(zip(list(fls_exact.keys()), list(fls_exact.values()))):
@@ -181,8 +181,9 @@ def solve_fl_problems(fls_exact, fl_data):
                 if time in solve_list:
                     print_INFO_message_timestamp(f"Solving exact solution for {time}")
                     fl_exact.solve(mode="exact")
-                    print_INFO_message(f"{time}")
+                    print_INFO_message(f"Saving exact solution for {time}")
                     fl_exact.save(saving_path)
+                    print_INFO_message(f"Exact solution for {time} SAVED")
                 else:
                     print_INFO_message(f"Skipping {time}")
             

@@ -60,24 +60,24 @@ def build_adj_matrix(time):
         dataset_adj_matrix = PickleDataSet(adj_matrix_path)
         dataset_adj_matrix.save(adj_matrix)
     
-    sp = dict(nx.all_pairs_dijkstra_path_length(average_graph))
-    adj_matrix = np.zeros((len(sp), len(sp)))
+    # sp = dict(nx.all_pairs_dijkstra_path_length(average_graph))
+    # adj_matrix = np.zeros((len(sp), len(sp)))
 
-    print_INFO_message_timestamp("Creating distance matrix")
-    for i in range(len((sp))):
-        for j in range(len(sp)):
-            adj_matrix[i, j] = sp[mapping[i]][mapping[j]]
-        if i % 500 == 0:
-            print_INFO_message("{} out of {}".format(i, len(sp)))
+    # print_INFO_message_timestamp("Creating distance matrix")
+    # for i in range(len((sp))):
+    #     for j in range(len(sp)):
+    #         adj_matrix[i, j] = sp[mapping[i]][mapping[j]]
+    #     if i % 500 == 0:
+    #         print_INFO_message("{} out of {}".format(i, len(sp)))
 
-    adj_matrix_path = retrieve_adj_matrix_path(time)
-    adj_mapping_path = retrieve_adj_mapping_path(time)
+    # adj_matrix_path = retrieve_adj_matrix_path(time)
+    # adj_mapping_path = retrieve_adj_mapping_path(time)
 
-    dataset_adj_matrix = PickleDataSet(adj_matrix_path)
-    dataset_adj_mapping = PickleDataSet(adj_mapping_path)
+    # dataset_adj_matrix = PickleDataSet(adj_matrix_path)
+    # dataset_adj_mapping = PickleDataSet(adj_mapping_path)
 
-    dataset_adj_matrix.save(adj_matrix)
-    dataset_adj_mapping.save(mapping)
+    # dataset_adj_matrix.save(adj_matrix)
+    # dataset_adj_mapping.save(mapping)
 
     finished = True
 

@@ -55,6 +55,7 @@ st.set_page_config(layout = "wide")
 session_state = st.session_state
 
 project_path = r"/mount/src/geospatial-analysis/facility-location-Bergen"
+project_path = r"/app/geospatial-analysis/facility-location-Bergen"
 metadata = bootstrap_project(project_path)
 
 TIMES = ["all_day_free_flow", "all_day", "morning", "midday", "afternoon"]

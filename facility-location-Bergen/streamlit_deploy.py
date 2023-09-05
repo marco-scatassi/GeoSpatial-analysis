@@ -61,9 +61,13 @@ metadata = bootstrap_project(project_path)
 TIMES = ["all_day_free_flow", "all_day", "morning", "midday", "afternoon"]
 FACILITIES_NUMBER = [1,2,3]
 
-LOG_FILE_PATH = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/split_roads.log"
-LOG_FILE_PATH2 = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/split_roads_changes.log"
-HTML_IMG_PATH = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/img_split_roads.html"
+# LOG_FILE_PATH = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/split_roads.log"
+# LOG_FILE_PATH2 = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/split_roads_changes.log"
+# HTML_IMG_PATH = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/img_split_roads.html"
+
+LOG_FILE_PATH = r"/app/geospatial-analysis/facility-location-Bergen/logs/split_roads.log"
+LOG_FILE_PATH2 = r"/app/geospatial-analysis/facility-location-Bergen/logs/split_roads_changes.log"
+HTML_IMG_PATH = r"/app/geospatial-analysis/facility-location-Bergen/logs/img_split_roads.html"
 
 GRAPH_MANIPULATION_SEED=8797
 # --------------------------------------------- UTILITY AND CALLBACK --------------------------------------------

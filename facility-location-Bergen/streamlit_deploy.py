@@ -473,7 +473,7 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
         
         average_graphs = {}
         for time in TIMES[1:]:
-            path = project_path+"/"+retrieve_average_graph_path(time, connected=True)
+            path = project_path+"/"+retrieve_average_graph_path(time, True, True, True, False)
             with open(path, "rb") as f:
                 average_graphs[time] = pkl.load(f)
 

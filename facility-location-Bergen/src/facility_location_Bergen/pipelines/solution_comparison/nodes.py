@@ -2,7 +2,7 @@
 import sys
 
 sys.path.append(
-    r"C:\Users\Marco\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\src\facility_location_Bergen\custome_modules"
+    r"\\Pund\Stab$\guest801968\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\src\facility_location_Bergen\custome_modules"
 )
 
 import warnings
@@ -73,9 +73,9 @@ def solution_vs_scenario(data, is_created=False):
         # Load the average graph
         print_INFO_message(f"Loading adj matrix for {time_scenario}")
         if worst:
-            path = rf"C:\Users\Marco\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\data\03_primary\worst_average_graph_{time_scenario}.pkl"
+            path = rf"\\Pund\Stab$\guest801968\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\data\03_primary\worst_average_graph_{time_scenario}.pkl"
         else:
-            path = rf"C:\Users\Marco\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\data\03_primary\average_graph_{time_scenario}.pkl"
+            path = rf"\\Pund\Stab$\guest801968\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\data\03_primary\average_graph_{time_scenario}_connected_splitted_firstSCC.pkl"
         with open(path, "rb") as f:
             average_graph = pkl.load(f)
 

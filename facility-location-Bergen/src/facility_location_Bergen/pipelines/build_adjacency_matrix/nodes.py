@@ -43,41 +43,41 @@ def build_adj_matrix(time):
     for i, node in enumerate(average_graph.nodes()):
         mapping[i] = node
 
-    if time == "all_day":
-        sp_free_flow = dict(
-            nx.all_pairs_dijkstra_path_length(average_graph, weight="weight2")
-        )
-        adj_matrix = np.zeros((len(sp_free_flow), len(sp_free_flow)))
+    # if time == "all_day":
+    #     sp_free_flow = dict(
+    #         nx.all_pairs_dijkstra_path_length(average_graph, weight="weight2")
+    #     )
+    #     adj_matrix = np.zeros((len(sp_free_flow), len(sp_free_flow)))
 
-        print_INFO_message_timestamp("Creating free_flow distance matrix")
-        for i in range(len((sp_free_flow))):
-            for j in range(len(sp_free_flow)):
-                adj_matrix[i, j] = sp_free_flow[mapping[i]][mapping[j]]
-            if i % 500 == 0:
-                print_INFO_message("{} out of {}".format(i, len(sp_free_flow)))
+    #     print_INFO_message_timestamp("Creating free_flow distance matrix")
+    #     for i in range(len((sp_free_flow))):
+    #         for j in range(len(sp_free_flow)):
+    #             adj_matrix[i, j] = sp_free_flow[mapping[i]][mapping[j]]
+    #         if i % 500 == 0:
+    #             print_INFO_message("{} out of {}".format(i, len(sp_free_flow)))
 
-        adj_matrix_path = retrieve_adj_matrix_path(time, free_flow=True)
-        dataset_adj_matrix = PickleDataSet(adj_matrix_path)
-        dataset_adj_matrix.save(adj_matrix)
+    #     adj_matrix_path = retrieve_adj_matrix_path(time, free_flow=True)
+    #     dataset_adj_matrix = PickleDataSet(adj_matrix_path)
+    #     dataset_adj_matrix.save(adj_matrix)
     
-    # sp = dict(nx.all_pairs_dijkstra_path_length(average_graph))
-    # adj_matrix = np.zeros((len(sp), len(sp)))
+    sp = dict(nx.all_pairs_dijkstra_path_length(average_graph))
+    adj_matrix = np.zeros((len(sp), len(sp)))
 
-    # print_INFO_message_timestamp("Creating distance matrix")
-    # for i in range(len((sp))):
-    #     for j in range(len(sp)):
-    #         adj_matrix[i, j] = sp[mapping[i]][mapping[j]]
-    #     if i % 500 == 0:
-    #         print_INFO_message("{} out of {}".format(i, len(sp)))
+    print_INFO_message_timestamp("Creating distance matrix")
+    for i in range(len((sp))):
+        for j in range(len(sp)):
+            adj_matrix[i, j] = sp[mapping[i]][mapping[j]]
+        if i % 500 == 0:
+            print_INFO_message("{} out of {}".format(i, len(sp)))
 
-    # adj_matrix_path = retrieve_adj_matrix_path(time)
-    # adj_mapping_path = retrieve_adj_mapping_path(time)
+    adj_matrix_path = retrieve_adj_matrix_path(time)
+    adj_mapping_path = retrieve_adj_mapping_path(time)
 
-    # dataset_adj_matrix = PickleDataSet(adj_matrix_path)
-    # dataset_adj_mapping = PickleDataSet(adj_mapping_path)
+    dataset_adj_matrix = PickleDataSet(adj_matrix_path)
+    dataset_adj_mapping = PickleDataSet(adj_mapping_path)
 
-    # dataset_adj_matrix.save(adj_matrix)
-    # dataset_adj_mapping.save(mapping)
+    dataset_adj_matrix.save(adj_matrix)
+    dataset_adj_mapping.save(mapping)
 
     finished = True
 

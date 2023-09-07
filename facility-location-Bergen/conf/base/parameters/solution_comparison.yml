@@ -1,61 +1,61 @@
 solution_comparison0:
     facilities_number: 1
-    time_solution: "morning"
+    time_solution: "midday"
     time_scenario: "all_day"
     weight: "weight2"
     worst: "False"
 solution_comparison1:
     facilities_number: 1
-    time_solution: "morning"
+    time_solution: "midday"
     time_scenario: "all_day"
     weight: "weight"
     worst: "False"
 solution_comparison2:
     facilities_number: 1
-    time_solution: "morning"
+    time_solution: "midday"
     time_scenario: "morning"
     weight: "weight"
     worst: "False"
 solution_comparison3:
     facilities_number: 1
-    time_solution: "morning"
+    time_solution: "midday"
     time_scenario: "midday"
     weight: "weight"
     worst: "False"
 solution_comparison4:
     facilities_number: 1
-    time_solution: "morning"
+    time_solution: "midday"
     time_scenario: "afternoon"
     weight: "weight"
     worst: "False"
 
-# solution_comparison5:
-#     facilities_number: 1
-#     time_solution: "afternoon"
-#     time_scenario: "all_day"
-#     weight: "weight2"
-#     worst: "False"
-# solution_comparison6:
-#     facilities_number: 1
-#     time_solution: "afternoon"
-#     time_scenario: "all_day"
-#     weight: "weight"
-#     worst: "False"
-# solution_comparison7:
-#     facilities_number: 1
-#     time_solution: "afternoon"
-#     time_scenario: "morning"
-#     weight: "weight"
-#     worst: "False"
-# solution_comparison8:
-#     facilities_number: 1
-#     time_solution: "afternoon"
-#     time_scenario: "midday"
-#     weight: "weight"
-#     worst: "False"
-# solution_comparison9:
-#     facilities_number: 1
-#     time_solution: "afternoon"
-#     time_scenario: "afternoon"
-#     weight: "weight"
-#     worst: "False"
+solution_comparison5:
+    facilities_number: 1
+    time_solution: "afternoon"
+    time_scenario: "all_day"
+    weight: "weight2"
+    worst: "False"
+solution_comparison6:
+    facilities_number: 1
+    time_solution: "afternoon"
+    time_scenario: "all_day"
+    weight: "weight"
+    worst: "False"
+solution_comparison7:
+    facilities_number: 1
+    time_solution: "afternoon"
+    time_scenario: "morning"
+    weight: "weight"
+    worst: "False"
+solution_comparison8:
+    facilities_number: 1
+    time_solution: "afternoon"
+    time_scenario: "midday"
+    weight: "weight"
+    worst: "False"
+solution_comparison9:
+    facilities_number: 1
+    time_solution: "afternoon"
+    time_scenario: "afternoon"
+    weight: "weight"
+    worst: "False"

@@ -540,68 +540,68 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number, traffic_
 
     #------------------ FREE FLOW SOLUTION UNDER DIFFERENT SCENARIOS COMPARISON ------------------
     #------------------ OBJ FUNCTION VALUE -------------
-    col1, col2 = st.columns(2)
-    if f"abs_diff_barplot_{facilities_number}" not in session_state:
-        fls_exact = session_state[f"fls_exact_{facilities_number}"]
-        dfs = session_state[f"dfs_{facilities_number}"]
-        dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
-        a = list(range(len(TIMES)-1))
-        b = list(range(len(TIMES)-1))
-        b_worst = list(range(len(TIMES)-1))
-        for i, time in enumerate(TIMES[1:]):
-            a[i], b[i], b_worst[i] = compute_rel_diff(fls_exact, dfs, dfs_worst, time)
-        session_state[f"abs_diff_barplot_{facilities_number}"] = (a,b,b_worst)
+    # col1, col2 = st.columns(2)
+    # if f"abs_diff_barplot_{facilities_number}" not in session_state:
+    #     fls_exact = session_state[f"fls_exact_{facilities_number}"]
+    #     dfs = session_state[f"dfs_{facilities_number}"]
+    #     dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
+    #     a = list(range(len(TIMES)-1))
+    #     b = list(range(len(TIMES)-1))
+    #     b_worst = list(range(len(TIMES)-1))
+    #     for i, time in enumerate(TIMES[1:]):
+    #         a[i], b[i], b_worst[i] = compute_rel_diff(fls_exact, dfs, dfs_worst, time)
+    #     session_state[f"abs_diff_barplot_{facilities_number}"] = (a,b,b_worst)
 
-    with col1:
-        (a,b,b_worst) = session_state[f"abs_diff_barplot_{facilities_number}"]
-        fig = objective_function_value_under_different_cases(a, b, b_worst)
-        st.plotly_chart(fig, use_container_width=True)
+    # with col1:
+    #     (a,b,b_worst) = session_state[f"abs_diff_barplot_{facilities_number}"]
+    #     fig = objective_function_value_under_different_cases(a, b, b_worst)
+    #     st.plotly_chart(fig, use_container_width=True)
 
-    with col2:
-        with open(project_path+
-                  rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBySideWithFirstBarplot.md", 
-                  "r",
-                  encoding="utf-8") as f:
-            content = f.read()
+    # with col2:
+    #     with open(project_path+
+    #               rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBySideWithFirstBarplot.md", 
+    #               "r",
+    #               encoding="utf-8") as f:
+    #         content = f.read()
 
-        for i in range(6):
-            st.write("")
-        st.markdown(content)
+    #     for i in range(6):
+    #         st.write("")
+    #     st.markdown(content)
     
     #------------------ RELATIVE DIFFERENCES ------------  
-    col1, col2 = st.columns(2)
-    with col1:
-        with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBySideWithSecondBarplot.md", 
-                  "r",
-                  encoding="utf-8") as f:
-            content = f.read()
+    # col1, col2 = st.columns(2)
+    # with col1:
+    #     with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBySideWithSecondBarplot.md", 
+    #               "r",
+    #               encoding="utf-8") as f:
+    #         content = f.read()
 
-        for i in range(6):
-            st.write("")
-        st.markdown(content)
+    #     for i in range(6):
+    #         st.write("")
+    #     st.markdown(content)
     
-    with col2:    
-        (a,b,b_worst) = session_state[f"abs_diff_barplot_{facilities_number}"]
-        fig = outsample_evaluation_relative_differences(a, b, b_worst)
-        st.plotly_chart(fig, use_container_width=True)
+    # with col2:    
+    #     (a,b,b_worst) = session_state[f"abs_diff_barplot_{facilities_number}"]
+    #     fig = outsample_evaluation_relative_differences(a, b, b_worst)
+    #     st.plotly_chart(fig, use_container_width=True)
 
     #------------------------------------ DISTRIBUTION ANALYSIS ---------------------------------------
-    col1, col2 = st.columns(2)
-    if f"distribution_violin_plot_{facilities_number}" not in session_state:
-        df_min = session_state[f"df_min_{facilities_number}"]
-        fig = average_travel_time_across_under_different_cases(df_min)
-        session_state[f"distribution_violin_plot_{facilities_number}"] = fig
+    # col1, col2 = st.columns(2)
+    # if f"distribution_violin_plot_{facilities_number}" not in session_state:
+    #     df_min = session_state[f"df_min_{facilities_number}"]
+    #     fig = average_travel_time_across_under_different_cases(df_min)
+    #     session_state[f"distribution_violin_plot_{facilities_number}"] = fig
 
-    with col1:
-        st.plotly_chart(session_state[f"distribution_violin_plot_{facilities_number}"], 
-        use_container_width=True)
+    # with col1:
+    #     st.plotly_chart(session_state[f"distribution_violin_plot_{facilities_number}"], 
+    #     use_container_width=True)
         
         
         
-    df_min = session_state[f"df_min_{facilities_number}"]
+    # df_min = session_state[f"df_min_{facilities_number}"]
             
-    fig = travel_times_distribution_under_different_cases(df_min)
-    st.plotly_chart(fig, use_container_width=True)
+    # fig = travel_times_distribution_under_different_cases(df_min)
+    # st.plotly_chart(fig, use_container_width=True)
         
 def deterministic_analysis(session_state, TIMES, facilities_number, ratio1, ratio2, seed, traffic_jam_time):
     ############################################## RUN THE MODEL ##############################################

@@ -489,7 +489,7 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
     if c == 4:
         progress_bar.progress(100, "Loading data completed!")
 
-def deterministic_generate_viz(session_state, TIMES, facilities_number):
+def deterministic_generate_viz(session_state, TIMES, facilities_number, traffic_jam_time):
     if f"fls_exact_{facilities_number}" not in session_state:
         return st.error("Please load data first!", icon="🚨")
 
@@ -523,19 +523,30 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
 
     st.markdown(content)
 
-    #---------------------------------- MAP LONGEST PATH -------------------------------------
+    #---------------------------------- MAP LONGEST PATH / TRAFFIC JAM -------------------------------------        
     col1, col2 = st.columns([1.5,1])
     if f"map_longest_paths_{facilities_number}" not in session_state:
         dfs = session_state[f"dfs_{facilities_number}"]
         average_graphs = session_state[f"average_graphs"]
         map = visualize_longest_paths(dfs, average_graphs)
         session_state[f"map_longest_paths_{facilities_number}"] = map
+    
+    if traffic_jam_time is not None:
+        average_graphs = session_state[f"average_graphs"]
+        map_jam = show_traffic_jam(average_graphs[traffic_jam_time], display_jam=True, title="TRAFFIC JAM - "+traffic_jam_time)
+        session_state[f"map_jam_{facilities_number}"] = map_jam
         
     with col1:
         st_folium(
                 session_state[f"map_longest_paths_{facilities_number}"],
                 returned_objects=[],
                 width=800)
+        
+    with col2:
+        st.plotly_chart(
+                session_state[f"map_jam_{facilities_number}"],
+                use_container_width=True
+        )
 
     #------------------ FREE FLOW SOLUTION UNDER DIFFERENT SCENARIOS COMPARISON ------------------
     #------------------ OBJ FUNCTION VALUE -------------
@@ -602,7 +613,7 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
     fig = travel_times_distribution_under_different_cases(df_min)
     st.plotly_chart(fig, use_container_width=True)
         
-def deterministic_analysis(session_state, TIMES, facilities_number, ratio1, ratio2, seed):
+def deterministic_analysis(session_state, TIMES, facilities_number, ratio1, ratio2, seed, traffic_jam_time):
     ############################################## RUN THE MODEL ##############################################
     # button1 = st.button("Run the model")
         
@@ -712,7 +723,7 @@ def deterministic_analysis(session_state, TIMES, facilities_number, ratio1, rati
         
     ############################################## GENERATE VIZ ##############################################    
     if button_viz:
-        deterministic_generate_viz(session_state, TIMES, facilities_number)
+        deterministic_generate_viz(session_state, TIMES, facilities_number, traffic_jam_time)
 
 # -------------------------------------------- STOCHASTIC ANALYSIS ---------------------------------------------
 def stochastic_load_data(session_state, facilities_number):
@@ -860,6 +871,13 @@ if __name__ == '__main__':
                     (324324,),
                     label_visibility="collapsed",)
             
+            if section == "Deterministic models analysis":
+                st.markdown("**Scenario for TRAFFIC JAM viz:**")
+                time_jam = st.radio(
+                        "Scenario for TRAFFIC JAM viz",
+                        TIMES[1:],
+                        label_visibility="collapsed",)
+            
         if section == "Graph manipulation":
             st.subheader("Restore the old state")
             uploaded_file = st.file_uploader("**Upload graph**", 
@@ -903,7 +921,7 @@ if __name__ == '__main__':
         graph_manipulation(session_state, TIMES)
         
     elif section == "Deterministic models analysis":
-        deterministic_analysis(session_state, TIMES, facilities_number, ratio1, ratio2, seed)
+        deterministic_analysis(session_state, TIMES, facilities_number, ratio1, ratio2, seed, time_jam)
         
     elif section == "Stochastic models analysis":
         stochastic_analysis(session_state)

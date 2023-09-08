@@ -37,17 +37,7 @@ from retrieve_global_parameters import (
     retrieve_light_solution_path,
     retrieve_solution_vs_scenario_path,
 )
-from src.facility_location_Bergen.custome_modules.graphical_analysis import (
-    average_travel_time_across_under_different_cases,
-    compute_min_distance_df,
-    compute_rel_diff,
-    facilities_on_map,
-    objective_function_value_under_different_cases,
-    outsample_evaluation_relative_differences,
-    travel_times_distribution_under_different_cases,
-    visualize_longest_paths,
-    show_graph
-)
+from src.facility_location_Bergen.custome_modules.graphical_analysis import *
 from streamlit_folium import st_folium
 
 

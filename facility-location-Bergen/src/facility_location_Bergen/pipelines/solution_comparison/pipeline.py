@@ -36,7 +36,7 @@ def create_child_pipeline(key, value) -> list:
                 name="update_data_catalog",
             ),
         ],
-        namespace=f"solution_comparison.{key[-1]}",
+        namespace=f"solution_comparison.{key[-2:]}",
         parameters={key: key},
     )
 

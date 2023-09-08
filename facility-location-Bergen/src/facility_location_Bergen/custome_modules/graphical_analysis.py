@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import networkx as nx
 import geopandas as gpd
+from scipy import stats
 from shapely.geometry import Point
 import plotly.graph_objects as go
 from sklearn.utils import resample
@@ -266,6 +267,102 @@ def visualize_longest_paths(dfs, average_graphs):
         path.add_to(map)
     
     return map
+
+def show_traffic_jam(F, display_jam=False, free_flow=False, fig=None, title="TRAFFIC JAM"):
+  if type(F) != list:
+    F = [F]
+  
+  colors = ["blue", "red", "green", "yellow", "orange", "purple", "brown"]
+  
+  if fig is None:
+    fig = go.Figure()
+
+  for j, f in enumerate(F):
+    if j < len(colors):
+      color = colors[j]
+    else:
+      color = "black"
+      
+    nodes_lon = []
+    nodes_lat = []
+    diff_weights = []
+    for edge in f.edges(data=True):
+          x0, y0 = edge[0]
+          x1, y1 = edge[1]
+          weight = edge[2]["weight"]
+          weight2 = edge[2]["weight2"]
+          nodes_lon.append(x0)
+          nodes_lon.append(x1)
+          nodes_lon.append(None)
+          nodes_lat.append(y0)
+          nodes_lat.append(y1)
+          nodes_lat.append(None)
+          diff_weights.append(abs(weight2 - weight) / weight2)
+    
+    nodes_lon_color = {"green": [], "gold": [], "orange": [], "red": []}
+    nodes_lat_color = {"green": [], "gold": [], "orange": [], "red": []}
+
+    
+    for i, weight in enumerate(diff_weights):
+      mapped_weight = stats.percentileofscore(diff_weights, weight) / 100
+      if mapped_weight < 0.25:
+        nodes_lon_color["green"] += nodes_lon[i*3:i*3+3]
+        nodes_lat_color["green"] += nodes_lat[i*3:i*3+3]
+      elif mapped_weight < 0.5:
+        nodes_lon_color["gold"] += nodes_lon[i*3:i*3+3]
+        nodes_lat_color["gold"] += nodes_lat[i*3:i*3+3]
+      elif mapped_weight < 0.75:
+        nodes_lon_color["orange"] += nodes_lon[i*3:i*3+3]
+        nodes_lat_color["orange"] += nodes_lat[i*3:i*3+3]
+      else:
+        nodes_lon_color["red"] += nodes_lon[i*3:i*3+3]
+        nodes_lat_color["red"] += nodes_lat[i*3:i*3+3]
+  
+    if display_jam and not free_flow:
+      for key in nodes_lon_color.keys():
+        fig.add_trace(go.Scattermapbox(
+              lat=nodes_lat_color[key],
+              lon=nodes_lon_color[key],
+              mode='lines',
+              line=dict(width=1, color=key),
+              showlegend=False,
+          ))
+    else:
+      fig.add_trace(go.Scattermapbox(
+          lat=nodes_lat,
+          lon=nodes_lon,
+          mode='lines',
+          line=dict(width=1, color=color),
+          showlegend=False,
+      ))
+
+      nodes = f.nodes()
+      nodes = gpd.GeoDataFrame(pd.Series(list(nodes())).apply(lambda x: Point(x)), columns=["geometry"], crs="EPSG:4326")
+
+
+      fig.add_trace(go.Scattermapbox(
+      lat = nodes.geometry.y,
+      lon = nodes.geometry.x,
+      mode='markers',
+      marker=dict(size=2, color="black"),
+      showlegend=False,
+    ))
+  
+  if display_jam:
+    style = "carto-positron"
+  else:
+    style = "open-street-map"
+  fig.update_layout(title="<b>"+ title + "<b>",
+                        mapbox=dict(
+                          style=style,
+                          center=dict(lat=np.mean(pd.Series(nodes_lat).dropna()), lon=np.mean(pd.Series(nodes_lon).dropna())),
+                          zoom=9
+                          ),
+                        title_pad_l=260,
+                        height=700,
+                        width=1000,)
+
+  return  fig
         
 def show_graph(F):
   if type(F) != list:
@@ -358,23 +455,27 @@ def show_graph(F):
 
 def compute_rel_diff(fls_exact, dfs, dfs_worst, time):
     df_min = get_minimum_distances(dfs[("all-day-free-flow", time.replace("_", "-"), "weight")])
-    df_worst_min = get_minimum_distances(dfs_worst[("all-day-free-flow", time.replace("_","-"), "weight")])
+    if dfs_worst is not None:
+        df_worst_min = get_minimum_distances(dfs_worst[("all-day-free-flow", time.replace("_","-"), "weight")])
 
     a = round(fls_exact[time].solution_value/60, 3)
 
     b = df_min.sort_values(by="travel_time", ascending=False).iloc[0].travel_time
-    b_worst = df_worst_min.sort_values(by="travel_time", ascending=False).iloc[0].travel_time
-
+    if dfs_worst is not None:
+        b_worst = df_worst_min.sort_values(by="travel_time", ascending=False).iloc[0].travel_time
+    else:
+        b_worst = None
     return a, b, b_worst
 
-def objective_function_value_under_different_cases(a, b, b_worst):
+def objective_function_value_under_different_cases(a, b, b_worst=None):
     
     plot_data = []
     
     for i in range(len(a)):
         plot_data.append(a[i])
         plot_data.append(b[i])
-        plot_data.append(b_worst[i])
+        if b_worst is not None:
+            plot_data.append(b_worst[i])
     
     fig = make_subplots(rows=1, cols=1,)
     fig.update_layout(title="<b>Outsample evaluation of free flow solution<b>",
@@ -394,9 +495,10 @@ def objective_function_value_under_different_cases(a, b, b_worst):
     
     return fig
 
-def outsample_evaluation_relative_differences(a, b, b_worst):
+def outsample_evaluation_relative_differences(a, b, b_worst=None):
     rel_diffs = [round(abs(a_-b_)/a_ * 100,3) for a_, b_ in zip(a,b)]
-    rel_diffs_worst = [round(abs(a_-b_)/a_ * 100,3) for a_, b_ in zip(a,b_worst)]
+    if b_worst is not None:
+        rel_diffs_worst = [round(abs(a_-b_)/a_ * 100,3) for a_, b_ in zip(a,b_worst)]
     
     fig = make_subplots(rows=1, cols=1,)
     fig.update_layout(title="<b>Outsample evaluation, relative differences<b>",
@@ -412,10 +514,11 @@ def outsample_evaluation_relative_differences(a, b, b_worst):
                      marker=dict(color=["blue"]*len(rel_diffs)),
                      x=["all_day", "morning", "midday", "afternoon"],), row=1, col=1)
 
-    fig.add_trace(go.Bar(y=rel_diffs_worst,
-                     name="average worst scenario",
-                     marker=dict(color=["navy"]*len(rel_diffs_worst)),
-                     x=["all_day", "morning", "midday", "afternoon"],), row=1, col=1)
+    if b_worst is not None:
+        fig.add_trace(go.Bar(y=rel_diffs_worst,
+                        name="average worst scenario",
+                        marker=dict(color=["navy"]*len(rel_diffs_worst)),
+                        x=["all_day", "morning", "midday", "afternoon"],), row=1, col=1)
 
     fig.update_layout(legend=dict(
                             orientation='h',  # Set the orientation to 'h' for horizontal
@@ -426,23 +529,23 @@ def outsample_evaluation_relative_differences(a, b, b_worst):
                         ),)
     return fig
 
-def compute_min_distance_df(dfs, dfs_worst):
+def compute_min_distance_df(dfs, dfs_worst=None):
     dfs_min_list = []
     dfs_min_worst_list = []
     
     for time in ["all_day", "morning", "midday", "afternoon"]:
         df_min = get_minimum_distances(dfs[('all-day-free-flow', time.replace("_","-"), "weight")])
-        df_min_worst = get_minimum_distances(dfs_worst[('all-day-free-flow', time.replace("_","-"), "weight")])
+        # df_min_worst = get_minimum_distances(dfs_worst[('all-day-free-flow', time.replace("_","-"), "weight")])
 
         dfs_min_list.append(df_min)
-        dfs_min_worst_list.append(df_min_worst)
+        # dfs_min_worst_list.append(df_min_worst)
     
     df_min = get_minimum_distances(dfs[('all-day-free-flow', "all-day", "weight2")])[["target", "travel_time"]]
     
-    for df, name in zip(dfs_min_list+
-                        dfs_min_worst_list, 
-                        ["all_day", "morning", "midday", "afternoon"]+
-                        ["worst_all_day", "worst_morning", "worst_midday", "worst_afternoon"]):
+    for df, name in zip(dfs_min_list,
+                        # + dfs_min_worst_list, 
+                        ["all_day", "morning", "midday", "afternoon"]):
+                        #  + ["worst_all_day", "worst_morning", "worst_midday", "worst_afternoon"]):
         
         df_min = df_min.merge(df[["target", "travel_time"]], 
                             on="target", 

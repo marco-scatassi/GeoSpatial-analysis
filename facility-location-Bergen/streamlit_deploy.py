@@ -37,17 +37,7 @@ from retrieve_global_parameters import (
     retrieve_worst_average_graph_path,
     retrieve_solution_vs_scenario_path,
 )
-from src.facility_location_Bergen.custome_modules.graphical_analysis import (
-    average_travel_time_across_under_different_cases,
-    compute_min_distance_df,
-    compute_rel_diff,
-    facilities_on_map,
-    objective_function_value_under_different_cases,
-    outsample_evaluation_relative_differences,
-    travel_times_distribution_under_different_cases,
-    visualize_longest_paths,
-    show_graph
-)
+from src.facility_location_Bergen.custome_modules.graphical_analysis import *
 from streamlit_folium import st_folium
 
 
@@ -97,7 +87,6 @@ def initialize_session_state_attributes(from_graph_button_load=False):
             st.session_state["history_changes"] = pkl.load(st.session_state["upload_button_1"])
             st.session_state["history_changes_refine"] = deepcopy(st.session_state["history_changes"])
         
- 
 def clear_log_files():
     with open(LOG_FILE_PATH, "w") as f:
         f.write("")
@@ -174,6 +163,8 @@ def on_submit_apply(placeholder):
 def on_submit_apply2():
     session_state["refine_graph"]["is_submitted2"] = True
 
+def set_deterministic_viz(bool):
+    session_state["deterministic_viz"] = bool
 
 # --------------------------------------------- GRAPH MANIPULATION ----------------------------------------------
 def graph_manipulation_load_data(session_state, TIMES):
@@ -451,22 +442,22 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
         session_state[f"dfs_{facilities_number}"] = dfs
     c += 1
             
-    if f"dfs_worst_{facilities_number}" not in session_state:
-        root = project_path+rf"/data/08_reporting/{facilities_number}_locations"
-        paths_worst = [p for p in os.listdir(root) if ("solution_vs_scenario" in p) and ("worst" in p)]
+    # if f"dfs_worst_{facilities_number}" not in session_state:
+    #     root = project_path+rf"/data/08_reporting/{facilities_number}_locations"
+    #     paths_worst = [p for p in os.listdir(root) if ("solution_vs_scenario" in p) and ("worst" in p)]
             
-        dfs_worst = {}
+    #     dfs_worst = {}
 
-        for path in paths_worst:
-            with open(os.path.join(root, path), "rb") as f:
-                key =   tuple(path.
-                        replace("all_day_free_flow", "all-day-free-flow").
-                        replace("all_day", "all-day").
-                        removesuffix(".pkl").split("_")[-4:-1])
+    #     for path in paths_worst:
+    #         with open(os.path.join(root, path), "rb") as f:
+    #             key =   tuple(path.
+    #                     replace("all_day_free_flow", "all-day-free-flow").
+    #                     replace("all_day", "all-day").
+    #                     removesuffix(".pkl").split("_")[-4:-1])
                         
-                dfs_worst[key] = pkl.load(f)
+    #             dfs_worst[key] = pkl.load(f)
             
-        session_state[f"dfs_worst_{facilities_number}"] = dfs_worst
+    #     session_state[f"dfs_worst_{facilities_number}"] = dfs_worst
     c+=1
 
     if f"average_graphs" not in session_state:
@@ -484,15 +475,15 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
     if c == 4:
         progress_bar.progress(100, "Loading data completed!")
 
-def deterministic_generate_viz(session_state, TIMES, facilities_number):
+def deterministic_generate_viz(session_state, TIMES, facilities_number, traffic_jam_time):
     if f"fls_exact_{facilities_number}" not in session_state:
         return st.error("Please load data first!", icon="🚨")
 
     #------------------------------- FACILITIES ON MAP ---------------------------------------
     col1, col2 = st.columns([1.5,1])
     dfs = session_state[f"dfs_{facilities_number}"]
-    dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
-    session_state[f"df_min_{facilities_number}"] = compute_min_distance_df(dfs, dfs_worst)
+    # dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
+    session_state[f"df_min_{facilities_number}"] = compute_min_distance_df(dfs, None)#, dfs_worst)
 
     if f"facilities_on_map_{facilities_number}" not in session_state:
         fls_exact = session_state[f"fls_exact_{facilities_number}"]
@@ -518,86 +509,97 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
 
     st.markdown(content)
 
-    #---------------------------------- MAP LONGEST PATH -------------------------------------
+    #---------------------------------- MAP LONGEST PATH / TRAFFIC JAM -------------------------------------        
     col1, col2 = st.columns([1.5,1])
     if f"map_longest_paths_{facilities_number}" not in session_state:
         dfs = session_state[f"dfs_{facilities_number}"]
         average_graphs = session_state[f"average_graphs"]
         map = visualize_longest_paths(dfs, average_graphs)
         session_state[f"map_longest_paths_{facilities_number}"] = map
+    
+    if traffic_jam_time is not None:
+        average_graphs = session_state[f"average_graphs"]
+        map_jam = show_traffic_jam(average_graphs[traffic_jam_time], display_jam=True, title="TRAFFIC JAM - "+traffic_jam_time)
+        session_state[f"map_jam_{facilities_number}"] = map_jam
         
     with col1:
         st_folium(
                 session_state[f"map_longest_paths_{facilities_number}"],
                 returned_objects=[],
                 width=800)
+        
+    with col2:
+        st.plotly_chart(
+                session_state[f"map_jam_{facilities_number}"],
+                use_container_width=True
+        )
 
     #------------------ FREE FLOW SOLUTION UNDER DIFFERENT SCENARIOS COMPARISON ------------------
     #------------------ OBJ FUNCTION VALUE -------------
-    col1, col2 = st.columns(2)
-    if f"abs_diff_barplot_{facilities_number}" not in session_state:
-        fls_exact = session_state[f"fls_exact_{facilities_number}"]
-        dfs = session_state[f"dfs_{facilities_number}"]
-        dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
-        a = list(range(len(TIMES)-1))
-        b = list(range(len(TIMES)-1))
-        b_worst = list(range(len(TIMES)-1))
-        for i, time in enumerate(TIMES[1:]):
-            a[i], b[i], b_worst[i] = compute_rel_diff(fls_exact, dfs, dfs_worst, time)
-        session_state[f"abs_diff_barplot_{facilities_number}"] = (a,b,b_worst)
+    # col1, col2 = st.columns(2)
+    # if f"abs_diff_barplot_{facilities_number}" not in session_state:
+    #     fls_exact = session_state[f"fls_exact_{facilities_number}"]
+    #     dfs = session_state[f"dfs_{facilities_number}"]
+    #     dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
+    #     a = list(range(len(TIMES)-1))
+    #     b = list(range(len(TIMES)-1))
+    #     b_worst = list(range(len(TIMES)-1))
+    #     for i, time in enumerate(TIMES[1:]):
+    #         a[i], b[i], b_worst[i] = compute_rel_diff(fls_exact, dfs, dfs_worst, time)
+    #     session_state[f"abs_diff_barplot_{facilities_number}"] = (a,b,b_worst)
 
-    with col1:
-        (a,b,b_worst) = session_state[f"abs_diff_barplot_{facilities_number}"]
-        fig = objective_function_value_under_different_cases(a, b, b_worst)
-        st.plotly_chart(fig, use_container_width=True)
+    # with col1:
+    #     (a,b,b_worst) = session_state[f"abs_diff_barplot_{facilities_number}"]
+    #     fig = objective_function_value_under_different_cases(a, b, b_worst)
+    #     st.plotly_chart(fig, use_container_width=True)
 
-    with col2:
-        with open(project_path+
-                  rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBySideWithFirstBarplot.md", 
-                  "r",
-                  encoding="utf-8") as f:
-            content = f.read()
+    # with col2:
+    #     with open(project_path+
+    #               rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBySideWithFirstBarplot.md", 
+    #               "r",
+    #               encoding="utf-8") as f:
+    #         content = f.read()
 
-        for i in range(6):
-            st.write("")
-        st.markdown(content)
+    #     for i in range(6):
+    #         st.write("")
+    #     st.markdown(content)
     
-    #------------------ RELATIVE DIFFERENCES ------------  
-    col1, col2 = st.columns(2)
-    with col1:
-        with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBySideWithSecondBarplot.md", 
-                  "r",
-                  encoding="utf-8") as f:
-            content = f.read()
+    # #------------------ RELATIVE DIFFERENCES ------------  
+    # col1, col2 = st.columns(2)
+    # with col1:
+    #     with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBySideWithSecondBarplot.md", 
+    #               "r",
+    #               encoding="utf-8") as f:
+    #         content = f.read()
 
-        for i in range(6):
-            st.write("")
-        st.markdown(content)
+    #     for i in range(6):
+    #         st.write("")
+    #     st.markdown(content)
     
-    with col2:    
-        (a,b,b_worst) = session_state[f"abs_diff_barplot_{facilities_number}"]
-        fig = outsample_evaluation_relative_differences(a, b, b_worst)
-        st.plotly_chart(fig, use_container_width=True)
+    # with col2:    
+    #     (a,b,b_worst) = session_state[f"abs_diff_barplot_{facilities_number}"]
+    #     fig = outsample_evaluation_relative_differences(a, b, b_worst)
+    #     st.plotly_chart(fig, use_container_width=True)
 
-    #------------------------------------ DISTRIBUTION ANALYSIS ---------------------------------------
-    col1, col2 = st.columns(2)
-    if f"distribution_violin_plot_{facilities_number}" not in session_state:
-        df_min = session_state[f"df_min_{facilities_number}"]
-        fig = average_travel_time_across_under_different_cases(df_min)
-        session_state[f"distribution_violin_plot_{facilities_number}"] = fig
+    # #------------------------------------ DISTRIBUTION ANALYSIS ---------------------------------------
+    # col1, col2 = st.columns(2)
+    # if f"distribution_violin_plot_{facilities_number}" not in session_state:
+    #     df_min = session_state[f"df_min_{facilities_number}"]
+    #     fig = average_travel_time_across_under_different_cases(df_min)
+    #     session_state[f"distribution_violin_plot_{facilities_number}"] = fig
 
-    with col1:
-        st.plotly_chart(session_state[f"distribution_violin_plot_{facilities_number}"], 
-        use_container_width=True)
+    # with col1:
+    #     st.plotly_chart(session_state[f"distribution_violin_plot_{facilities_number}"], 
+    #     use_container_width=True)
         
         
         
-    df_min = session_state[f"df_min_{facilities_number}"]
+    # df_min = session_state[f"df_min_{facilities_number}"]
             
-    fig = travel_times_distribution_under_different_cases(df_min)
-    st.plotly_chart(fig, use_container_width=True)
+    # fig = travel_times_distribution_under_different_cases(df_min)
+    # st.plotly_chart(fig, use_container_width=True)
         
-def deterministic_analysis(session_state, TIMES, facilities_number, ratio1, ratio2, seed):
+def deterministic_analysis(session_state, TIMES, facilities_number, ratio1, ratio2, seed, traffic_jam_time):
     ############################################## RUN THE MODEL ##############################################
     # button1 = st.button("Run the model")
         
@@ -694,6 +696,9 @@ def deterministic_analysis(session_state, TIMES, facilities_number, ratio1, rati
             
     # st.markdown("---")
     
+    # init_session_state_attributes(session_state)
+    session_state["deterministic_viz"] = False
+    
     col1, col2, _, _ = st.columns(4)
     with col1:
         button_load = st.button("Load data for solution analysis")
@@ -707,7 +712,7 @@ def deterministic_analysis(session_state, TIMES, facilities_number, ratio1, rati
         
     ############################################## GENERATE VIZ ##############################################    
     if button_viz:
-        deterministic_generate_viz(session_state, TIMES, facilities_number)
+        deterministic_generate_viz(session_state, TIMES, facilities_number, traffic_jam_time)
 
 # -------------------------------------------- STOCHASTIC ANALYSIS ---------------------------------------------
 def stochastic_load_data(session_state, facilities_number):
@@ -854,6 +859,13 @@ if __name__ == '__main__':
                     "Seed for reproducibility",
                     (324324,),
                     label_visibility="collapsed",)
+
+            if section == "Deterministic models analysis":
+                st.markdown("**Scenario for TRAFFIC JAM viz:**")
+                time_jam = st.radio(
+                        "Scenario for TRAFFIC JAM viz",
+                        TIMES[1:],
+                        label_visibility="collapsed",)
             
         if section == "Graph manipulation":
             st.subheader("Restore the old state")
@@ -898,7 +910,7 @@ if __name__ == '__main__':
         graph_manipulation(session_state, TIMES)
         
     elif section == "Deterministic models analysis":
-        deterministic_analysis(session_state, TIMES, facilities_number, ratio1, ratio2, seed)
+        deterministic_analysis(session_state, TIMES, facilities_number, ratio1, ratio2, seed, time_jam)
         
     elif section == "Stochastic models analysis":
         stochastic_analysis(session_state)

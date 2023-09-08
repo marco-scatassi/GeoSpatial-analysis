@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import networkx as nx
 import geopandas as gpd
+from scipy import stats
 import plotly.graph_objects as go
 from sklearn.utils import resample
 from shapely.geometry import Point

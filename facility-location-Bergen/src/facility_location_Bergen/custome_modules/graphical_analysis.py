@@ -271,6 +271,103 @@ def show_graph(F):
 
   return  fig, node_mapping
 
+
+def show_traffic_jam(F, display_jam=False, free_flow=False, fig=None):
+  if type(F) != list:
+    F = [F]
+  
+  colors = ["blue", "red", "green", "yellow", "orange", "purple", "brown"]
+  
+  if fig is None:
+    fig = go.Figure()
+
+  for j, f in enumerate(F):
+    if j < len(colors):
+      color = colors[j]
+    else:
+      color = "black"
+      
+    nodes_lon = []
+    nodes_lat = []
+    diff_weights = []
+    for edge in f.edges(data=True):
+          x0, y0 = edge[0]
+          x1, y1 = edge[1]
+          weight = edge[2]["weight"]
+          weight2 = edge[2]["weight2"]
+          nodes_lon.append(x0)
+          nodes_lon.append(x1)
+          nodes_lon.append(None)
+          nodes_lat.append(y0)
+          nodes_lat.append(y1)
+          nodes_lat.append(None)
+          diff_weights.append(abs(weight2 - weight) / weight2)
+    
+    nodes_lon_color = {"green": [], "gold": [], "orange": [], "red": []}
+    nodes_lat_color = {"green": [], "gold": [], "orange": [], "red": []}
+
+    
+    for i, weight in enumerate(diff_weights):
+      mapped_weight = stats.percentileofscore(diff_weights, weight) / 100
+      if mapped_weight < 0.25:
+        nodes_lon_color["green"] += nodes_lon[i*3:i*3+3]
+        nodes_lat_color["green"] += nodes_lat[i*3:i*3+3]
+      elif mapped_weight < 0.5:
+        nodes_lon_color["gold"] += nodes_lon[i*3:i*3+3]
+        nodes_lat_color["gold"] += nodes_lat[i*3:i*3+3]
+      elif mapped_weight < 0.75:
+        nodes_lon_color["orange"] += nodes_lon[i*3:i*3+3]
+        nodes_lat_color["orange"] += nodes_lat[i*3:i*3+3]
+      else:
+        nodes_lon_color["red"] += nodes_lon[i*3:i*3+3]
+        nodes_lat_color["red"] += nodes_lat[i*3:i*3+3]
+  
+    if display_jam and not free_flow:
+      for key in nodes_lon_color.keys():
+        fig.add_trace(go.Scattermapbox(
+              lat=nodes_lat_color[key],
+              lon=nodes_lon_color[key],
+              mode='lines',
+              line=dict(width=1, color=key),
+              showlegend=False,
+          ))
+    else:
+      fig.add_trace(go.Scattermapbox(
+          lat=nodes_lat,
+          lon=nodes_lon,
+          mode='lines',
+          line=dict(width=1, color=color),
+          showlegend=False,
+      ))
+
+      nodes = f.nodes()
+      nodes = gpd.GeoDataFrame(pd.Series(list(nodes())).apply(lambda x: Point(x)), columns=["geometry"], crs="EPSG:4326")
+
+
+      fig.add_trace(go.Scattermapbox(
+      lat = nodes.geometry.y,
+      lon = nodes.geometry.x,
+      mode='markers',
+      marker=dict(size=2, color="black"),
+      showlegend=False,
+    ))
+  
+  if display_jam:
+    style = "carto-positron"
+  else:
+    style = "open-street-map"
+  fig.update_layout(title="<b>Graph visualization<b>",
+                        mapbox=dict(
+                          style=style,
+                          center=dict(lat=np.mean(pd.Series(nodes_lat).dropna()), lon=np.mean(pd.Series(nodes_lon).dropna())),
+                          zoom=9
+                          ),
+                        title_pad_l=260,
+                        height=700,
+                        width=1000,)
+
+  return  fig
+
 def visualize_longest_paths(dfs, average_graphs):
     # ------------------------------ prepare the data ----------------------------------#
     dfs_min = {}

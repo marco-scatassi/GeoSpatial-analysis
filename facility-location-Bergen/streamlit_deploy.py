@@ -39,7 +39,6 @@ from retrieve_global_parameters import (
 )
 from src.facility_location_Bergen.custome_modules.graphical_analysis import *
 from streamlit_folium import st_folium
-import stats
 
 
 st.set_page_config(layout = "wide")

@@ -272,7 +272,7 @@ def show_graph(F):
   return  fig, node_mapping
 
 
-def show_traffic_jam(F, display_jam=False, free_flow=False, fig=None):
+def show_traffic_jam(F, display_jam=False, free_flow=False, fig=None, title="TRAFFIC JAM"):
   if type(F) != list:
     F = [F]
   
@@ -356,7 +356,7 @@ def show_traffic_jam(F, display_jam=False, free_flow=False, fig=None):
     style = "carto-positron"
   else:
     style = "open-street-map"
-  fig.update_layout(title="<b>Graph visualization<b>",
+  fig.update_layout(title="<b>"+ title + "<b>",
                         mapbox=dict(
                           style=style,
                           center=dict(lat=np.mean(pd.Series(nodes_lat).dropna()), lon=np.mean(pd.Series(nodes_lon).dropna())),
@@ -367,6 +367,7 @@ def show_traffic_jam(F, display_jam=False, free_flow=False, fig=None):
                         width=1000,)
 
   return  fig
+        
 
 def visualize_longest_paths(dfs, average_graphs):
     # ------------------------------ prepare the data ----------------------------------#

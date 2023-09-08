@@ -14,6 +14,7 @@ scikit-learn
 Pyomo~=6.5.0
 mpi-sppy
 networkx
+scipy
 
 # kedro requirements
 black~=22.0

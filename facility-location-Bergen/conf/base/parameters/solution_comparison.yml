@@ -1,33 +1,33 @@
-# solution_comparison00:
-#     facilities_number: 3
-#     time_solution: "all_day_free_flow"
-#     time_scenario: "all_day"
-#     weight: "weight2"
-#     worst: "False"
-# solution_comparison01:
-#     facilities_number: 3
-#     time_solution: "all_day_free_flow"
-#     time_scenario: "all_day"
-#     weight: "weight"
-#     worst: "False"
-# solution_comparison02:
-#     facilities_number: 3
-#     time_solution: "all_day_free_flow"
-#     time_scenario: "morning"
-#     weight: "weight"
-#     worst: "False"
-# solution_comparison03:
-#     facilities_number: 3
-#     time_solution: "all_day_free_flow"
-#     time_scenario: "midday"
-#     weight: "weight"
-#     worst: "False"
-# solution_comparison04:
-#     facilities_number: 3
-#     time_solution: "all_day_free_flow"
-#     time_scenario: "afternoon"
-#     weight: "weight"
-#     worst: "False"
+solution_comparison00:
+    facilities_number: 3
+    time_solution: "all_day_free_flow"
+    time_scenario: "all_day"
+    weight: "weight2"
+    worst: "False"
+solution_comparison01:
+    facilities_number: 3
+    time_solution: "all_day_free_flow"
+    time_scenario: "all_day"
+    weight: "weight"
+    worst: "False"
+solution_comparison02:
+    facilities_number: 3
+    time_solution: "all_day_free_flow"
+    time_scenario: "morning"
+    weight: "weight"
+    worst: "False"
+solution_comparison03:
+    facilities_number: 3
+    time_solution: "all_day_free_flow"
+    time_scenario: "midday"
+    weight: "weight"
+    worst: "False"
+solution_comparison04:
+    facilities_number: 3
+    time_solution: "all_day_free_flow"
+    time_scenario: "afternoon"
+    weight: "weight"
+    worst: "False"
 
 solution_comparison05:
     facilities_number: 3

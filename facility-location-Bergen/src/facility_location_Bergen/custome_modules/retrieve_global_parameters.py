@@ -110,11 +110,16 @@ def retrieve_adj_mapping_path(time):
     saving_path = f"data/03_primary/adj_mapping_{time}.pkl"
     return saving_path
 
+def retrieve_adj_mapping_path_2(time, free_flow=False):
+    if free_flow:
+        saving_path = f"data/03_primary/adj_mapping_2_{time}_free_flow.pkl"
+    else:
+        saving_path = f"data/03_primary/adj_mapping_2_{time}.pkl"   
+    return saving_path
 
 def retrieve_worst_adj_mapping_path(time):
     saving_path = f"data/03_primary/worst_adj_mapping_{time}.pkl"
     return saving_path
-
 
 def retrieve_solution_path(facilities_number, time):
     path = f"data/07_model_output/{facilities_number}_locations/deterministic_exact_solutions/exact_solution_{time}.pkl"  

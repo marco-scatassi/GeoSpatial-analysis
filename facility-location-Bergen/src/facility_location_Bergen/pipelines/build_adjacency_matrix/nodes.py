@@ -131,9 +131,10 @@ def build_adj_matrix(time):
         for i in range(len((sp_free_flow))):
             if mapping_points[i] in coordinates_sampled2.geometry:
                 for j in range(len(sp_free_flow)):
-                    min_dis, mapped_key = get_min_distance(i, j, geodf, sp_free_flow, mapping)
-                    adj_matrix[i,j] = min_dis
-                    adj_matrix_mapping[(i,j)] = mapped_key
+                    if mapping_points[j] in coordinates_sampled.geometry:
+                        min_dis, mapped_key = get_min_distance(i, j, geodf, sp_free_flow, mapping)
+                        adj_matrix[i,j] = min_dis
+                        adj_matrix_mapping[(i,j)] = mapped_key
             if i % 500 == 0:
                 print_INFO_message("{} out of {}".format(i, len(sp_free_flow)))
 

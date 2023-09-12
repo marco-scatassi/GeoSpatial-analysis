@@ -383,8 +383,8 @@ def visualize_longest_paths(dfs, average_graphs):
     for key, df in dfs_min.items():
         try:
             if key[0] == key[1] or (key[0] == "all-day-free-flow" and key[1] == "all-day" and key[2] == "weight2"):
-                sources[key] = df.iloc[0]["source"]
-                destinations[key] = df.iloc[0]["target"]
+                sources[key] = df.iloc[0]["new_source"]
+                destinations[key] = df.iloc[0]["new_target"]
                 solution_paths[key] = nx.dijkstra_path(G=average_graphs[key[1].replace("-", "_")],
                                                     source=sources[key],
                                                     target=destinations[key],

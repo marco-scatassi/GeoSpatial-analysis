@@ -13,6 +13,7 @@ Pyomo~=6.5.0
 mpi4py
 mpi-sppy
 networkx
+folium
 
 # kedro requirements
 black~=22.0

@@ -619,3 +619,25 @@ def refine_graph(G_dict, form_placeholder, session_state, apply_to_all=False):
             for e in session_state["history_changes_refine"]["graph"]["edges_to_delete"]:
                 H.remove_edge(e[0], e[1])
       
+def create_gdf_from_mapping(mapping):
+    geodf = gpd.GeoDataFrame.from_dict(mapping, orient='index')
+    geodf.columns = ["geometry"]
+    geodf = geodf.set_geometry("geometry")
+    
+    buffer_col = []
+    for p in geodf.index:
+        buffer_col.append(geodf.iloc[p][0].buffer(0.00013))
+
+    geodf["buffer"] = buffer_col
+    geodf = geodf.set_geometry("buffer")
+    
+    new_col = []
+    new_col2 = []
+    for i in geodf.index:
+        is_contained = geodf.iloc[i][1].contains(geodf).geometry
+        new_col.append(is_contained.sum())
+        new_col2.append(is_contained.where(lambda x: x == True).dropna().index.to_numpy().tolist())
+
+    geodf["count"] = new_col
+    geodf["contained"] = new_col2
+    return geodf

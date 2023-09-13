@@ -1,5 +1,5 @@
 fl_deterministic.data:
-  facilities_number: 3
+  facilities_number: 2
   ratio1: 0.1
   ratio2: 0.05
   seed: 324324

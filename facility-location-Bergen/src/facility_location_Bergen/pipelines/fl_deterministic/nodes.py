@@ -48,7 +48,7 @@ def sample_coords(coordinates, idx_sample):
 def verify_problem_already_solved(fl_data):
     print_INFO_message_timestamp("CHECKING IF PROBLEM HAS BEEN ALREADY SOLVED")
     n_facilities = fl_data["facilities_number"]
-    path = rf"\\Pund\Stab$\guest801968\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\data\07_model_output\{n_facilities}_locations\deterministic_exact_solutions"
+    path = rf"\\Pund\Stab$\guest801981\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\data\07_model_output\{n_facilities}_locations\deterministic_exact_solutions"
     if len(os.listdir(path)) <15:
         return False
     else:
@@ -64,17 +64,17 @@ def set_up_fl_problems(fl_data, already_solved):
         for time in times:
             if time != "all_day_free_flow":
                 print_INFO_message(f"Loading adj matrix for {time}")
-                path = rf"\\Pund\Stab$\guest801968\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\data\03_primary\average_graph_{time}_connected_splitted_firstSCC.pkl"
+                path = rf"\\Pund\Stab$\guest801981\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\data\03_primary\average_graph_{time}_connected_splitted_firstSCC.pkl"
                 with open(path, "rb") as f:
                     average_graphs[time] = pkl.load(f)
 
         ADJ_PATHS = {
-            time: r"\/Pund/Stab$/guest801968/Documents/GitHub/GeoSpatial-analysis/facility-location-Bergen/"
+            time: r"\/Pund/Stab$/guest801981/Documents/GitHub/GeoSpatial-analysis/facility-location-Bergen/"
             + retrieve_adj_matrix_path(time)
             for time in times
         }
         ADJ_PATHS["all_day_free_flow"] = (
-            r"\/Pund/Stab$/guest801968/Documents/GitHub/GeoSpatial-analysis/facility-location-Bergen/"
+            r"\/Pund/Stab$/guest801981/Documents/GitHub/GeoSpatial-analysis/facility-location-Bergen/"
             + retrieve_adj_matrix_path("all_day", free_flow=True)
         )
         adj_matricies = {time: None for time in times}
@@ -174,7 +174,7 @@ def solve_fl_problems(fls_exact, fl_data):
     
     if fls_exact != {}:
         for i, (time, fl_exact) in enumerate(zip(list(fls_exact.keys()), list(fls_exact.values()))):
-            saving_path = rf"\\Pund\Stab$\guest801968\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\data\07_model_output\{fl_data['facilities_number']}_locations\deterministic_exact_solutions\exact_solution_{time}.pkl"
+            saving_path = rf"\\Pund\Stab$\guest801981\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\data\07_model_output\{fl_data['facilities_number']}_locations\deterministic_exact_solutions\exact_solution_{time}.pkl"
             if os.path.exists(saving_path):
                 print_INFO_message(f"Exact solution for {time} already exists. Skipping...")
             else:

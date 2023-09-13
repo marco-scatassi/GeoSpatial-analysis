@@ -2,7 +2,7 @@
 import sys
 
 sys.path.append(
-    r"\\Pund\Stab$\guest801968\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\src\facility_location_Bergen\custome_modules"
+    r"\\Pund\Stab$\guest801981\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\src\facility_location_Bergen\custome_modules"
 )
 
 import warnings
@@ -12,18 +12,17 @@ from shapely.errors import ShapelyDeprecationWarning
 warnings.filterwarnings("ignore", category=ShapelyDeprecationWarning)
 
 import os
+import numpy as np
 import regex as re
 import pandas as pd
 import pickle as pkl
 import networkx as nx
+from shapely.geometry import Point
 from facility_location import FacilityLocation
 from kedro.extras.datasets.pickle import PickleDataSet
+from graph_manipulation import create_gdf_from_mapping
 from log import print_INFO_message_timestamp, print_INFO_message
-from retrieve_global_parameters import (
-    retrieve_catalog_path,
-    retrieve_solution_path,
-    retrieve_solution_vs_scenario_path,
-)
+from retrieve_global_parameters import *
 
 ################################################################################## STEP 1 ######################################################################
 
@@ -48,16 +47,30 @@ def verify_df_already_created(data: dict):
 ################################################################################## STEP 2 ######################################################################
 
 ## ------------------------------------------------------- solution_vs_scenario ------------------------------------------------------- ##
+# Function to get the minimum distance between two points avoiding taking 
+# into account the carriageway, i.e. the side of the road
+def get_min_distance(starting_index, ending_index, geodf, mapping, average_graph, weight):
+    distances = {}
+    for i in geodf.iloc[starting_index].contained:
+        for j in geodf.iloc[ending_index].contained:
+            distances[(j, i)] = nx.dijkstra_path_length(
+                                G=average_graph, source=mapping[i], target=mapping[j], weight=weight
+                            ),
+            
+    mapped_key = min(distances, key=distances.get)
+    min_distance = distances[mapped_key]
+    return min_distance, mapped_key
+
+
 # This function takes as input the time of the solution and the time of the scenario and returns a dataframe with the distance from the
 # exact solution to all the other nodes in the graph, under the specified scenario.
-
-
 def solution_vs_scenario(data, is_created=False):
     weight = data["weight"]
     time_solution = data["time_solution"]
     time_scenario = data["time_scenario"]
     facilities_number = data["facilities_number"]
     worst = True if data["worst"] == "True" else False
+    is_free_flow = True if time_solution == "all_day_free_flow" else False
 
     saving_path = retrieve_solution_vs_scenario_path(
         facilities_number, time_solution, time_scenario, weight, worst
@@ -67,25 +80,40 @@ def solution_vs_scenario(data, is_created=False):
     if not is_created:
         # Load the exact solution
         print_INFO_message_timestamp(f"Loading exact solution for {time_solution}")
-        path = retrieve_solution_path(facilities_number, time_solution)
+        path = retrieve_light_solution_path(facilities_number, time_solution)
+        adj_mapping_path = retrieve_adj_mapping_path(time_solution, is_free_flow)
+        adj_mapping_path_2 = retrieve_adj_mapping_path_2(time_solution, is_free_flow)
         fls_exact_solution = FacilityLocation.load(path)
+        with open(adj_mapping_path, "rb") as f:
+            adj_mapping = pkl.load(f)
+        adj_mapping_reverse = {v: k for k, v in adj_mapping.items()}
+        with open(adj_mapping_path_2, "rb") as f:
+            adj_mapping_2 = pkl.load(f)
 
         # Load the average graph
         print_INFO_message(f"Loading adj matrix for {time_scenario}")
         if worst:
-            path = rf"\\Pund\Stab$\guest801968\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\data\03_primary\worst_average_graph_{time_scenario}.pkl"
+            path = rf"\\Pund\Stab$\guest801981\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\data\03_primary\worst_average_graph_{time_scenario}.pkl"
         else:
-            path = rf"\\Pund\Stab$\guest801968\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\data\03_primary\average_graph_{time_scenario}_connected_splitted_firstSCC.pkl"
+            path = rf"\\Pund\Stab$\guest801981\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\data\03_primary\average_graph_{time_scenario}_connected_splitted_firstSCC.pkl"
         with open(path, "rb") as f:
             average_graph = pkl.load(f)
 
         # extract the coordinates of the exact solution
         ff_solutions_location = fls_exact_solution.locations_coordinates
-
+    
         # compute the distance from the exact solution to all the other nodes in the graph
         print_INFO_message_timestamp(
             f"Compute the distance from the {time_solution} solution to all the other nodes in the {time_scenario} graph"
         )
+        
+        # get the real source nodes using the stored mapping
+        adj_mapping_point = {}
+        for key, value in adj_mapping.items():
+            adj_mapping_point[key] = Point(value)
+        
+        geodf = create_gdf_from_mapping(adj_mapping_point)
+        
 
         temporal_distances = {
             ff_solutions_location[i].geometry.coords[0]: []
@@ -102,26 +130,35 @@ def solution_vs_scenario(data, is_created=False):
                 keys = list(temporal_distances.keys())
                 
                 for k in keys:
+                    min_dis, mapped_index = get_min_distance(adj_mapping_reverse[k], 
+                                             adj_mapping_reverse[node], 
+                                             geodf, 
+                                             adj_mapping, 
+                                             average_graph, 
+                                             weight)
                     temporal_distances[k].append(
                         (
+                            adj_mapping[mapped_index[1]],
                             node,
-                            nx.dijkstra_path_length(
-                                G=average_graph, source=k, target=node, weight=weight
-                            ),
+                            adj_mapping[mapped_index[0]],
+                            min_dis[0],
                         )
                     )
                 else:
                     continue
 
         # create a dataframe with the distance from the exact solution to all the other nodes in the graph
-        d = {"source": [], "target": [], "travel_time": []}
+        d = {"source": [], "new_source": [], "target": [], "new_target": [], "travel_time": []}
 
         for key, value in temporal_distances.items():
-            for node, distance in value:
+            for new_source, target, new_target, distance  in value:
                 d["source"].append(key)
-                d["target"].append(node)
+                d["new_source"].append(new_source)
+                d["target"].append(target)
+                d["new_target"].append(new_target)
                 d["travel_time"].append(round(distance / 60, 3))
-
+        
+        print(pd.DataFrame(d))
         df_.save(pd.DataFrame(d))
 
     return df_

@@ -6,7 +6,7 @@
 
 build_adjacency_matrix.all_day: all_day
 
-build_adjacency_matrix.morning: morning
+# build_adjacency_matrix.morning: morning
 
 # build_adjacency_matrix.midday: midday
 

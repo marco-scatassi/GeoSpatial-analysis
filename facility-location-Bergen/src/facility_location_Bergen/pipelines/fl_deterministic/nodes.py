@@ -11,6 +11,7 @@ from shapely.errors import ShapelyDeprecationWarning
 warnings.filterwarnings("ignore", category=ShapelyDeprecationWarning)
 
 import os
+import copy
 import random
 import numpy as np
 import pandas as pd
@@ -174,7 +175,10 @@ def solve_fl_problems(fls_exact, fl_data):
     
     if fls_exact != {}:
         for i, (time, fl_exact) in enumerate(zip(list(fls_exact.keys()), list(fls_exact.values()))):
-            saving_path = rf"\\Pund\Stab$\guest801981\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\data\07_model_output\{fl_data['facilities_number']}_locations\deterministic_exact_solutions\exact_solution_{time}.pkl"
+            root_path = rf"\\Pund\Stab$\guest801981\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\data\07_model_output\{fl_data['facilities_number']}_locations\deterministic_exact_solutions"
+            saving_path = root_path + rf"\exact_solution_{time}.pkl"
+            saving_path_light = root_path + rf"\light_exact_solution_{time}.pkl"
+            saving_path_super_light = root_path + rf"\super_light_exact_solution_{time}.pkl"
             if os.path.exists(saving_path):
                 print_INFO_message(f"Exact solution for {time} already exists. Skipping...")
             else:
@@ -184,6 +188,16 @@ def solve_fl_problems(fls_exact, fl_data):
                     print_INFO_message(f"Saving exact solution for {time}")
                     fl_exact.save(saving_path)
                     print_INFO_message(f"Exact solution for {time} SAVED")
+                    fl_exact_light = copy.deepcopy(fl_exact)
+                    del fl_exact_light.adjacency_matrix
+                    del fl_exact_light.model
+                    del fl_exact_light.instance
+                    fl_exact_light.save(saving_path_light)
+                    print_INFO_message(f"Light exact solution for {time} SAVED")
+                    fl_exact_super_light = copy.deepcopy(fl_exact_light)
+                    del fl_exact_super_light[time].result
+                    fl_exact_super_light.save(saving_path_super_light)
+                    print_INFO_message(f"Super light exact solution for {time} SAVED")
                 else:
                     print_INFO_message(f"Skipping {time}")
             

@@ -4,10 +4,10 @@
 # Documentation for this file format can be found in "Parameters"
 # Link: https://docs.kedro.org/en/0.18.7/kedro_project_setup/configuration.html#parameters
 
-build_adjacency_matrix.all_day: all_day
+# build_adjacency_matrix.all_day: all_day
 
 # build_adjacency_matrix.morning: morning
 
 # build_adjacency_matrix.midday: midday
 
-# build_adjacency_matrix.afternoon: afternoon
+build_adjacency_matrix.afternoon: afternoon

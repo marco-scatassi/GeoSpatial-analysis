@@ -195,7 +195,7 @@ def solve_fl_problems(fls_exact, fl_data):
                     fl_exact_light.save(saving_path_light)
                     print_INFO_message(f"Light exact solution for {time} SAVED")
                     fl_exact_super_light = copy.deepcopy(fl_exact_light)
-                    del fl_exact_super_light[time].result
+                    del fl_exact_super_light.result
                     fl_exact_super_light.save(saving_path_super_light)
                     print_INFO_message(f"Super light exact solution for {time} SAVED")
                 else:

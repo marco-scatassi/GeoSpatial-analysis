@@ -558,7 +558,7 @@ def on_submit_refine_form(session_state, G, node_mapping_r):
             n1 = e[1]
             if type(e[0]) == int:
                 n0 = node_mapping_r[e[0]]
-            if type(e[0]) == int:
+            if type(e[1]) == int:
                 n1 = node_mapping_r[e[1]]           
             new_edges.append((n0, n1, int(d)))
     else:

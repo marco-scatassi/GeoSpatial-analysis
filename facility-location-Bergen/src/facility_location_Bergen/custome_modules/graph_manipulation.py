@@ -541,7 +541,7 @@ def on_submit_refine_form(session_state, G, node_mapping_r):
     edges_to_delete_input = session_state[f"edges_to_delete"]
     
     dist = distances_to_add_input.replace(" ", "").split(",")
-    add = (edges_to_add_input.replace(" ", "").replace(")", "))")+",").split("),")[:-1]
+    add = (edges_to_add_input.replace(" ", "").replace(")", "))")+",").split("),")[:-1].replace("))", ")")
     delete = (edges_to_delete_input.replace(" ", "").replace(")", "))")+",").split("),")[:-1]
     
     add = [eval(e) for e in add]

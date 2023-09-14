@@ -29,12 +29,13 @@ def add_edge(node, G, only_successors=False, only_predecessors=False):
         raise ValueError
     
     if not only_successors:
-        predecessors = list(G.predecessors(node[0]))
-        # print_INFO_message(f"predecessors of {node[0]} is {predecessors}")
-        for predecessor in predecessors:
-            edge = (predecessor, node[0])
-            speeds.append(list(G.edges(edge, data=True))[0][2]["speed"])
-            free_flow_speeds.append(list(G.edges(edge, data=True))[0][2]["free_flow_speed"])
+        if G.has_node(node[0]):
+            predecessors = list(G.predecessors(node[0]))
+            # print_INFO_message(f"predecessors of {node[0]} is {predecessors}")
+            for predecessor in predecessors:
+                edge = (predecessor, node[0])
+                speeds.append(list(G.edges(edge, data=True))[0][2]["speed"])
+                free_flow_speeds.append(list(G.edges(edge, data=True))[0][2]["free_flow_speed"])
     
     if not only_predecessors:
         if G.has_node(node[1]):
@@ -550,7 +551,16 @@ def on_submit_refine_form(session_state, G, node_mapping_r):
         st.error(f"the number of edges to add and the number of distances provided are different\n{add}\n{dist}")
     
     if len(add) > 0:
-        new_edges = [(node_mapping_r[e[0]], node_mapping_r[e[1]], int(d)) for e, d  in zip(add, dist)]
+        # new_edges = [(node_mapping_r[e[0]], node_mapping_r[e[1]], int(d)) for e, d  in zip(add, dist)]
+        new_edges = []
+        for e, d  in zip(add, dist):
+            n0 = e[0]
+            n1 = e[1]
+            if type(e[0]) == int:
+                n0 = node_mapping_r[e[0]]
+            if type(e[0]) == int:
+                n1 = node_mapping_r[e[1]]           
+            new_edges.append((n0, n1, int(d)))
     else:
         new_edges = []
     if len(delete) > 0:

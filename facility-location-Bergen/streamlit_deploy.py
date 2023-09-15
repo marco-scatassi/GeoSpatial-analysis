@@ -524,7 +524,7 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
     #---------------------------------- MAP LONGEST PATH -------------------------------------        
 
     with col2:
-        st.markdown("<h1 style='text-align: center;'>Longest paths</h1>", unsafe_allow_html=True)
+        st.markdown("<h3 style='text-align: center;'>Longest paths</h3>", unsafe_allow_html=True)
         st_folium(
                 session_state[f"map_longest_paths_{facilities_number}"],
                 returned_objects=[],

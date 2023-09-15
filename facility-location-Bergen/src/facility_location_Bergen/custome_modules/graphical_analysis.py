@@ -153,7 +153,7 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
                             below=' ', 
                             type='fill',   
                             color = c,
-                            opacity=0.9
+                            opacity=0.3
             ))
 
 

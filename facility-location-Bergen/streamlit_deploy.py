@@ -9,6 +9,7 @@ if directory_path not in sys.path:
 import os
 import pickle as pkl
 import random
+import numpy as np
 import time as ptime
 from copy import deepcopy
 from pathlib import Path
@@ -467,13 +468,17 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
     if f"average_graphs" not in session_state:
         
         average_graphs = {}
+        data_for_traffic_jam_visualization = {}
         for time in TIMES[1:]:
             path = project_path+"/"+retrieve_average_graph_path(time, True, True, True, False)
             with open(path, "rb") as f:
                 average_graphs[time] = pkl.load(f)
+            
+            data_for_traffic_jam_visualization[time] = prepare_data_for_traffic_jam_visualization(average_graphs[time])
 
         session_state[f"average_graphs"] = average_graphs
-
+        session_state[f"data_for_traffic_jam_visualization"] = data_for_traffic_jam_visualization
+        
     c+=1
 
     if c == 4:
@@ -486,10 +491,19 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
     # --------------------------------- TRAFFIC JAM ------------------------------------------
     col1, col2, col3, col4 = st.columns([1,1,1,1])
     average_graphs = session_state[f"average_graphs"]
+    data_for_traffic_jam_visualization = session_state[f"data_for_traffic_jam_visualization"]
+    jam_vector = []
+    for _, _, diff_weight in data_for_traffic_jam_visualization.values():
+        jam_vector.append(diff_weight)
     
     for key, col in zip(TIMES[1:], [col1, col2, col3, col4]):
         if f"map_traffic_jam_{key}" not in session_state:
-            map = show_traffic_jam(average_graphs[key], display_jam=True, title="TRAFFIC JAM - " + key)
+            map = show_traffic_jam(average_graphs[key], 
+                                   display_jam=True, 
+                                   title="TRAFFIC JAM - " + key,
+                                   precomputed_data=data_for_traffic_jam_visualization[key],
+                                   overall_jam = np.mean(jam_vector, axis=0),
+                                   )
             session_state[f"map_traffic_jam_{key}"] = map
         with col:
             st.plotly_chart(

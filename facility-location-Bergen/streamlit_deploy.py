@@ -520,8 +520,15 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
     with col1:
         st.plotly_chart(session_state[f"facilities_on_map_{facilities_number}"], 
                         use_container_width=True)
-    
-    #---------------------------------- MAP LONGEST PATH -------------------------------------
+
+    #---------------------------------- MAP LONGEST PATH -------------------------------------        
+
+    with col2:
+        st.write("             ### Longest paths")
+        st_folium(
+                session_state[f"map_longest_paths_{facilities_number}"],
+                returned_objects=[],
+                width=800)
 
     #------------------ FREE FLOW SOLUTION UNDER DIFFERENT SCENARIOS COMPARISON ------------------
     #------------------ OBJ FUNCTION VALUE -------------

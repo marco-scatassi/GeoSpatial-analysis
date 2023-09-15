@@ -50,10 +50,10 @@ metadata = bootstrap_project(project_path)
 TIMES = ["all_day_free_flow", "all_day", "morning", "midday", "afternoon"]
 FACILITIES_NUMBER = [1,2,3]
 
-LOG_FILE_PATH = r"\\Pund\Stab$\guest801968\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\logs\split_roads.log"
-LOG_FILE_PATH2 = r"\\Pund\Stab$\guest801968\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\logs\split_roads_changes.log"
-HTML_IMG_PATH = r"\\Pund\Stab$\guest801968\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\logs\img_split_roads.html"
-PROCESSED_DATA_ROOT_PATH = r"\\Pund\Stab$\guest801968\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\data\05_model_input"
+LOG_FILE_PATH = r"\\Pund\Stab$\guest801981\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\logs\split_roads.log"
+LOG_FILE_PATH2 = r"\\Pund\Stab$\guest801981\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\logs\split_roads_changes.log"
+HTML_IMG_PATH = r"\\Pund\Stab$\guest801981\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\logs\img_split_roads.html"
+PROCESSED_DATA_ROOT_PATH = r"\\Pund\Stab$\guest801981\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\data\05_model_input"
 
 GRAPH_MANIPULATION_SEED=8797
 # --------------------------------------------- UTILITY AND CALLBACK --------------------------------------------
@@ -475,12 +475,27 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
     if c == 4:
         progress_bar.progress(100, "Loading data completed!")
 
-def deterministic_generate_viz(session_state, TIMES, facilities_number, traffic_jam_time):
+def deterministic_generate_viz(session_state, TIMES, facilities_number):
     if f"fls_exact_{facilities_number}" not in session_state:
         return st.error("Please load data first!", icon="🚨")
 
+    # --------------------------------- TRAFFIC JAM ------------------------------------------
+    col1, col2, col3, col4 = st.columns([1,1,1,1])
+    average_graphs = session_state[f"average_graphs"]
+    
+    for key, col in zip(TIMES[1:], [col1, col2, col3, col4]):
+        if f"map_traffic_jam_{key}" not in session_state:
+            map = show_traffic_jam(average_graphs[key], display_jam=True, title="TRAFFIC JAM - " + key)
+            session_state[f"map_traffic_jam_{key}"] = map
+        with col:
+            st.plotly_chart(
+                session_state[f"map_traffic_jam_{key}"],
+                use_container_width=True
+            )
+    
+    
     #------------------------------- FACILITIES ON MAP ---------------------------------------
-    col1, col2 = st.columns([1.5,1])
+    col1, col2 = st.columns([1,1])
     dfs = session_state[f"dfs_{facilities_number}"]
     # dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
     session_state[f"df_min_{facilities_number}"] = compute_min_distance_df(dfs, None)#, dfs_worst)
@@ -491,48 +506,38 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number, traffic_
                                     extra_text=[time for time in fls_exact.keys()],
                                     title_pad_l=200)
         session_state[f"facilities_on_map_{facilities_number}"] = fig
-        
-    with col1:
-        st.plotly_chart(session_state[f"facilities_on_map_{facilities_number}"], 
-                        use_container_width=True)
-
-    with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBysideWithMap.md", "r") as f:
-        content = f.read()
-
-    with col2:
-        for i in range(7):
-            st.write("")
-        st.markdown(content)
-        
-    with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/underTheMap.md", "r") as f:
-        content = f.read()
-
-    st.markdown(content)
-
-    #---------------------------------- MAP LONGEST PATH / TRAFFIC JAM -------------------------------------        
-    col1, col2 = st.columns([1.5,1])
+    
     if f"map_longest_paths_{facilities_number}" not in session_state:
         dfs = session_state[f"dfs_{facilities_number}"]
         average_graphs = session_state[f"average_graphs"]
         map = visualize_longest_paths(dfs, average_graphs)
         session_state[f"map_longest_paths_{facilities_number}"] = map
-    
-    if traffic_jam_time is not None:
-        average_graphs = session_state[f"average_graphs"]
-        map_jam = show_traffic_jam(average_graphs[traffic_jam_time], display_jam=True, title="TRAFFIC JAM - "+traffic_jam_time)
-        session_state[f"map_jam_{facilities_number}"] = map_jam
         
     with col1:
+        st.plotly_chart(session_state[f"facilities_on_map_{facilities_number}"], 
+                        use_container_width=True)
+    
+    #---------------------------------- MAP LONGEST PATH -------------------------------------        
+
+    with col2:
         st_folium(
                 session_state[f"map_longest_paths_{facilities_number}"],
                 returned_objects=[],
                 width=800)
+
+    # with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBysideWithMap.md", "r") as f:
+    #     content = f.read()
+
+    # with col2:
+    #     for i in range(7):
+    #         st.write("")
+    #     st.markdown(content)
         
-    with col2:
-        st.plotly_chart(
-                session_state[f"map_jam_{facilities_number}"],
-                use_container_width=True
-        )
+    # with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/underTheMap.md", "r") as f:
+    #     content = f.read()
+
+    # st.markdown(content)
+
 
     #------------------ FREE FLOW SOLUTION UNDER DIFFERENT SCENARIOS COMPARISON ------------------
     #------------------ OBJ FUNCTION VALUE -------------
@@ -599,7 +604,7 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number, traffic_
     # fig = travel_times_distribution_under_different_cases(df_min)
     # st.plotly_chart(fig, use_container_width=True)
         
-def deterministic_analysis(session_state, TIMES, facilities_number, ratio1, ratio2, seed, traffic_jam_time):
+def deterministic_analysis(session_state, TIMES, facilities_number, ratio1, ratio2, seed):
     ############################################## RUN THE MODEL ##############################################
     # button1 = st.button("Run the model")
         
@@ -712,7 +717,7 @@ def deterministic_analysis(session_state, TIMES, facilities_number, ratio1, rati
         
     ############################################## GENERATE VIZ ##############################################    
     if button_viz:
-        deterministic_generate_viz(session_state, TIMES, facilities_number, traffic_jam_time)
+        deterministic_generate_viz(session_state, TIMES, facilities_number)
 
 # -------------------------------------------- STOCHASTIC ANALYSIS ---------------------------------------------
 def stochastic_load_data(session_state, facilities_number):
@@ -860,12 +865,12 @@ if __name__ == '__main__':
                     (324324,),
                     label_visibility="collapsed",)
 
-            if section == "Deterministic models analysis":
-                st.markdown("**Scenario for TRAFFIC JAM viz:**")
-                time_jam = st.radio(
-                        "Scenario for TRAFFIC JAM viz",
-                        TIMES[1:],
-                        label_visibility="collapsed",)
+            # if section == "Deterministic models analysis":
+            #     st.markdown("**Scenario for TRAFFIC JAM viz:**")
+            #     time_jam = st.radio(
+            #             "Scenario for TRAFFIC JAM viz",
+            #             TIMES[1:],
+            #             label_visibility="collapsed",)
             
         if section == "Graph manipulation":
             st.subheader("Restore the old state")
@@ -910,7 +915,7 @@ if __name__ == '__main__':
         graph_manipulation(session_state, TIMES)
         
     elif section == "Deterministic models analysis":
-        deterministic_analysis(session_state, TIMES, facilities_number, ratio1, ratio2, seed, time_jam)
+        deterministic_analysis(session_state, TIMES, facilities_number, ratio1, ratio2, seed)
         
     elif section == "Stochastic models analysis":
         stochastic_analysis(session_state)

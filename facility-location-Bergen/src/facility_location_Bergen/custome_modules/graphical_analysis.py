@@ -358,7 +358,7 @@ def show_traffic_jam(F, display_jam=False, free_flow=False, fig=None, title="TRA
                           center=dict(lat=np.mean(pd.Series(nodes_lat).dropna()), lon=np.mean(pd.Series(nodes_lon).dropna())),
                           zoom=9
                           ),
-                        title_pad_l=260,
+                        title_pad_l=100,
                         height=700,
                         width=1000,)
 

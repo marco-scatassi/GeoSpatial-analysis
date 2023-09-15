@@ -446,22 +446,22 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
         session_state[f"dfs_{facilities_number}"] = dfs
     c += 1
             
-    if f"dfs_worst_{facilities_number}" not in session_state:
-        root = project_path+rf"/data/08_reporting/{facilities_number}_locations"
-        paths_worst = [p for p in os.listdir(root) if ("solution_vs_scenario" in p) and ("worst" in p)]
+    # if f"dfs_worst_{facilities_number}" not in session_state:
+    #     root = project_path+rf"/data/08_reporting/{facilities_number}_locations"
+    #     paths_worst = [p for p in os.listdir(root) if ("solution_vs_scenario" in p) and ("worst" in p)]
             
-        dfs_worst = {}
+    #     dfs_worst = {}
 
-        for path in paths_worst:
-            with open(os.path.join(root, path), "rb") as f:
-                key =   tuple(path.
-                        replace("all_day_free_flow", "all-day-free-flow").
-                        replace("all_day", "all-day").
-                        removesuffix(".pkl").split("_")[-4:-1])
+    #     for path in paths_worst:
+    #         with open(os.path.join(root, path), "rb") as f:
+    #             key =   tuple(path.
+    #                     replace("all_day_free_flow", "all-day-free-flow").
+    #                     replace("all_day", "all-day").
+    #                     removesuffix(".pkl").split("_")[-4:-1])
                         
-                dfs_worst[key] = pkl.load(f)
+    #             dfs_worst[key] = pkl.load(f)
             
-        session_state[f"dfs_worst_{facilities_number}"] = dfs_worst
+    #     session_state[f"dfs_worst_{facilities_number}"] = dfs_worst
     c+=1
 
     if f"average_graphs" not in session_state:

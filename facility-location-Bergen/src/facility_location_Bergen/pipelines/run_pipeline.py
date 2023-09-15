@@ -9,7 +9,10 @@ project_path = r"\/Pund/Stab$/guest801981/Documents/GitHub/GeoSpatial-analysis/f
 metadata = bootstrap_project(project_path)
 
 def main():
+    print("Running pipeline: solution_comparison")
+    print("Loading runner...")
     runner = SequentialRunner()
+    print("Finding pipelines...")
     pipelines = find_pipelines()
 
     # ------------------------------ SOLUTION COMPARISON ------------------------------ #
@@ -24,7 +27,9 @@ def main():
         params = yaml.safe_load(f)
 
     for fn in facility_numbers:
+        print(f"Running pipeline: {pipeline_to_run} with {fn} facilities")
         for i, nms in enumerate(namespace_to_run):
+            print(f"Running namespace: {nms}")
             data_params_path = project_path + f"/conf/base/parameters/{pipeline_to_run}_TEMP.yml"
             params_data_set = YAMLDataSet(filepath=data_params_path)
             params[pipeline_to_run+nms]["facilities_number"] = fn

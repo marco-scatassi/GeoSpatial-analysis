@@ -268,7 +268,29 @@ def visualize_longest_paths(dfs, average_graphs):
     
     return map
 
-def show_traffic_jam(F, display_jam=False, free_flow=False, fig=None, title="TRAFFIC JAM"):
+def prepare_data_for_traffic_jam_visualization(graph):
+    nodes_lon = []
+    nodes_lat = []
+    diff_weights = []
+    for edge in graph.edges(data=True):
+        x0, y0 = edge[0]
+        x1, y1 = edge[1]
+        weight = edge[2]["weight"]
+        weight2 = edge[2]["weight2"]
+        nodes_lon.append(x0)
+        nodes_lon.append(x1)
+        nodes_lon.append(None)
+        nodes_lat.append(y0)
+        nodes_lat.append(y1)
+        nodes_lat.append(None)
+        diff_weights.append(abs(weight2 - weight) / weight2)
+    
+    return nodes_lon, nodes_lat, diff_weights
+
+def show_traffic_jam(F, display_jam=False, free_flow=False, 
+                     fig=None, title="TRAFFIC JAM", 
+                     precomputed_data=None,
+                     overall_jam = None):
   if type(F) != list:
     F = [F]
   
@@ -282,29 +304,20 @@ def show_traffic_jam(F, display_jam=False, free_flow=False, fig=None, title="TRA
       color = colors[j]
     else:
       color = "black"
-      
-    nodes_lon = []
-    nodes_lat = []
-    diff_weights = []
-    for edge in f.edges(data=True):
-          x0, y0 = edge[0]
-          x1, y1 = edge[1]
-          weight = edge[2]["weight"]
-          weight2 = edge[2]["weight2"]
-          nodes_lon.append(x0)
-          nodes_lon.append(x1)
-          nodes_lon.append(None)
-          nodes_lat.append(y0)
-          nodes_lat.append(y1)
-          nodes_lat.append(None)
-          diff_weights.append(abs(weight2 - weight) / weight2)
+    
+    if precomputed_data is None:
+        nodes_lon, nodes_lat, diff_weights = prepare_data_for_traffic_jam_visualization(f)
+    else:
+        nodes_lon, nodes_lat, diff_weights = precomputed_data
     
     nodes_lon_color = {"green": [], "gold": [], "orange": [], "red": []}
     nodes_lat_color = {"green": [], "gold": [], "orange": [], "red": []}
 
+    if overall_jam is None:
+        overall_jam = diff_weights  
     
     for i, weight in enumerate(diff_weights):
-      mapped_weight = stats.percentileofscore(diff_weights, weight) / 100
+      mapped_weight = stats.percentileofscore(overall_jam, weight) / 100
       if mapped_weight < 0.25:
         nodes_lon_color["green"] += nodes_lon[i*3:i*3+3]
         nodes_lat_color["green"] += nodes_lat[i*3:i*3+3]
@@ -364,7 +377,7 @@ def show_traffic_jam(F, display_jam=False, free_flow=False, fig=None, title="TRA
 
   return  fig
         
-def show_graph(F):
+def show_graph(F, precomputed_data=None):
   if type(F) != list:
     F = [F]
   
@@ -400,20 +413,10 @@ def show_graph(F):
     
     opacity = 1 - len(f.nodes)/total_nodes if len(F) > 1 else 1
     
-    nodes_lon = []
-    nodes_lat = []
-    weights = []
-    for edge in f.edges(data=True):
-          x0, y0 = edge[0]
-          x1, y1 = edge[1]
-          weight = edge[2]["weight"]
-          nodes_lon.append(x0)
-          nodes_lon.append(x1)
-          nodes_lon.append(None)
-          nodes_lat.append(y0)
-          nodes_lat.append(y1)
-          nodes_lat.append(None)
-          weights.append(weight)
+    if precomputed_data is None:
+        nodes_lon, nodes_lat, _ = prepare_data_for_traffic_jam_visualization(f)
+    else:
+        nodes_lon, nodes_lat, _ = precomputed_data
       
     fig.add_trace(go.Scattermapbox(
         lat=nodes_lat,

@@ -24,6 +24,8 @@ from graph_manipulation import create_gdf_from_mapping
 from log import print_INFO_message_timestamp, print_INFO_message
 from retrieve_global_parameters import *
 
+ROOTH = r"\/Pund/Stab$/guest801981/Documents/GitHub/GeoSpatial-analysis/facility-location-Bergen/"
+
 ################################################################################## STEP 1 ######################################################################
 
 ## -------------------------------------------------- verify dataframe already created ------------------------------------------------- ##
@@ -38,7 +40,7 @@ def verify_df_already_created(data: dict):
     saving_path = retrieve_solution_vs_scenario_path(
         facilities_number, time_solution, time_scenario, weight, worst
     )
-    if os.path.exists(saving_path):
+    if os.path.exists(saving_path) or os.path.exists(ROOTH+saving_path):
         is_created = True
 
     return is_created
@@ -75,6 +77,9 @@ def solution_vs_scenario(data, is_created=False):
     saving_path = retrieve_solution_vs_scenario_path(
         facilities_number, time_solution, time_scenario, weight, worst
     )
+    if not os.path.exists(saving_path):
+        saving_path = ROOTH+saving_path
+        
     df_ = PickleDataSet(filepath=saving_path)
 
     if not is_created:
@@ -83,12 +88,20 @@ def solution_vs_scenario(data, is_created=False):
         path = retrieve_light_solution_path(facilities_number, time_solution)
         adj_mapping_path = retrieve_adj_mapping_path(time_solution, is_free_flow)
         adj_mapping_path_2 = retrieve_adj_mapping_path_2(time_solution, is_free_flow)
-        fls_exact_solution = FacilityLocation.load(path)
-        with open(adj_mapping_path, "rb") as f:
-            adj_mapping = pkl.load(f)
-        adj_mapping_reverse = {v: k for k, v in adj_mapping.items()}
-        with open(adj_mapping_path_2, "rb") as f:
-            adj_mapping_2 = pkl.load(f)
+        try:
+            fls_exact_solution = FacilityLocation.load(path)
+            with open(adj_mapping_path, "rb") as f:
+                adj_mapping = pkl.load(f)
+            adj_mapping_reverse = {v: k for k, v in adj_mapping.items()}
+            with open(adj_mapping_path_2, "rb") as f:
+                adj_mapping_2 = pkl.load(f)
+        except:
+            fls_exact_solution = FacilityLocation.load(ROOTH+path)
+            with open(ROOTH+adj_mapping_path, "rb") as f:
+                adj_mapping = pkl.load(f)
+            adj_mapping_reverse = {v: k for k, v in adj_mapping.items()}
+            with open(ROOTH+adj_mapping_path_2, "rb") as f:
+                adj_mapping_2 = pkl.load(f)
 
         # Load the average graph
         print_INFO_message(f"Loading adj matrix for {time_scenario}")

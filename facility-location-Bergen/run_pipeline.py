@@ -33,5 +33,5 @@ for fn in facility_numbers:
         params_data_set = YAMLDataSet(filepath=data_params_path)
         params[pipeline_to_run+nms]["facilities_number"] = fn
         params_data_set.save(params[pipeline_to_run+nms])
-        data_catalog = DataCatalog(data_sets={f"params:{pipeline_to_run}{namespace_to_run}": params_data_set})
-        runner.run(pipelines[pipeline_to_run].only_nodes_with_namespace(f"{pipeline_to_run}.{namespace_to_run}"), data_catalog)
+        data_catalog = DataCatalog(data_sets={f"params:{pipeline_to_run}{nms}": params_data_set})
+        runner.run(pipelines[pipeline_to_run].only_nodes_with_namespace(f"{pipeline_to_run}.{nms}"), data_catalog)

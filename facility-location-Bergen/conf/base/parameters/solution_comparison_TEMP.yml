@@ -1,5 +1,5 @@
-facilities_number: 3
-time_scenario: all_day
+facilities_number: 1
+time_scenario: midday
 time_solution: all_day_free_flow
 weight: weight
 worst: 'False'

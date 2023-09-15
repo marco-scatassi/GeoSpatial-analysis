@@ -4,9 +4,9 @@ import pandas as pd
 import networkx as nx
 import geopandas as gpd
 from scipy import stats
+from shapely.geometry import Point
 import plotly.graph_objects as go
 from sklearn.utils import resample
-from shapely.geometry import Point
 from plotly.subplots import make_subplots
 
 def rand_jitter(list):
@@ -140,7 +140,7 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
         geojd = {"type": "FeatureCollection"}
         geojd['features'] = []
         for lon, lat in zip(rand_jitter(lons[k]), rand_jitter(lats[k])):
-            b = control_polygon(lon, lat, width=0.015, height= 0.012) #The width and height of a location pin 
+            b = control_polygon(lon, lat, width=0.028, height= 0.020) #The width and height of a location pin 
                                                                     # are chosen by trial and error
             bez = BezierCv(b, nr=30)
 
@@ -153,7 +153,7 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
                             below=' ', 
                             type='fill',   
                             color = c,
-                            opacity=0.6
+                            opacity=0.9
             ))
 
 
@@ -183,95 +183,90 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
 
     return fig
 
-def show_graph(F):
-  if type(F) != list:
-    F = [F]
-  
-  # assumption: the first graph is the global graph and the rest are the cc
-  node_mapping = {}
-  i = 0
-  for node in F[0].nodes():
-    node_mapping[node] = i
-    i += 1
-  
-  F_list = []
-  
-  for i, f in enumerate(F):
-    if len(f.nodes) > 1:
-      F_list.append(f)
-    else:
-      break
+def visualize_longest_paths(dfs, average_graphs):
+    # ------------------------------ prepare the data ----------------------------------#
+    dfs_min = {}
+    for key, df in dfs.items():
+        dfs_min[key] = get_minimum_distances(df).sort_values(by="travel_time", ascending=False)
     
-  index_start = i
-  if index_start < len(F) - 1:
-    F_list.append(nx.union_all(F[index_start:]))
-  
-  colors = ["red", "blue", "green", "yellow", "orange", "purple", "brown"]
-  total_nodes = sum([len(f.nodes) for f in F])
-  
-  fig = go.Figure()
+    sources = {}
+    destinations = {}
+    solution_paths = {}
 
-  for i, f in enumerate(F_list):
-    if i < len(colors):
-      color = colors[i]
-    else:
-      color = "white"
+    for key, df in dfs_min.items():
+        try:
+            if key[0] == key[1] or (key[0] == "all-day-free-flow" and key[1] == "all-day" and key[2] == "weight2"):
+                sources[key] = df.iloc[0]["new_source"]
+                destinations[key] = df.iloc[0]["new_target"]
+                solution_paths[key] = nx.dijkstra_path(G=average_graphs[key[1].replace("-", "_")],
+                                                    source=sources[key],
+                                                    target=destinations[key],
+                                                    weight=key[2])
+            else:
+                continue
+        except:
+            print("Skipping: ", key[0])
+        
+    travel_time = {}
+    for key in solution_paths.keys():
+        travel_time[key] = {}
+        for time in ['all_day_free_flow', 'all_day', 'morning', 'midday', 'afternoon']:
+            if key[0].replace("-", "_") == time:
+                if time == "all_day_free_flow":
+                    travel_time[key][time] = nx.dijkstra_path_length(G=average_graphs["all_day"], source=sources[key], target=destinations[key], weight=key[2])
+                else:
+                    # print(key[0].replace("-", "_"), time)
+                    travel_time[key][time] = nx.dijkstra_path_length(G=average_graphs[time], source=sources[key], target=destinations[key], weight=key[2])
+            else:
+                if time == "all_day_free_flow":
+                    travel_time[key][time] = get_travel_time(solution_paths[key], average_graphs["all_day"], "weight2")
+                else:
+                    travel_time[key][time] = get_travel_time(solution_paths[key], average_graphs[time], "weight")
+            minutes = int(travel_time[key][time]/60)
+            seconds = int(travel_time[key][time]%60)
+            travel_time[key][time] = str(minutes) + " min" + " " + str(seconds) + " sec"
     
-    opacity = 1 - len(f.nodes)/total_nodes if len(F) > 1 else 1
+    #----------------------------------- design the map --------------------------------#
+    center_pt = [60.41, 5.32415]
+    color_mapping = {
+        "all-day-free-flow":"red",
+        "all-day":"black",
+        "morning":"blue",
+        "midday":"purple",
+        "afternoon":"green",
+    }
+    map = folium.Map(location=center_pt, tiles="OpenStreetMap", zoom_start=11)
+
+    tooltip_targets = {}
+    for key in solution_paths.keys():
+        target = solution_paths[key][-1]
+        if target not in tooltip_targets.keys():
+            tooltip_targets[target] = f"<b>Farthest location for:</b>" 
+        
+        tooltip_targets[target] += f"<br>- {key[0].upper()}"
+
+    for key in solution_paths.keys():
+        tooltip_source =f"<b>{key[0].upper()}</b><br>(opt locations)<br><br>"+"<br>- ".join(["<b>Travel time</b>:"]+[rf"{time}: " + travel_time[key][time] for time in 
+                                ['all_day_free_flow', 'all_day', 'morning', 'midday', 'afternoon']])
+
+        start_marker = folium.Marker(location=(solution_paths[key][0][1]+np.random.normal(0, 0.0003, 1),
+                                            solution_paths[key][0][0]+np.random.normal(0, 0.0003, 1)),
+                    icon=folium.Icon(color=color_mapping[key[0]], prefix='fa',icon='car'),
+                    tooltip=tooltip_source)
+        start_marker.add_to(map)
+        
+        folium.Marker(location=(solution_paths[key][-1][1], solution_paths[key][-1][0]),
+                    tooltip=tooltip_targets[solution_paths[key][-1]],
+                    icon=folium.Icon(color='gray', prefix='fa',icon='crosshairs'),).add_to(map)
+
+        path = folium.PolyLine(locations=[(node[1], node[0]) for node in solution_paths[key]], 
+                        color=color_mapping[key[0]],
+                        tooltip=key[0],
+                        weight=2,)
+
+        path.add_to(map)
     
-    nodes_lon = []
-    nodes_lat = []
-    weights = []
-    for edge in f.edges(data=True):
-          x0, y0 = edge[0]
-          x1, y1 = edge[1]
-          weight = edge[2]["weight"]
-          nodes_lon.append(x0)
-          nodes_lon.append(x1)
-          nodes_lon.append(None)
-          nodes_lat.append(y0)
-          nodes_lat.append(y1)
-          nodes_lat.append(None)
-          weights.append(weight)
-      
-    fig.add_trace(go.Scattermapbox(
-        lat=nodes_lat,
-        lon=nodes_lon,
-        mode='lines',
-        line=dict(width=1, color=color),
-        showlegend=False,
-    ))
-
-    nodes = f.nodes()
-    nodes = gpd.GeoDataFrame(pd.Series(list(nodes())).apply(lambda x: Point(x)), columns=["geometry"], crs="EPSG:4326")
-
-    text = []
-    for n in nodes.geometry:
-      text.append("")
-      text[-1] += str(node_mapping[(n.x, n.y)])
-                
-                
-    fig.add_trace(go.Scattermapbox(
-    lat = nodes.geometry.y,
-    lon = nodes.geometry.x,
-    mode='markers',
-    text=text,
-    marker=dict(size=3, color="black", opacity=opacity),
-    showlegend=False,
-  ))
-
-  fig.update_layout(title="<b>Graph visualization<b>",
-                      mapbox=dict(
-                        style="open-street-map",
-                        center=dict(lat=60.366746, lon=5.336089),
-                        zoom=9
-                        ),
-                      title_pad_l=260,
-                      height=700,
-                      width=1000,)
-
-  return  fig, node_mapping
-
+    return map
 
 def show_traffic_jam(F, display_jam=False, free_flow=False, fig=None, title="TRAFFIC JAM"):
   if type(F) != list:
@@ -363,117 +358,124 @@ def show_traffic_jam(F, display_jam=False, free_flow=False, fig=None, title="TRA
                           center=dict(lat=np.mean(pd.Series(nodes_lat).dropna()), lon=np.mean(pd.Series(nodes_lon).dropna())),
                           zoom=9
                           ),
-                        title_pad_l=260,
+                        title_pad_l=100,
                         height=700,
                         width=1000,)
 
   return  fig
         
-
-def visualize_longest_paths(dfs, average_graphs):
-    # ------------------------------ prepare the data ----------------------------------#
-    dfs_min = {}
-    for key, df in dfs.items():
-        dfs_min[key] = get_minimum_distances(df).sort_values(by="travel_time", ascending=False)
+def show_graph(F):
+  if type(F) != list:
+    F = [F]
+  
+  # assumption: the first graph is the global graph and the rest are the cc
+  node_mapping = {}
+  i = 0
+  for node in F[0].nodes():
+    node_mapping[node] = i
+    i += 1
+  
+  F_list = []
+  
+  for i, f in enumerate(F):
+    if len(f.nodes) > 1:
+      F_list.append(f)
+    else:
+      break
     
-    sources = {}
-    destinations = {}
-    solution_paths = {}
+  index_start = i
+  if index_start < len(F) - 1:
+    F_list.append(nx.union_all(F[index_start:]))
+  
+  colors = ["red", "blue", "green", "yellow", "orange", "purple", "brown"]
+  total_nodes = sum([len(f.nodes) for f in F])
+  
+  fig = go.Figure()
 
-    for key, df in dfs_min.items():
-        try:
-            if (key[0] == key[1] and  key[2] != "weight2") or (key[0] == "all-day-free-flow" and key[1] == "all-day" and key[2] == "weight2"):
-                sources[key] = df.iloc[0]["new_source"]
-                destinations[key] = df.iloc[0]["new_target"]
-                solution_paths[key] = nx.dijkstra_path(G=average_graphs[key[1].replace("-", "_")],
-                                                    source=sources[key],
-                                                    target=destinations[key],
-                                                    weight=key[2])
-            else:
-                continue
-        except:
-            print("Skipping: ", key[0])
-        
-    travel_time = {}
-    for key in solution_paths.keys():
-        travel_time[key] = {}
-        for time in ['all_day_free_flow', 'all_day', 'morning', 'midday', 'afternoon']:
-            if key[0].replace("-", "_") == time:
-                if time == "all_day_free_flow":
-                    travel_time[key][time] = nx.dijkstra_path_length(G=average_graphs["all_day"], source=sources[key], target=destinations[key], weight=key[2])
-                else:
-                    # print(key[0].replace("-", "_"), time)
-                    travel_time[key][time] = nx.dijkstra_path_length(G=average_graphs[time], source=sources[key], target=destinations[key], weight=key[2])
-            else:
-                if time == "all_day_free_flow":
-                    travel_time[key][time] = get_travel_time(solution_paths[key], average_graphs["all_day"], "weight2")
-                else:
-                    travel_time[key][time] = get_travel_time(solution_paths[key], average_graphs[time], "weight")
-            minutes = int(travel_time[key][time]/60)
-            seconds = int(travel_time[key][time]%60)
-            travel_time[key][time] = str(minutes) + " min" + " " + str(seconds) + " sec"
+  for i, f in enumerate(F_list):
+    if i < len(colors):
+      color = colors[i]
+    else:
+      color = "white"
     
-    #----------------------------------- design the map --------------------------------#
-    center_pt = [60.41, 5.32415]
-    color_mapping = {
-        "all-day-free-flow":"red",
-        "all-day":"black",
-        "morning":"blue",
-        "midday":"purple",
-        "afternoon":"green",
-    }
-    map = folium.Map(location=center_pt, tiles="OpenStreetMap", zoom_start=11)
-
-    tooltip_targets = {}
-    for key in solution_paths.keys():
-        target = solution_paths[key][-1]
-        if target not in tooltip_targets.keys():
-            tooltip_targets[target] = f"<b>Farthest location for:</b>" 
-        
-        tooltip_targets[target] += f"<br>- {key[0].upper()}"
-
-    for key in solution_paths.keys():
-        tooltip_source =f"<b>{key[0].upper()}</b><br>(opt locations)<br><br>"+"<br>- ".join(["<b>Travel time</b>:"]+[rf"{time}: " + travel_time[key][time] for time in 
-                                ['all_day_free_flow', 'all_day', 'morning', 'midday', 'afternoon']])
-
-        start_marker = folium.Marker(location=(solution_paths[key][0][1]+np.random.normal(0, 0.0003, 1),
-                                            solution_paths[key][0][0]+np.random.normal(0, 0.0003, 1)),
-                    icon=folium.Icon(color=color_mapping[key[0]], prefix='fa',icon='car'),
-                    tooltip=tooltip_source)
-        start_marker.add_to(map)
-        
-        folium.Marker(location=(solution_paths[key][-1][1], solution_paths[key][-1][0]),
-                    tooltip=tooltip_targets[solution_paths[key][-1]],
-                    icon=folium.Icon(color='gray', prefix='fa',icon='crosshairs'),).add_to(map)
-
-        path = folium.PolyLine(locations=[(node[1], node[0]) for node in solution_paths[key]], 
-                        color=color_mapping[key[0]],
-                        tooltip=key[0],
-                        weight=2,)
-
-        path.add_to(map)
+    opacity = 1 - len(f.nodes)/total_nodes if len(F) > 1 else 1
     
-    return map
-        
+    nodes_lon = []
+    nodes_lat = []
+    weights = []
+    for edge in f.edges(data=True):
+          x0, y0 = edge[0]
+          x1, y1 = edge[1]
+          weight = edge[2]["weight"]
+          nodes_lon.append(x0)
+          nodes_lon.append(x1)
+          nodes_lon.append(None)
+          nodes_lat.append(y0)
+          nodes_lat.append(y1)
+          nodes_lat.append(None)
+          weights.append(weight)
+      
+    fig.add_trace(go.Scattermapbox(
+        lat=nodes_lat,
+        lon=nodes_lon,
+        mode='lines',
+        line=dict(width=1, color=color),
+        showlegend=False,
+    ))
+
+    nodes = f.nodes()
+    nodes = gpd.GeoDataFrame(pd.Series(list(nodes())).apply(lambda x: Point(x)), columns=["geometry"], crs="EPSG:4326")
+
+    text = []
+    for n in nodes.geometry:
+      text.append("")
+      text[-1] += str(node_mapping[(n.x, n.y)])
+                
+                
+    fig.add_trace(go.Scattermapbox(
+    lat = nodes.geometry.y,
+    lon = nodes.geometry.x,
+    mode='markers',
+    text=text,
+    marker=dict(size=3, color="black", opacity=opacity),
+    showlegend=False,
+  ))
+
+  fig.update_layout(title="<b>Graph visualization<b>",
+                      mapbox=dict(
+                        style="open-street-map",
+                        center=dict(lat=60.366746, lon=5.336089),
+                        zoom=9
+                        ),
+                      title_pad_l=260,
+                      height=700,
+                      width=1000,)
+
+  return  fig, node_mapping  
+
 def compute_rel_diff(fls_exact, dfs, dfs_worst, time):
     df_min = get_minimum_distances(dfs[("all-day-free-flow", time.replace("_", "-"), "weight")])
-    df_worst_min = get_minimum_distances(dfs_worst[("all-day-free-flow", time.replace("_","-"), "weight")])
+    if dfs_worst is not None:
+        df_worst_min = get_minimum_distances(dfs_worst[("all-day-free-flow", time.replace("_","-"), "weight")])
 
     a = round(fls_exact[time].solution_value/60, 3)
 
     b = df_min.sort_values(by="travel_time", ascending=False).iloc[0].travel_time
-    b_worst = df_worst_min.sort_values(by="travel_time", ascending=False).iloc[0].travel_time
-
+    if dfs_worst is not None:
+        b_worst = df_worst_min.sort_values(by="travel_time", ascending=False).iloc[0].travel_time
+    else:
+        b_worst = None
     return a, b, b_worst
 
-def objective_function_value_under_different_cases(a, b, b_worst):
+def objective_function_value_under_different_cases(a, b, b_worst=None):
     
     plot_data = []
     
     for i in range(len(a)):
         plot_data.append(a[i])
         plot_data.append(b[i])
-        plot_data.append(b_worst[i])
+        if b_worst is not None:
+            plot_data.append(b_worst[i])
     
     fig = make_subplots(rows=1, cols=1,)
     fig.update_layout(title="<b>Outsample evaluation of free flow solution<b>",
@@ -493,9 +495,10 @@ def objective_function_value_under_different_cases(a, b, b_worst):
     
     return fig
 
-def outsample_evaluation_relative_differences(a, b, b_worst):
+def outsample_evaluation_relative_differences(a, b, b_worst=None):
     rel_diffs = [round(abs(a_-b_)/a_ * 100,3) for a_, b_ in zip(a,b)]
-    rel_diffs_worst = [round(abs(a_-b_)/a_ * 100,3) for a_, b_ in zip(a,b_worst)]
+    if b_worst is not None:
+        rel_diffs_worst = [round(abs(a_-b_)/a_ * 100,3) for a_, b_ in zip(a,b_worst)]
     
     fig = make_subplots(rows=1, cols=1,)
     fig.update_layout(title="<b>Outsample evaluation, relative differences<b>",
@@ -511,10 +514,11 @@ def outsample_evaluation_relative_differences(a, b, b_worst):
                      marker=dict(color=["blue"]*len(rel_diffs)),
                      x=["all_day", "morning", "midday", "afternoon"],), row=1, col=1)
 
-    fig.add_trace(go.Bar(y=rel_diffs_worst,
-                     name="average worst scenario",
-                     marker=dict(color=["navy"]*len(rel_diffs_worst)),
-                     x=["all_day", "morning", "midday", "afternoon"],), row=1, col=1)
+    if b_worst is not None:
+        fig.add_trace(go.Bar(y=rel_diffs_worst,
+                        name="average worst scenario",
+                        marker=dict(color=["navy"]*len(rel_diffs_worst)),
+                        x=["all_day", "morning", "midday", "afternoon"],), row=1, col=1)
 
     fig.update_layout(legend=dict(
                             orientation='h',  # Set the orientation to 'h' for horizontal
@@ -525,23 +529,23 @@ def outsample_evaluation_relative_differences(a, b, b_worst):
                         ),)
     return fig
 
-def compute_min_distance_df(dfs, dfs_worst):
+def compute_min_distance_df(dfs, dfs_worst=None):
     dfs_min_list = []
     dfs_min_worst_list = []
     
     for time in ["all_day", "morning", "midday", "afternoon"]:
         df_min = get_minimum_distances(dfs[('all-day-free-flow', time.replace("_","-"), "weight")])
-        df_min_worst = get_minimum_distances(dfs_worst[('all-day-free-flow', time.replace("_","-"), "weight")])
+        # df_min_worst = get_minimum_distances(dfs_worst[('all-day-free-flow', time.replace("_","-"), "weight")])
 
         dfs_min_list.append(df_min)
-        dfs_min_worst_list.append(df_min_worst)
+        # dfs_min_worst_list.append(df_min_worst)
     
     df_min = get_minimum_distances(dfs[('all-day-free-flow', "all-day", "weight2")])[["target", "travel_time"]]
     
-    for df, name in zip(dfs_min_list+
-                        dfs_min_worst_list, 
-                        ["all_day", "morning", "midday", "afternoon"]+
-                        ["worst_all_day", "worst_morning", "worst_midday", "worst_afternoon"]):
+    for df, name in zip(dfs_min_list,
+                        # + dfs_min_worst_list, 
+                        ["all_day", "morning", "midday", "afternoon"]):
+                        #  + ["worst_all_day", "worst_morning", "worst_midday", "worst_afternoon"]):
         
         df_min = df_min.merge(df[["target", "travel_time"]], 
                             on="target", 

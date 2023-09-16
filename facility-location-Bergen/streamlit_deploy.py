@@ -550,7 +550,10 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
     if f"abs_diff_barplot_{facilities_number}" not in session_state:
         fls_exact = session_state[f"fls_exact_{facilities_number}"]
         dfs = session_state[f"dfs_{facilities_number}"]
-        dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
+        try:
+            dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
+        except:
+            dfs_worst = None
         a = list(range(len(TIMES)-1))
         b = list(range(len(TIMES)-1))
         b_worst = list(range(len(TIMES)-1))

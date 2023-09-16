@@ -532,7 +532,7 @@ def outsample_evaluation_relative_differences(a, b, b_worst=None):
                      marker=dict(color=["blue"]*len(rel_diffs)),
                      x=["all_day", "morning", "midday", "afternoon"],), row=1, col=1)
 
-    if b_worst is not None:
+    if not is_None:
         fig.add_trace(go.Bar(y=rel_diffs_worst,
                         name="average worst scenario",
                         marker=dict(color=["navy"]*len(rel_diffs_worst)),

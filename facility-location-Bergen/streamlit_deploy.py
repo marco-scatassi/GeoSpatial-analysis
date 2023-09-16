@@ -552,13 +552,12 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
         dfs = session_state[f"dfs_{facilities_number}"]
         try:
             dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
-            b_worst = list(range(len(TIMES)-1))
         except:
             dfs_worst = None
-            b_worst = None
             
         a = list(range(len(TIMES)-1))
         b = list(range(len(TIMES)-1))
+        b_worst = list(range(len(TIMES)-1))
 
         for i, time in enumerate(TIMES[1:]):
             a[i], b[i], b_worst[i] = compute_rel_diff(fls_exact, dfs, dfs_worst, time)

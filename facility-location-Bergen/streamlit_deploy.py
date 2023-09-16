@@ -556,7 +556,7 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
             dfs_worst = None
         a = list(range(len(TIMES)-1))
         b = list(range(len(TIMES)-1))
-        if f"dfs_worst_{facilities_number}" in session_state.keys()
+        if f"dfs_worst_{facilities_number}" in session_state.keys():
             b_worst = list(range(len(TIMES)-1))
         else:
             b_worst = None

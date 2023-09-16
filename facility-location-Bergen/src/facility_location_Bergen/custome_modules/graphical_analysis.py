@@ -498,10 +498,10 @@ def objective_function_value_under_different_cases(a, b, b_worst=None):
                         yaxis_title="time (minutes)")
 
     fig.add_trace(go.Bar(y=plot_data,
-                        x=["op sol all_day", "ff sol in all_day scenario", "ff sol in all_day worst scenario", 
-                           "op sol morning", "ff sol in morning", "ff sol in morning worst scenario",
-                           "op sol midday", "ff sol in midday", "ff sol in midday worst scenario",
-                           "op sol afternoon", "ff sol in afternoon", "ff sol in afternoon worst scenario"],
+                        x=["op sol all_day", "ff sol in all_day scenario",# "ff sol in all_day worst scenario", 
+                           "op sol morning", "ff sol in morning",# "ff sol in morning worst scenario",
+                           "op sol midday", "ff sol in midday",# "ff sol in midday worst scenario",
+                           "op sol afternoon", "ff sol in afternoon",# "ff sol in afternoon worst scenario"],
                         marker=dict(
                             color=["lightblue", "blue", "navy"]*len(plot_data),
                             )), row=1, col=1)
@@ -511,6 +511,11 @@ def objective_function_value_under_different_cases(a, b, b_worst=None):
 def outsample_evaluation_relative_differences(a, b, b_worst=None):
     rel_diffs = [round(abs(a_-b_)/a_ * 100,3) for a_, b_ in zip(a,b)]
     if b_worst is not None:
+        is_None = True
+        for e in b_worst:
+            if e is not None:
+                is_None = False
+    if not is_None:
         rel_diffs_worst = [round(abs(a_-b_)/a_ * 100,3) for a_, b_ in zip(a,b_worst)]
     
     fig = make_subplots(rows=1, cols=1,)

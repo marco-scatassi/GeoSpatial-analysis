@@ -556,7 +556,10 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
             dfs_worst = None
         a = list(range(len(TIMES)-1))
         b = list(range(len(TIMES)-1))
-        b_worst = list(range(len(TIMES)-1))
+        if f"dfs_worst_{facilities_number}" is in session_state.keys()
+            b_worst = list(range(len(TIMES)-1))
+        else:
+            b_worst = None
         for i, time in enumerate(TIMES[1:]):
             a[i], b[i], b_worst[i] = compute_rel_diff(fls_exact, dfs, dfs_worst, time)
         session_state[f"abs_diff_barplot_{facilities_number}"] = (a,b,b_worst)

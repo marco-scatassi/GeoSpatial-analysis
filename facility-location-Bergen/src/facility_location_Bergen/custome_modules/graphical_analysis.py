@@ -501,7 +501,7 @@ def objective_function_value_under_different_cases(a, b, b_worst=None):
                         x=["op sol all_day", "ff sol in all_day scenario",# "ff sol in all_day worst scenario", 
                            "op sol morning", "ff sol in morning",# "ff sol in morning worst scenario",
                            "op sol midday", "ff sol in midday",# "ff sol in midday worst scenario",
-                           "op sol afternoon", "ff sol in afternoon",# "ff sol in afternoon worst scenario"],
+                           "op sol afternoon", "ff sol in afternoon"],# "ff sol in afternoon worst scenario"],
                         marker=dict(
                             color=["lightblue", "blue", "navy"]*len(plot_data),
                             )), row=1, col=1)

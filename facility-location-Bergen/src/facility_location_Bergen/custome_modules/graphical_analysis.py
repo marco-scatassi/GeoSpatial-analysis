@@ -573,7 +573,7 @@ def compute_min_distance_df(dfs, dfs_worst=None):
     df_min = df_min.rename(columns={"travel_time": "travel_time_free_flow"})
     return df_min
 
-def travel_times_distribution_under_different_cases(df_min):
+def travel_times_distribution_under_different_cases(df_min, worst=False):
     fig = go.Figure()
 
     show_legend = [True]+[False]*len(df_min.columns[1:])
@@ -582,9 +582,13 @@ def travel_times_distribution_under_different_cases(df_min):
                     title_pad_l=150,
                     height=500,
                     width=1200,)
-
-    for i, name in enumerate(["free_flow", "all_day", "morning", "midday", "afternoon",
-                            "worst_all_day", "worst_morning", "worst_midday", "worst_afternoon"]):
+    if worst:
+        traces = ["free_flow", "all_day", "morning", "midday", "afternoon",
+                            "worst_all_day", "worst_morning", "worst_midday", "worst_afternoon"]
+    else:
+        traces = ["free_flow", "all_day", "morning", "midday", "afternoon"]
+        
+    for i, name in enumerate(traces):
         fig.add_trace(go.Violin(y=df_min["travel_time_free_flow"],
                                 name=name,
                                 box_visible=True,

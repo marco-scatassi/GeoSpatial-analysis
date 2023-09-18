@@ -1,3 +1,4 @@
 # ignite virtual env
+spenv/**
 kedro_env/** 
 postman_problem_env/**

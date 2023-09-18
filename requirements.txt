@@ -1,0 +1,14 @@
+requests
+networkx
+matplotlib
+dill
+numpy
+pandas
+geopandas
+shapely
+datetime
+kedro
+pyomo
+# INSTALL (IF WINDOWS) MICROSOFT MPI AND THEN
+mpi4py
+mpi-sppy

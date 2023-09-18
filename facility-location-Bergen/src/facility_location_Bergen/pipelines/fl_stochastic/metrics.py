@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 import pickle as pkl
 from sputility import evaluate_stochastic_solution
-from retrieve_global_parameters import retrieve_adj_matrix_path
+from retrieve_global_parameters import retrieve_adj_matrix_path, retrieve_average_graph_path
 from log import print_INFO_message_timestamp, print_INFO_message
 from facility_location import (StochasticFacilityLocationMetrics,
                                StochasticFacilityLocation, 
@@ -20,6 +20,7 @@ from facility_location import (StochasticFacilityLocationMetrics,
 
 print_INFO_message_timestamp(f"START...")
 
+ROOTH = r"\/Pund/Stab$/guest801981/Documents/GitHub/GeoSpatial-analysis/facility-location-Bergen/"
 
 ##################################### INITIALIZATION #####################################
 method = "LS"
@@ -30,10 +31,10 @@ n_locations = [1,2,3]
 scenario_names = ["morning", "midday", "afternoon"]
 
 print_INFO_message(f"Loading avg graph for {time}")
-path = rf"C:\Users\Marco\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\data\03_primary\average_graph_{time}.pkl"
+path = ROOTH + retrieve_average_graph_path(time, connected=True, splitted=True, firstSCC=True)
 with open(path, "rb") as f:
     average_graphs[time] = pkl.load(f)
-adj_paths = {time: r"C:/Users/Marco/Documents/GitHub/GeoSpatial-analysis/facility-location-Bergen/" + retrieve_adj_matrix_path(time) for time in scenario_names}
+adj_paths = {time: ROOTH + retrieve_adj_matrix_path(time) for time in scenario_names}
 adj_matricies = {time: None for time in scenario_names}
 
 print_INFO_message(f"Loading adj matrices")

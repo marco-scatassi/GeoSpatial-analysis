@@ -1,5 +1,6 @@
 import sys
-sys.path.append(r'C:\Users\Marco\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\src\facility_location_Bergen\custome_modules')
+sys.path.append(r'\\Pund\Stab$\guest801981\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\src\facility_location_Bergen\custome_modules')
+# sys.path.append(r'C:\Users\Marco\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\src\facility_location_Bergen\custome_modules')
 import warnings
 from shapely.errors import ShapelyDeprecationWarning
 # Ignore the ShapelyDeprecationWarning
@@ -14,8 +15,9 @@ import geopandas as gpd
 from shapely.geometry import Point
 from log import print_INFO_message_timestamp, print_INFO_message
 from facility_location import AdjacencyMatrix, StochasticFacilityLocation
-from retrieve_global_parameters import retrieve_adj_matrix_path
+from retrieve_global_parameters import retrieve_adj_matrix_path, retrieve_average_graph_path
 
+ROOTH = r"\/Pund/Stab$/guest801981/Documents/GitHub/GeoSpatial-analysis/facility-location-Bergen/"
 
 ## Useful functions
 def sample_idx(idxs, sample_ratio=0.1):
@@ -39,10 +41,10 @@ average_graphs = {}
 time = "all_day"
 
 print_INFO_message(f"Loading avg graph for {time}")
-path = rf"C:\Users\Marco\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\data\03_primary\average_graph_{time}.pkl"
+path = ROOTH + retrieve_average_graph_path(time, connected=True, splitted=True, firstSCC=True)
 with open(path, "rb") as f:
     average_graphs[time] = pkl.load(f)
-adj_paths = {time: r"C:/Users/Marco/Documents/GitHub/GeoSpatial-analysis/facility-location-Bergen/" + retrieve_adj_matrix_path(time) for time in times}
+adj_paths = {time: ROOTH + retrieve_adj_matrix_path(time) for time in times}
 adj_matricies = {time: None for time in times}
 
 print_INFO_message(f"Loading adj matrices")
@@ -60,13 +62,20 @@ weighted_adj_matricies = {time: AdjacencyMatrix(adj_matrix=adj_matricies[time],
 ## Problem initialization
 #It's not possible to solve the problem exactly using all the nodes in the graph. The problem is too big. We can try to solve it using a subset of the nodes.
 random.seed(324324)
-ratio1 = 1/5
-ratio2= 1/10
+ratio1 = 0.1
+ratio2= 0.05
+
+idx_sampled = sample_idx(list(range(len(average_graphs["all_day"].nodes()))), ratio1)
+idx_sampled2 = sample_idx(idx_sampled, ratio2)
+
 coordinates = pd.Series(list(average_graphs["all_day"].nodes()))
 coordinates = coordinates.apply(lambda x: Point(x))
 coordinates = gpd.GeoDataFrame(geometry=coordinates)
-idx_sampled = sample_idx(list(coordinates.index), ratio1)
-idx_sampled2 = sample_idx(idx_sampled, ratio2)
+coordinates["geometry_x"] = coordinates.geometry.x
+coordinates["geometry_y"] = coordinates.geometry.y
+coordinates.sort_values(by=["geometry_x", "geometry_y"], inplace=True)
+coordinates.drop(columns=["geometry_x", "geometry_y"], inplace=True)
+
 coordinates_sampled = sample_coords(coordinates, idx_sampled)
 coordinates_sampled2 = sample_coords(coordinates, idx_sampled2)
 
@@ -82,8 +91,8 @@ for m in n_locations:
                                             candidate_coordinates=coordinates_sampled2,)
     fl_stochastic.solve(scenarios_data=weighted_adj_matricies,
                         scenarioProbabilities=probabilities,
-                        method="LS",
+                        method="EF",
                         max_iter=20,)
 
     print_INFO_message_timestamp(f"Saving solution")
-    fl_stochastic.save(rf"C:\Users\Marco\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\data\07_model_output\{m}_locations\stochastic_solution\lshape_solution.pkl")
+    fl_stochastic.save(ROOTH + rf"data/07_model_output/{m}_locations/stochastic_solution/lshape_solution.pkl")

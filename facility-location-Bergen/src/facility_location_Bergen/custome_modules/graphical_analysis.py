@@ -283,7 +283,7 @@ def prepare_data_for_traffic_jam_visualization(graph):
         nodes_lat.append(y0)
         nodes_lat.append(y1)
         nodes_lat.append(None)
-        diff_weights.append(abs(weight2 - weight) / weight2)
+        diff_weights.append((weight - weight2) / weight2)
     
     return nodes_lon, nodes_lat, diff_weights
 
@@ -310,15 +310,18 @@ def show_traffic_jam(F, display_jam=False, free_flow=False,
     else:
         nodes_lon, nodes_lat, diff_weights = precomputed_data
     
-    nodes_lon_color = {"green": [], "gold": [], "orange": [], "red": []}
-    nodes_lat_color = {"green": [], "gold": [], "orange": [], "red": []}
+    nodes_lon_color = {"blue": [], "green": [], "gold": [], "orange": [], "red": []}
+    nodes_lat_color = {"blue": [], "green": [], "gold": [], "orange": [], "red": []}
 
     if overall_jam is None:
         overall_jam = diff_weights  
     
     for i, weight in enumerate(diff_weights):
       mapped_weight = stats.percentileofscore(overall_jam, weight) / 100
-      if mapped_weight < 0.25:
+      if weight < 0:
+        nodes_lon_color["blue"] += nodes_lon[i*3:i*3+3]
+        nodes_lat_color["blue"] += nodes_lat[i*3:i*3+3]
+      elif mapped_weight < 0.25:
         nodes_lon_color["green"] += nodes_lon[i*3:i*3+3]
         nodes_lat_color["green"] += nodes_lat[i*3:i*3+3]
       elif mapped_weight < 0.5:

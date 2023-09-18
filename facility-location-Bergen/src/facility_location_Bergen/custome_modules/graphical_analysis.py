@@ -310,15 +310,18 @@ def show_traffic_jam(F, display_jam=False, free_flow=False,
     else:
         nodes_lon, nodes_lat, diff_weights = precomputed_data
     
-    nodes_lon_color = {"green": [], "gold": [], "orange": [], "red": []}
-    nodes_lat_color = {"green": [], "gold": [], "orange": [], "red": []}
+    nodes_lon_color = {"blue": [], "green": [], "gold": [], "orange": [], "red": []}
+    nodes_lat_color = {"blue": [], "green": [], "gold": [], "orange": [], "red": []}
 
     if overall_jam is None:
         overall_jam = diff_weights  
     
     for i, weight in enumerate(diff_weights):
       mapped_weight = stats.percentileofscore(overall_jam, weight) / 100
-      if mapped_weight < 0.25:
+      if weight < 0:
+        nodes_lon_color["blue"] += nodes_lon[i*3:i*3+3]
+        nodes_lat_color["blue"] += nodes_lat[i*3:i*3+3]
+      elif mapped_weight < 0.25:
         nodes_lon_color["green"] += nodes_lon[i*3:i*3+3]
         nodes_lat_color["green"] += nodes_lat[i*3:i*3+3]
       elif mapped_weight < 0.5:
@@ -376,6 +379,127 @@ def show_traffic_jam(F, display_jam=False, free_flow=False,
                         width=1000,)
 
   return  fig
+        
+def show_graph(F, precomputed_data=None):
+  if type(F) != list:
+    F = [F]
+  
+  # assumption: the first graph is the global graph and the rest are the cc
+  node_mapping = {}
+  i = 0
+  for node in F[0].nodes():
+    node_mapping[node] = i
+    i += 1
+  
+  F_list = []
+  
+  for i, f in enumerate(F):
+    if len(f.nodes) > 1:
+      F_list.append(f)
+    else:
+      break
+    
+  index_start = i
+  if index_start < len(F) - 1:
+    F_list.append(nx.union_all(F[index_start:]))
+  
+  colors = ["red", "blue", "green", "yellow", "orange", "purple", "brown"]
+  total_nodes = sum([len(f.nodes) for f in F])
+  
+  fig = go.Figure()
+
+  for i, f in enumerate(F_list):
+    if i < len(colors):
+      color = colors[i]
+    else:
+      color = "white"
+    
+    opacity = 1 - len(f.nodes)/total_nodes if len(F) > 1 else 1
+    
+    if precomputed_data is None:
+        nodes_lon, nodes_lat, _ = prepare_data_for_traffic_jam_visualization(f)
+    else:
+        nodes_lon, nodes_lat, _ = precomputed_data
+      
+    fig.add_trace(go.Scattermapbox(
+        lat=nodes_lat,
+        lon=nodes_lon,
+        mode='lines',
+        line=dict(width=1, color=color),
+        showlegend=False,
+    ))
+
+    nodes = f.nodes()
+    nodes = gpd.GeoDataFrame(pd.Series(list(nodes())).apply(lambda x: Point(x)), columns=["geometry"], crs="EPSG:4326")
+
+    text = []
+    for n in nodes.geometry:
+      text.append("")
+      text[-1] += str(node_mapping[(n.x, n.y)])
+                
+                
+    fig.add_trace(go.Scattermapbox(
+    lat = nodes.geometry.y,
+    lon = nodes.geometry.x,
+    mode='markers',
+    text=text,
+    marker=dict(size=3, color="black", opacity=opacity),
+    showlegend=False,
+  ))
+
+  fig.update_layout(title="<b>Graph visualization<b>",
+                      mapbox=dict(
+                        style="open-street-map",
+                        center=dict(lat=60.366746, lon=5.336089),
+                        zoom=9
+                        ),
+                      title_pad_l=260,
+                      height=700,
+                      width=1000,)
+
+  return  fig, node_mapping  
+
+def compute_rel_diff(fls_exact, dfs, dfs_worst, time):
+    df_min = get_minimum_distances(dfs[("all-day-free-flow", time.replace("_", "-"), "weight")])
+    if dfs_worst is not None:
+        df_worst_min = get_minimum_distances(dfs_worst[("all-day-free-flow", time.replace("_","-"), "weight")])
+
+    a = round(fls_exact[time].solution_value/60, 3)
+
+    b = df_min.sort_values(by="travel_time", ascending=False).iloc[0].travel_time
+    if dfs_worst is not None:
+        b_worst = df_worst_min.sort_values(by="travel_time", ascending=False).iloc[0].travel_time
+    else:
+        b_worst = None
+    return a, b, b_worst
+
+def objective_function_value_under_different_cases(a, b, b_worst=None):
+    
+    plot_data = []
+    
+    for i in range(len(a)):
+        plot_data.append(a[i])
+        plot_data.append(b[i])
+        if b_worst is not None:
+            plot_data.append(b_worst[i])
+    
+    fig = make_subplots(rows=1, cols=1,)
+    fig.update_layout(title="<b>Outsample evaluation of free flow solution<b>",
+                        title_pad_l=175,
+                        height=500,
+                        width=1200,
+                        yaxis_title="time (minutes)")
+
+    fig.add_trace(go.Bar(y=plot_data,
+                        x=["op sol all_day", "ff sol in all_day scenario", "ff sol in all_day worst scenario", 
+                           "op sol morning", "ff sol in morning", "ff sol in morning worst scenario",
+                           "op sol midday", "ff sol in midday", "ff sol in midday worst scenario",
+                           "op sol afternoon", "ff sol in afternoon", "ff sol in afternoon worst scenario"],
+                        marker=dict(
+                            color=["lightblue", "blue", "navy"]*len(plot_data),
+                            )), row=1, col=1)
+    
+    return fig
                          
 def show_graph(F):
   if type(F) != list:

@@ -500,8 +500,8 @@ class StochasticFacilityLocation:
         model = pyo.AbstractModel()
 
         # ---------------------------index sets-------------------------------
-        model.I = pyo.Set(initialize=list(self.coordinates.index))
-        model.J = pyo.Set(initialize=list(self.candidate_coordinates.index))
+        model.I = pyo.Set(initialize=list(range(len(self.coordinates.index))))
+        model.J = pyo.Set(initialize=list(range(len(self.candidate_coordinates.index))))
 
         # ---------------------------parameters-------------------------------
         # define the number of locations to be opened (p)
@@ -568,8 +568,8 @@ class StochasticFacilityLocation:
         modelData[None]['d'] = dict()
         modelData[None]['d'] =  {
             (j, i): scenarios_data[scenarioName].adjacency_matrix[j][i]
-            for j in self.candidate_coordinates.index
-            for i in self.coordinates.index
+            for j in range(len(self.candidate_coordinates.index))
+            for i in range(len(self.coordinates.index))
         }
         return modelData
     
@@ -591,8 +591,8 @@ class StochasticFacilityLocation:
         
         if method == "LS":
             options = {
-                "root_solver": "cplex_persistent",
-                "sp_solver": "cplex_persistent",
+                "root_solver": "cplex",
+                "sp_solver": "cplex",
                 "max_iter": max_iter,
             }
         elif method == "EF":
@@ -628,7 +628,7 @@ class StochasticFacilityLocation:
             
         
         self.locations_index = [
-            j for j in self.candidate_coordinates.index if instance.x[j].value == 1
+            self.candidate_coordinates.iloc[j].name for j in range(len(self.candidate_coordinates.index)) if instance.x[j].value == 1
         ]
         self.locations_coordinates = [
             self.candidate_coordinates.loc[j] for j in self.locations_index

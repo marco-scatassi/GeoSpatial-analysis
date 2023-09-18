@@ -283,7 +283,7 @@ def prepare_data_for_traffic_jam_visualization(graph):
         nodes_lat.append(y0)
         nodes_lat.append(y1)
         nodes_lat.append(None)
-        diff_weights.append(abs(weight2 - weight) / weight2)
+        diff_weights.append((weight - weight2) / weight2)
     
     return nodes_lon, nodes_lat, diff_weights
 

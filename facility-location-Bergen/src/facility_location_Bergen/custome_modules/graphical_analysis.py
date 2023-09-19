@@ -84,9 +84,8 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
             lats[k] = [p.geometry.y for p in fl.locations_coordinates]
             lons[k] = [p.geometry.x for p in fl.locations_coordinates]
         elif "stochastic" in k:
-            n_l_to_choose = fl.n_of_locations_to_choose
-            idx = pd.Series([k if fl[n_l_to_choose].first_stage_solution[k] != 0 else None 
-                 for k in fl[n_l_to_choose].first_stage_solution.keys()]).dropna().values
+            idx = pd.Series([k if fl.first_stage_solution[k] != 0 else None 
+                 for k in fl.first_stage_solution.keys()]).dropna().values
 
             stochastic_locations_coordinates = fl.candidate_coordinates.iloc[idx]
                     

@@ -84,17 +84,14 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
             lats[k] = [p.geometry.y for p in fl.locations_coordinates]
             lons[k] = [p.geometry.x for p in fl.locations_coordinates]
         elif "stochastic" in k:
-            if fl.n_of_locations_to_choose == 1:
-                idx = int(pd.Series([k2 if fl.first_stage_solution[k2] != 0 else None 
-                        for k2 in fl.first_stage_solution.keys()]).dropna().iloc[0])
+            n_l_to_choose = fl.n_of_locations_to_choose
+            idx = pd.Series([k if fl[n_l_to_choose].first_stage_solution[k] != 0 else None 
+                 for k in fl[n_l_to_choose].first_stage_solution.keys()]).dropna().values
 
-                stochastic_locations_coordinates = fl.coordinates.loc[idx]
+            stochastic_locations_coordinates = fl.candidate_coordinates.iloc[idx]
                     
-                lats[k] = [p.y for p in stochastic_locations_coordinates]
-                lons[k] = [p.x for p in stochastic_locations_coordinates]
-            else:
-                lats[k] = [p.geometry.y for p in fl.locations_coordinates]
-                lons[k] = [p.geometry.x for p in fl.locations_coordinates]
+            lats[k] = [p.y for p in stochastic_locations_coordinates.geometry]
+            lons[k] = [p.x for p in stochastic_locations_coordinates.geometry]
     fig = go.Figure()
         
     fig.add_trace(go.Scattermapbox(

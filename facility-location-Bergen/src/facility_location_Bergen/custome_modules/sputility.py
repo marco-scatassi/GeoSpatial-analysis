@@ -362,25 +362,30 @@ def EVPI_value(options, all_scenario_names, scenario_creator_kwargs, method = 'E
 
 #-------------------EV (expected value solution)------------------
 def EV_solution(options, scenario_creator_kwargs, method = 'EF', verbose = False):
-    scenario_creator_kwargs1 = copy.deepcopy(scenario_creator_kwargs)
-    scenarios = scenario_creator_kwargs['scenarios']
+    if "custom_scenario" not in scenario_creator_kwargs['scenarios'].keys():
+        scenario_creator_kwargs1 = copy.deepcopy(scenario_creator_kwargs)
+        scenarios = scenario_creator_kwargs['scenarios']
 
-    scenariosProbabilities = scenario_creator_kwargs['scenariosProbabilities']
-    scenarioProbability = scenario_creator_kwargs['scenarioProbability']
+        scenariosProbabilities = scenario_creator_kwargs['scenariosProbabilities']
+        scenarioProbability = scenario_creator_kwargs['scenarioProbability']
 
-    if type(scenarios) == dict:
-        adj_matricies = []
-        for v in scenarios.values():
-            adj_matricies.append(v.adjacency_matrix)
-        
-        avg_matrix = np.mean(adj_matricies, axis=0)
-        scenario_creator_kwargs1['scenarios']["avg_scenario"] = AdjacencyMatrix(avg_matrix)
+        if type(scenarios) == dict:
+            adj_matricies = []
+            for v in scenarios.values():
+                adj_matricies.append(v.adjacency_matrix)
+            
+            avg_matrix = np.mean(adj_matricies, axis=0)
+            scenario_creator_kwargs1['scenarios']["avg_scenario"] = AdjacencyMatrix(avg_matrix)
 
-    else: 
-        print('scenarios must be a dictionary')
+        else: 
+            print('scenarios must be a dictionary')
 
-    scenario_creator_kwargs1['scenariosProbabilities']["avg_scenario"] = 1
-
+        scenario_creator_kwargs1['scenariosProbabilities']["avg_scenario"] = 1
+        new_scenario_name = "avg_scenario"
+    else:
+        scenario_creator_kwargs1 = scenario_creator_kwargs
+        new_scenario_name = "custom_scenario"
+    
     if method == 'LS':
         options_copy = copy.deepcopy(options)
         if 'valid_eta_lb' in options.keys():
@@ -388,9 +393,9 @@ def EV_solution(options, scenario_creator_kwargs, method = 'EF', verbose = False
 
 
     if method == 'EF':
-        EV = RP_solution(options, ["avg_scenario"], scenario_creator_kwargs1, 'EF', verbose)
+        EV = RP_solution(options, [new_scenario_name], scenario_creator_kwargs1, 'EF', verbose)
     elif method == 'LS':
-        EV = RP_solution(options_copy, ["avg_scenario"], scenario_creator_kwargs1, 'LS', verbose)
+        EV = RP_solution(options_copy, [new_scenario_name], scenario_creator_kwargs1, 'LS', verbose)
 
     return EV
 
@@ -399,15 +404,25 @@ def EV_solution(options, scenario_creator_kwargs, method = 'EF', verbose = False
 
 #-------------------EEV (Expectation of the expected solution)------------------
 
-def EEV_solution(options, all_scenario_names, scenario_creator_kwargs, method = 'EF', verbose = False):
+def EEV_solution(options, all_scenario_names, scenario_creator_kwargs, method = 'EF', verbose = False, custom_scenario = None):
+    if custom_scenario is not None:
+        scenario_creator_kwargs_copy = copy.deepcopy(scenario_creator_kwargs)
+        scenario_creator_kwargs_copy['scenarios']['custom_scenario'] = custom_scenario
+        scenario_creator_kwargs_copy['scenariosProbabilities']['custom_scenario'] = 1
     
     if method == 'EF':
-        EV = EV_solution(options, scenario_creator_kwargs, 'EF', verbose)
+        if custom_scenario is not None:
+            EV = EV_solution(options, scenario_creator_kwargs_copy, 'EF', verbose)
+        else:
+            EV = EV_solution(options, scenario_creator_kwargs, 'EF', verbose)   
         variables = EV[0].ef.component_objects(pyo.Var)
 
 
     elif method == 'LS':
-        EV = EV_solution(options, scenario_creator_kwargs, 'LS', verbose)
+        if custom_scenario is not None:
+            EV = EV_solution(options, scenario_creator_kwargs_copy, 'LS', verbose)
+        else:
+            EV = EV_solution(options, scenario_creator_kwargs, 'LS', verbose)
         variables = EV[0].root.component_objects(pyo.Var)
 
     if EV[1] == TerminationCondition.infeasible:
@@ -432,11 +447,11 @@ def EEV_solution(options, all_scenario_names, scenario_creator_kwargs, method = 
     
 #-------------------VSS (value of stochastic solution)------------------
 
-def VSS_value(options, all_scenario_names, scenario_creator_kwargs, method = 'EF', verbose = False, RP = None):
-    EVV = EEV_solution(options, all_scenario_names, scenario_creator_kwargs, method, verbose)
-    if type(EVV) == str:
+def VSS_value(options, all_scenario_names, scenario_creator_kwargs, method = 'EF', verbose = False, RP = None, custom_scenario = None):
+    EEV = EEV_solution(options, all_scenario_names, scenario_creator_kwargs, method, verbose, custom_scenario)
+    if type(EEV) == str:
         return 'EV is infeasible'
-    elif EVV[1] == TerminationCondition.infeasible:
+    elif EEV[1] == TerminationCondition.infeasible:
         return 'EVV is infeasible'
 
     if RP is None:
@@ -451,11 +466,11 @@ def VSS_value(options, all_scenario_names, scenario_creator_kwargs, method = 'EF
         RP_value = RP.solution_value
     
     if method == "EF":
-        EVV_value = EVV[0].get_objective_value()
+        EEV_value = EEV[0].get_objective_value()
     elif method == "LS":
-        EVV_value = EVV[0].root.obj()
+        EEV_value = EEV[0].root.obj()
     
-    VSS = abs(RP_value-EVV_value)
+    VSS = abs(RP_value-EEV_value)
 
     return VSS
 
@@ -488,7 +503,8 @@ def Out_of_sample_evaluation(options, all_scenario_names, scenario_creator_kwarg
 #------------------------------------FUNCTIONS TO COMPUTE MAIN EVALUATION METRICS-------------------------------------
 
 def evaluate_stochastic_solution(options, scenario_creator_kwargs, all_scenario_names, RP=None, fls_deterministics=None, method = 'EF',
-                                df = pd.DataFrame(columns=['n_locations', 'RP', 'RP_Out_of_Sample', 'WS', 'EVPI', 'VSS']), lb = 0):
+                                df = pd.DataFrame(columns=['n_locations', 'RP', 'RP_Out_of_Sample', 'WS', 'EVPI', 'VSS']), lb = 0,
+                                custom_scenario = None):
     options_copy = copy.deepcopy(options)
 
     if method == 'LS' and 'valid_eta_lb' in options.keys():
@@ -520,7 +536,7 @@ def evaluate_stochastic_solution(options, scenario_creator_kwargs, all_scenario_
     EVPI = abs(WS-RP_value)
     
     ## ------------------- Compute the VSS value -------------------
-    VSS = VSS_value(options_copy, all_scenario_names, scenario_creator_kwargs, method, RP = RP)
+    VSS = VSS_value(options_copy, all_scenario_names, scenario_creator_kwargs, method, RP = RP, custom_scenario = custom_scenario)
     
     ## ------------------- Compute the Out of Sample value -------------------
     RP_Out_of_Sample_value = "Not computed"

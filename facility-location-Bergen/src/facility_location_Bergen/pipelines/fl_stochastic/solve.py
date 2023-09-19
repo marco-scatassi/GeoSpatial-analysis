@@ -61,6 +61,7 @@ for time in times:
 random.seed(324324)
 RATIO1 = 0.1
 RATIO2= 0.05
+n_locations = [1,2,3]
 
 idx_sampled = sample_idx(list(range(len(average_graphs["morning"].nodes()))), RATIO1)
 idx_sampled2 = sample_idx(idx_sampled, RATIO2)
@@ -92,7 +93,6 @@ weighted_adj_matricies = {time: AdjacencyMatrix(adj_matrix=adj_matricies_sampled
 print_INFO_message_timestamp(f"coordinates_sampled shape: {coordinates_sampled['morning'].shape}"+
                              f"\ncoordinates_sampled2 shape: {coordinates_sampled2['morning'].shape}")
 
-n_locations = [1,2,3]
 
 for m in n_locations:
     probabilities = {time: 1/len(weighted_adj_matricies) for time in times}

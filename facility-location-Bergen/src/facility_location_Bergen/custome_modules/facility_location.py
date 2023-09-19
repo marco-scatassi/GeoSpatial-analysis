@@ -714,8 +714,8 @@ class StochasticFacilityLocationTemplate:
         model = pyo.AbstractModel()
 
         # ---------------------------index sets-------------------------------
-        model.I = pyo.Set(initialize=list(self.coordinates.index))
-        model.J = pyo.Set(initialize=list(self.candidate_coordinates.index))
+        model.I = pyo.Set(initialize=list(range(len(self.coordinates.index))))
+        model.J = pyo.Set(initialize=list(range(len(self.candidate_coordinates.index))))
 
         # ---------------------------parameters-------------------------------
         # define the number of locations to be opened (p)
@@ -781,8 +781,8 @@ class StochasticFacilityLocationTemplate:
         modelData[None]['d'] = dict()
         modelData[None]['d'] =  {
             (j, i): scenarios_data[scenarioName].adjacency_matrix[j][i]
-            for j in self.candidate_coordinates.index
-            for i in self.coordinates.index
+            for j in range(len(self.candidate_coordinates.index))
+            for i in range(len(self.coordinates.index))
         }
         return modelData
     
@@ -806,6 +806,7 @@ class StochasticFacilityLocationMetrics(StochasticFacilityLocationTemplate):
                                      scenarios_data: dict, 
                                      scenarioProbabilities: dict, 
                                      fls_deterministics: dict,
+                                     custom_scenario = None,
                                      df = pd.DataFrame(columns=['n_locations', 'RP', 'RP_Out_of_Sample', 'WS', 'EVPI', 'VSS']),
                                      method="EF", 
                                      max_iter=25):
@@ -822,8 +823,8 @@ class StochasticFacilityLocationMetrics(StochasticFacilityLocationTemplate):
         
         if method == "LS":
             options = {
-                "root_solver": "cplex_persistent",
-                "sp_solver": "cplex_persistent",
+                "root_solver": "cplex",
+                "sp_solver": "cplex",
                 "max_iter": max_iter,
             }
         elif method == "EF":
@@ -848,6 +849,7 @@ class StochasticFacilityLocationMetrics(StochasticFacilityLocationTemplate):
             fls_deterministics=fls_deterministics,
             df=df,
             method=method,
+            custom_scenario=custom_scenario
         )
         
         t2 = time.time()

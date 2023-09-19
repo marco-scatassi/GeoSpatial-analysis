@@ -75,6 +75,9 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
     lats = {}
     lons = {}
     
+    lat_candidate = fls[0].candidate_coordinates.geometry.y
+    lon_candidate = fls[0].candidate_coordinates.geometry.x
+        
     lat_global = fls[0].coordinates.geometry.y
     lon_global = fls[0].coordinates.geometry.x
 
@@ -84,13 +87,15 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
             lats[k] = [p.geometry.y for p in fl.locations_coordinates]
             lons[k] = [p.geometry.x for p in fl.locations_coordinates]
         elif "stochastic" in k:
-            idx = pd.Series([k if fl.first_stage_solution[k] != 0 else None 
-                 for k in fl.first_stage_solution.keys()]).dropna().values
+            n_l_to_choose = fl.n_of_locations_to_choose
+            idx = pd.Series([k if fl[n_l_to_choose].first_stage_solution[k] != 0 else None 
+                 for k in fl[n_l_to_choose].first_stage_solution.keys()]).dropna().values
 
             stochastic_locations_coordinates = fl.candidate_coordinates.iloc[idx]
                     
             lats[k] = [p.y for p in stochastic_locations_coordinates.geometry]
             lons[k] = [p.x for p in stochastic_locations_coordinates.geometry]
+
     fig = go.Figure()
         
     fig.add_trace(go.Scattermapbox(
@@ -99,6 +104,18 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
             mode='markers',
             marker=dict(
                 color=["grey"]*fls[0].coordinates.shape[0],
+                size=4.5,
+            ),
+            hovertemplate='<extra></extra>',
+            showlegend=False,
+        ))
+    
+    fig.add_trace(go.Scattermapbox(
+            lat=lat_candidate,
+            lon=lon_candidate,
+            mode='markers',
+            marker=dict(
+                color=["black"]*fls[0].coordinates.shape[0],
                 size=4.5,
             ),
             hovertemplate='<extra></extra>',

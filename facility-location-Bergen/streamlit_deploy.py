@@ -475,6 +475,7 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
         
     if f"data_for_traffic_jam_visualization" not in session_state:
         data_for_traffic_jam_visualization = {}
+        average_graphs = session_state[f"average_graphs"]
         for time in TIMES[1:]:
             data_for_traffic_jam_visualization[time] = prepare_data_for_traffic_jam_visualization(average_graphs[time])
         session_state[f"data_for_traffic_jam_visualization"] = data_for_traffic_jam_visualization

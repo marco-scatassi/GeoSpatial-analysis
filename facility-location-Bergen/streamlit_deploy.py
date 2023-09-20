@@ -362,6 +362,7 @@ def graph_manipulation(session_state, TIMES):
     ############################################## REFINE GRAPH ############################################## 
     if "is_submitted" in session_state["refine_graph"].keys() and not st.session_state["load_data_error"]:
         if session_state["refine_graph"]["is_submitted"]:
+            placeholder.empty()
             with placeholder:
                 graph_col, _, form_col = st.columns([2,0.25,1])
                                 

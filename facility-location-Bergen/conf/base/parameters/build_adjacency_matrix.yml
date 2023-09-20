@@ -4,22 +4,44 @@
 # Documentation for this file format can be found in "Parameters"
 # Link: https://docs.kedro.org/en/0.18.7/kedro_project_setup/configuration.html#parameters
 
-build_adjacency_matrix.all_day: 
+build_adjacency_matrix.all_day0: 
   time: all_day
   handpicked: True
   handpicked_locations: [5229, 1688, 1842, 4647, 159, 2075, 2428, 361, 3477, 3745, 4731]
 
-# build_adjacency_matrix.morning: 
-#   time: morning
-#   handpicked: True
-#   handpicked_locations: [5229, 1688, 1842, 4647, 159, 2075, 2428, 361, 3477, 3745, 4731]
+build_adjacency_matrix.morning0: 
+  time: morning
+  handpicked: True
+  handpicked_locations: [5229, 1688, 1842, 4647, 159, 2075, 2428, 361, 3477, 3745, 4731]
 
-# build_adjacency_matrix.midday: 
-#   time: midday
-#   handpicked: True
-#   handpicked_locations: [5229, 1688, 1842, 4647, 159, 2075, 2428, 361, 3477, 3745, 4731]
+build_adjacency_matrix.midday0: 
+  time: midday
+  handpicked: True
+  handpicked_locations: [5229, 1688, 1842, 4647, 159, 2075, 2428, 361, 3477, 3745, 4731]
 
-# build_adjacency_matrix.afternoon: 
-#   time: afternoon
-#   handpicked: True
-#   handpicked_locations: [5229, 1688, 1842, 4647, 159, 2075, 2428, 361, 3477, 3745, 4731]
+build_adjacency_matrix.afternoon0: 
+  time: afternoon
+  handpicked: True
+  handpicked_locations: [5229, 1688, 1842, 4647, 159, 2075, 2428, 361, 3477, 3745, 4731]
+
+build_adjacency_matrix.all_day1: 
+  time: all_day
+  handpicked: False
+  handpicked_locations: [5229, 1688, 1842, 4647, 159, 2075, 2428, 361, 3477, 3745, 4731]
+
+build_adjacency_matrix.morning1: 
+  time: morning
+  handpicked: False
+  handpicked_locations: [5229, 1688, 1842, 4647, 159, 2075, 2428, 361, 3477, 3745, 4731]
+
+build_adjacency_matrix.midday1: 
+  time: midday
+  handpicked: False
+  handpicked_locations: [5229, 1688, 1842, 4647, 159, 2075, 2428, 361, 3477, 3745, 4731]
+
+build_adjacency_matrix.afternoon1: 
+  time: afternoon
+  handpicked: False
+  handpicked_locations: [5229, 1688, 1842, 4647, 159, 2075, 2428, 361, 3477, 3745, 4731]
+
+

@@ -22,6 +22,7 @@ from log import print_INFO_message_timestamp, print_INFO_message
 from facility_location import AdjacencyMatrix, FacilityLocation
 from retrieve_global_parameters import retrieve_adj_matrix_path
 
+ROOTH = rf"\\Pund\Stab$\guest801981\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen"
 
 ## ------------------------------------------------------------- UTILS FUNCTIONS ------------------------------------------------------------- ##
 
@@ -49,7 +50,11 @@ def sample_coords(coordinates, idx_sample):
 def verify_problem_already_solved(fl_data):
     print_INFO_message_timestamp("CHECKING IF PROBLEM HAS BEEN ALREADY SOLVED")
     n_facilities = fl_data["facilities_number"]
-    path = rf"\\Pund\Stab$\guest801981\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\data\07_model_output\{n_facilities}_locations\deterministic_exact_solutions"
+    handpicked = fl_data["handpicked"]
+    if handpicked:
+        path = ROOTH + rf"\data\07_model_output\random_candidate_plus_handpicked\{n_facilities}_locations\deterministic_exact_solutions"
+    else:
+        path = ROOTH + rf"\data\07_model_output\only_random_candidate_location\{n_facilities}_locations\deterministic_exact_solutions"
     if len(os.listdir(path)) <15:
         return False
     else:
@@ -65,7 +70,7 @@ def set_up_fl_problems(fl_data, already_solved):
         for time in times:
             if time != "all_day_free_flow":
                 print_INFO_message(f"Loading adj matrix for {time}")
-                path = rf"\\Pund\Stab$\guest801981\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\data\03_primary\average_graph_{time}_connected_splitted_firstSCC.pkl"
+                path = ROOTH + rf"\data\03_primary\average_graph_{time}_connected_splitted_firstSCC.pkl"
                 with open(path, "rb") as f:
                     average_graphs[time] = pkl.load(f)
 
@@ -128,6 +133,26 @@ def set_up_fl_problems(fl_data, already_solved):
         coordinates_sampled["all_day_free_flow"] = coordinates_sampled["all_day"]
         coordinates_sampled2["all_day_free_flow"] = coordinates_sampled2["all_day"]
 
+        if fl_data["handpicked"]:
+            extra_locations = []
+            for i, node in enumerate(average_graphs["all_day"].nodes()):
+                if i in fl_data["handpicked_locations"]:
+                    extra_locations.append(Point(node))
+                    
+            extra_locations_index = {}
+            for time in coordinates_sampled.keys():
+                extra_locations_index[time] = []
+                for p in extra_locations:
+                    for i, e in zip(coordinates_sampled[time].index, coordinates_sampled[time].geometry):
+                        if e == p:
+                            extra_locations_index[time].append(i)
+                            
+            for time in coordinates_sampled.keys():
+                coordinates_sampled[time] = pd.concat([coordinates_sampled, 
+                                         gpd.GeoDataFrame(geometry=extra_locations[time], index=extra_locations_index)])
+                coordinates_sampled2[time] = pd.concat([coordinates_sampled2,
+                                         gpd.GeoDataFrame(geometry=extra_locations[time], index=extra_locations_index)])
+        
         # adj_sampled = {key: sample_matrix(adj_matricies[key], idx_sampled) for key in adj_matricies.keys()}
 
         # weighted_adj_sampled = {key: AdjacencyMatrix(adj_matrix=adj_sampled[key],

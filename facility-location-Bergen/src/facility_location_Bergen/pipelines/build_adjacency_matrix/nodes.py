@@ -65,12 +65,20 @@ def get_min_distance(starting_index, ending_index, geodf, sp, mapping):
 
 ##################################################################### STEP 1 #####################################################################
 
-def build_adj_matrix(time):
+def build_adj_matrix(params):
+    time = params["time"]
+    handpicked = params["handpicked"]
+    handpicked_locations = params["handpicked_locations"]
+    
     finished = False
     average_graph_path = retrieve_average_graph_path(time, True, True, True, False)
+    average_graph_all_day_path = retrieve_average_graph_path("all_day", True, True, True, False)
 
     with open(average_graph_path, "rb") as f:
         average_graph = pickle.load(f)
+        
+    with open(average_graph_all_day_path, "rb") as f:
+        average_graph_all_day = pickle.load(f)
         
     mapping = {}
     mapping_points = {}
@@ -84,7 +92,7 @@ def build_adj_matrix(time):
 
     RATIO1 = 0.1
     RATIO2 = 0.05
-
+    
     idx_sampled = sample_idx(list(range(len(average_graph.nodes()))), RATIO1)
     idx_sampled2 = sample_idx(idx_sampled, RATIO2)
         
@@ -95,61 +103,86 @@ def build_adj_matrix(time):
     coordinates["geometry_y"] = coordinates.geometry.y
     coordinates.sort_values(by=["geometry_x", "geometry_y"], inplace=True)
     coordinates.drop(columns=["geometry_x", "geometry_y"], inplace=True)
+    
+    coordinates_all_day = pd.Series(list(average_graph_all_day.nodes()))
+    coordinates_all_day = coordinates_all_day.apply(lambda x: Point(x))
+    coordinates_all_day = gpd.GeoDataFrame(geometry=coordinates_all_day)
+    coordinates_all_day["geometry_x"] = coordinates_all_day.geometry.x
+    coordinates_all_day["geometry_y"] = coordinates_all_day.geometry.y
+    coordinates_all_day.sort_values(by=["geometry_x", "geometry_y"], inplace=True)
+    coordinates_all_day.drop(columns=["geometry_x", "geometry_y"], inplace=True)
             
     coordinates_sampled = sample_coords(coordinates, idx_sampled)
     coordinates_sampled2 = sample_coords(coordinates, idx_sampled2)
-
-    # if time == "all_day":
-    #     sp_free_flow = dict(
-    #         nx.all_pairs_dijkstra_path_length(average_graph, weight="weight2")
-    #     )
-    #     adj_matrix = np.zeros((len(sp_free_flow), len(sp_free_flow)))
-    #     adj_matrix_mapping = {}
-
-    #     print_INFO_message_timestamp("Creating free_flow distance matrix")
-    #     for i in range(len((sp_free_flow))):
-    #         if mapping_points[i] in coordinates_sampled2.geometry:
-    #             for j in range(len(sp_free_flow)):
-    #                 if mapping_points[j] in coordinates_sampled.geometry:
-    #                     min_dis, mapped_key = get_min_distance(i, j, geodf, sp_free_flow, mapping)
-    #                     adj_matrix[i,j] = min_dis
-    #                     adj_matrix_mapping[(i,j)] = mapped_key
-    #         if i % 500 == 0:
-    #             print_INFO_message("{} out of {}".format(i, len(sp_free_flow)))
-
-    #     adj_matrix_path = retrieve_adj_matrix_path(time, free_flow=True)
-    #     adj_mapping_path_2 = retrieve_adj_mapping_path_2(time, free_flow=True)
-    #     dataset_adj_matrix = PickleDataSet(adj_matrix_path)
-    #     dataset_adj_mapping_2 = PickleDataSet(adj_mapping_path_2)
-    #     dataset_adj_matrix.save(adj_matrix)
-    #     dataset_adj_mapping_2.save(adj_matrix_mapping)
     
-    sp = dict(nx.all_pairs_dijkstra_path_length(average_graph))
-    adj_matrix = np.zeros((len(sp), len(sp)))
-    adj_matrix_mapping = {}
+    if handpicked:   
+        extra_locations = []
+        for i, node in enumerate(average_graph_all_day.nodes()):
+            if i in handpicked_locations:
+                extra_locations.append(Point(node))
+                
+        extra_locations_index = []
+        for p in extra_locations:
+            for i, e in zip(coordinates_all_day.index, coordinates_all_day.geometry):
+                if e == p:
+                    extra_locations_index.append(i)
 
-    print_INFO_message_timestamp("Creating distance matrix")
-    for i in range(len((sp))):
-        if mapping_points[i] in coordinates_sampled2.geometry:
-            for j in range(len(sp)):
-                if mapping_points[j] in coordinates_sampled.geometry:
-                    min_dis, mapped_key = get_min_distance(i, j, geodf, sp, mapping)
-                    adj_matrix[i,j] = min_dis
-                    adj_matrix_mapping[(i,j)] = mapped_key
-        if i % 500 == 0:
-            print_INFO_message("{} out of {}".format(i, len(sp)))
+        coordinates_sampled = pd.concat([coordinates_sampled, 
+                                         gpd.GeoDataFrame(geometry=extra_locations, index=extra_locations_index)])
+        coordinates_sampled2 = pd.concat([coordinates_sampled2,
+                                         gpd.GeoDataFrame(geometry=extra_locations, index=extra_locations_index)])
+        
+    if time == "all_day":
+        sp_free_flow = dict(
+            nx.all_pairs_dijkstra_path_length(average_graph, weight="weight2")
+        )
+        adj_matrix = np.zeros((len(sp_free_flow), len(sp_free_flow)))
+        adj_matrix_mapping = {}
 
-    adj_matrix_path = retrieve_adj_matrix_path(time)
-    adj_mapping_path = retrieve_adj_mapping_path(time)
-    adj_mapping_path_2 = retrieve_adj_mapping_path_2(time)
+        print_INFO_message_timestamp("Creating free_flow distance matrix")
+        for i in range(len((sp_free_flow))):
+            if mapping_points[i] in coordinates_sampled2.geometry:
+                for j in range(len(sp_free_flow)):
+                    if mapping_points[j] in coordinates_sampled.geometry:
+                        min_dis, mapped_key = get_min_distance(i, j, geodf, sp_free_flow, mapping)
+                        adj_matrix[i,j] = min_dis
+                        adj_matrix_mapping[(i,j)] = mapped_key
+            if i % 500 == 0:
+                print_INFO_message("{} out of {}".format(i, len(sp_free_flow)))
 
-    dataset_adj_matrix = PickleDataSet(adj_matrix_path)
-    dataset_adj_mapping = PickleDataSet(adj_mapping_path)
-    dataset_adj_mapping_2 = PickleDataSet(adj_mapping_path_2)
+        adj_matrix_path = retrieve_adj_matrix_path(time, free_flow=True, handpicked=handpicked)
+        adj_mapping_path_2 = retrieve_adj_mapping_path_2(time, free_flow=True, handpicked=handpicked)
+        dataset_adj_matrix = PickleDataSet(adj_matrix_path)
+        dataset_adj_mapping_2 = PickleDataSet(adj_mapping_path_2)
+        dataset_adj_matrix.save(adj_matrix)
+        dataset_adj_mapping_2.save(adj_matrix_mapping)
+    
+    # sp = dict(nx.all_pairs_dijkstra_path_length(average_graph))
+    # adj_matrix = np.zeros((len(sp), len(sp)))
+    # adj_matrix_mapping = {}
 
-    dataset_adj_matrix.save(adj_matrix)
-    dataset_adj_mapping.save(mapping)
-    dataset_adj_mapping_2.save(adj_matrix_mapping)
+    # print_INFO_message_timestamp("Creating distance matrix")
+    # for i in range(len((sp))):
+    #     if mapping_points[i] in coordinates_sampled2.geometry:
+    #         for j in range(len(sp)):
+    #             if mapping_points[j] in coordinates_sampled.geometry:
+    #                 min_dis, mapped_key = get_min_distance(i, j, geodf, sp, mapping)
+    #                 adj_matrix[i,j] = min_dis
+    #                 adj_matrix_mapping[(i,j)] = mapped_key
+    #     if i % 500 == 0:
+    #         print_INFO_message("{} out of {}".format(i, len(sp)))
+
+    # adj_matrix_path = retrieve_adj_matrix_path(time, free_flow=False, handpicked=handpicked)
+    # adj_mapping_path = retrieve_adj_mapping_path(time, free_flow=False, handpicked=handpicked)
+    # adj_mapping_path_2 = retrieve_adj_mapping_path_2(time, free_flow=False, handpicked=handpicked)
+
+    # dataset_adj_matrix = PickleDataSet(adj_matrix_path)
+    # dataset_adj_mapping = PickleDataSet(adj_mapping_path)
+    # dataset_adj_mapping_2 = PickleDataSet(adj_mapping_path_2)
+
+    # dataset_adj_matrix.save(adj_matrix)
+    # dataset_adj_mapping.save(mapping)
+    # dataset_adj_mapping_2.save(adj_matrix_mapping)
 
     finished = True
 
@@ -158,7 +191,8 @@ def build_adj_matrix(time):
 
 ##################################################################### STEP 2 #####################################################################
 # ---------------------------------------------- update_data_catalog ---------------------------------------
-def update_data_catalog(time, trigger):
+def update_data_catalog(params, trigger):
+    time = params["time"]
     if trigger:
         catalog_path = retrieve_catalog_path()
 

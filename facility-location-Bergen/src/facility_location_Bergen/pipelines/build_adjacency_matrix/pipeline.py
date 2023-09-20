@@ -15,7 +15,7 @@ from retrieve_global_parameters import *
 from kedro.pipeline import Pipeline, node, pipeline
 
 
-def create_child_pipeline(key, value) -> list:
+def create_child_pipeline(key) -> list:
     return pipeline(
         [
             node(
@@ -41,9 +41,9 @@ def create_pipeline(**kwargs) -> Pipeline:
 
     child_pipelines = []
 
-    for key, value in conf_params.items():
+    for key, _ in conf_params.items():
         if "build_adjacency_matrix" in key:
-            child_pipelines.append(create_child_pipeline(key, value))
+            child_pipelines.append(create_child_pipeline(key))
 
     build_adjacency_matrix_pipeline = sum(child_pipelines)
 

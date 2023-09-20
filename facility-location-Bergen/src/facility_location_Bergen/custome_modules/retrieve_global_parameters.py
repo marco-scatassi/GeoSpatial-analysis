@@ -90,54 +90,90 @@ def retrieve_worst_average_graph_path(time, connected=True, backslah=False):
     return saving_path
 
 
-def retrieve_adj_matrix_path(time, free_flow=False):
-    if free_flow:
-        saving_path = f"data/03_primary/adj_matrix_{time}_free_flow.pkl"
+def retrieve_adj_matrix_path(time, free_flow=False, handpicked=False):
+    if handpicked:
+        if free_flow:
+            saving_path = f"data/03_primary/adjacency_matrix_and_mapping/random_candidate_plus_handpicked/adj_matrix_{time}_free_flow.pkl"
+        else:
+            saving_path = f"data/03_primary/adjacency_matrix_and_mapping/random_candidate_plus_handpicked/adj_matrix_{time}.pkl"
     else:
-        saving_path = f"data/03_primary/adj_matrix_{time}.pkl"
+        if free_flow:
+            saving_path = f"data/03_primary/adjacency_matrix_and_mapping/only_random_candidate_location/adj_matrix_{time}_free_flow.pkl"
+        else:
+            saving_path = f"data/03_primary/adjacency_matrix_and_mapping/only_random_candidate_location/adj_matrix_{time}.pkl"
     return saving_path
 
 
-def retrieve_worst_adj_matrix_path(time, free_flow=False):
-    if free_flow:
-        saving_path = f"data/03_primary/worst_adj_matrix_{time}_free_flow.pkl"
+def retrieve_worst_adj_matrix_path(time, free_flow=False, handpicked=False):
+    if handpicked:
+        if free_flow:
+            saving_path = f"data/03_primary/adjacency_matrix_and_mapping/random_candidate_plus_handpicked/worst_adj_matrix_{time}_free_flow.pkl"
+        else:
+            saving_path = f"data/03_primary/adjacency_matrix_and_mapping/random_candidate_plus_handpicked/worst_adj_matrix_{time}.pkl"
     else:
-        saving_path = f"data/03_primary/worst_adj_matrix_{time}.pkl"
+        if free_flow:
+            saving_path = f"data/03_primary/adjacency_matrix_and_mapping/only_random_candidate_location/worst_adj_matrix_{time}_free_flow.pkl"
+        else:
+            saving_path = f"data/03_primary/adjacency_matrix_and_mapping/only_random_candidate_location/worst_adj_matrix_{time}.pkl"
     return saving_path
 
 
-def retrieve_adj_mapping_path(time, free_flow=False):
-    if free_flow:
-        saving_path = f"data/03_primary/adj_mapping_all_day.pkl"
+def retrieve_adj_mapping_path(time, free_flow=False, handpicked=False):
+    if handpicked:
+        if free_flow:
+            saving_path = f"data/03_primary/adjacency_matrix_and_mapping/random_candidate_plus_handpicked/adj_mapping_all_day.pkl"
+        else:
+            saving_path = f"data/03_primary/adjacency_matrix_and_mapping/random_candidate_plus_handpicked/adj_mapping_{time}.pkl"
     else:
-        saving_path = f"data/03_primary/adj_mapping_{time}.pkl"
+        if free_flow:
+            saving_path = f"data/03_primary/adjacency_matrix_and_mapping/only_random_candidate_location/adj_mapping_all_day.pkl"
+        else:
+            saving_path = f"data/03_primary/adjacency_matrix_and_mapping/only_random_candidate_location/adj_mapping_{time}.pkl"
     return saving_path
 
-def retrieve_adj_mapping_path_2(time, free_flow=False):
-    if free_flow:
-        saving_path = f"data/03_primary/adj_mapping_2_all_day_free_flow.pkl"
+def retrieve_adj_mapping_path_2(time, free_flow=False, handpicked=False):
+    if handpicked:
+        if free_flow:
+            saving_path = f"data/03_primary/adjacency_matrix_and_mapping/random_candidate_plus_handpicked/adj_mapping_2_all_day_free_flow.pkl"
+        else:
+            saving_path = f"data/03_primary/adjacency_matrix_and_mapping/random_candidate_plus_handpicked/adj_mapping_2_{time}.pkl"
     else:
-        saving_path = f"data/03_primary/adj_mapping_2_{time}.pkl"   
+        if free_flow:
+            saving_path = f"data/03_primary/adjacency_matrix_and_mapping/only_random_candidate_location/adj_mapping_2_all_day_free_flow.pkl"
+        else:
+            saving_path = f"data/03_primary/adjacency_matrix_and_mapping/only_random_candidate_location/adj_mapping_2_{time}.pkl" 
     return saving_path
 
 def retrieve_worst_adj_mapping_path(time):
     saving_path = f"data/03_primary/worst_adj_mapping_{time}.pkl"
     return saving_path
 
-def retrieve_solution_path(facilities_number, time):
-    path = f"data/07_model_output/{facilities_number}_locations/deterministic_exact_solutions/exact_solution_{time}.pkl"  
+def retrieve_solution_path(facilities_number, time, handpicked=False):
+    if handpicked:
+        path = f"data/07_model_output/random_candidate_plus_handpicked/{facilities_number}_locations/deterministic_exact_solutions/exact_solution_{time}.pkl"  
+    else:
+        path = f"data/07_model_output/only_random_candidate_location/{facilities_number}_locations/deterministic_exact_solutions/exact_solution_{time}.pkl"  
     return path
 
-def retrieve_light_solution_path(facilities_number, time):
-    path = f"data/07_model_output/{facilities_number}_locations/deterministic_exact_solutions/light_exact_solution_{time}.pkl"  
+def retrieve_light_solution_path(facilities_number, time, handpicked=False):
+    if handpicked:
+        path = f"data/07_model_output/random_candidate_plus_handpicked/{facilities_number}_locations/deterministic_exact_solutions/light_exact_solution_{time}.pkl"
+    else:
+        path = f"data/07_model_output/only_random_candidate_location/{facilities_number}_locations/deterministic_exact_solutions/light_exact_solution_{time}.pkl"
     return path
     
-def retrieve_solution_vs_scenario_path(
-    facilities_number, time_solution, time_scenario, weight, worst=False):
-    if worst:
-        saving_path = f"data/08_reporting/{facilities_number}_locations/solution_vs_scenario_{time_solution}_{time_scenario}_{weight}_worst.pkl"
+def retrieve_solution_vs_scenario_path(facilities_number, time_solution, time_scenario, weight, 
+                                       worst=False, handpicked=False):
+    if handpicked:
+        if worst:
+            saving_path = f"data/08_reporting/random_candidate_plus_handpicked/{facilities_number}_locations/solution_vs_scenario_{time_solution}_{time_scenario}_{weight}_worst.pkl"
+        else:
+            saving_path = f"data/08_reporting/random_candidate_plus_handpicked/{facilities_number}_locations/solution_vs_scenario_{time_solution}_{time_scenario}_{weight}.pkl"
     else:
-        saving_path = f"data/08_reporting/{facilities_number}_locations/solution_vs_scenario_{time_solution}_{time_scenario}_{weight}.pkl"
+        if worst:
+            saving_path = f"data/08_reporting/only_random_candidate_location/{facilities_number}_locations/solution_vs_scenario_{time_solution}_{time_scenario}_{weight}_worst.pkl"
+        else:
+            saving_path = f"data/08_reporting/only_random_candidate_location/{facilities_number}_locations/solution_vs_scenario_{time_solution}_{time_scenario}_{weight}.pkl"
     return saving_path
 
 

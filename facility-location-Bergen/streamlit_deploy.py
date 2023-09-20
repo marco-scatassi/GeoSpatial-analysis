@@ -466,17 +466,17 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
     c+=1
 
     if f"average_graphs" not in session_state:
-        
         average_graphs = {}
-        data_for_traffic_jam_visualization = {}
         for time in TIMES[1:]:
             path = project_path+"/"+retrieve_average_graph_path(time, True, True, True, False)
             with open(path, "rb") as f:
                 average_graphs[time] = pkl.load(f)
-            
-            data_for_traffic_jam_visualization[time] = prepare_data_for_traffic_jam_visualization(average_graphs[time])
-
         session_state[f"average_graphs"] = average_graphs
+        
+    if f"data_for_traffic_jam_visualization" not in session_state:
+        data_for_traffic_jam_visualization = {}
+        for time in TIMES[1:]:
+            data_for_traffic_jam_visualization[time] = prepare_data_for_traffic_jam_visualization(average_graphs[time])
         session_state[f"data_for_traffic_jam_visualization"] = data_for_traffic_jam_visualization
         
     c+=1

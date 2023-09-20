@@ -560,7 +560,7 @@ def on_submit_refine_form(session_state, G, node_mapping_r):
     else:
         new_edges = []
     if len(delete) > 0:
-        deleted_edges = [(node_mapping_r[e[0]], node_mapping_r[e[1]]) for e in delete]
+        deleted_edges = [(node_mapping_r[delete[i], node_mapping_r[delete[i+1]) for i in range(0, len(delete), 2)]
     else:
         deleted_edges = []
 

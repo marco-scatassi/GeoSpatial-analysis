@@ -137,6 +137,9 @@ def on_submit_refine(placeholder):
             if att not in st.session_state:
                 st.session_state["load_data_error"] = True
                 return st.error("Please load data first!", icon="🚨")
+    if st.session_state["load_data_error"] == False:
+        placeholder.empty()
+    
                 
 
     if "refine_graph" not in session_state:

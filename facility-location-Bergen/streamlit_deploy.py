@@ -357,12 +357,6 @@ def graph_manipulation(session_state, TIMES):
             placeholder.warning("Process interrupted and state cleared (load the data to start again)", icon="❌")
         else:
             placeholder.success("Process completed: changes has been saved. Download data using the download button", icon="✅")
-        # if session_state["button_load"]:
-        #     placeholder.warning("Process interrupted (load the data to start again)", icon="❌")
-        # elif session_state["stop_and_clear"]:
-        #     placeholder.warning("Process interrupted and state cleared (load the data to start again)", icon="❌")
-        # else:
-        #     placeholder.success("Process completed: changes has been saved. Download data using the download button", icon="✅")
 
     ############################################## REFINE GRAPH ############################################## 
     if "is_submitted" in session_state["refine_graph"].keys() and not st.session_state["load_data_error"]:

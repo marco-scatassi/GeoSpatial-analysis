@@ -301,9 +301,10 @@ def graph_manipulation_process_template(session_state, TIMES,
     if not stop_and_clear_button and not session_state["stop_and_clear"]:
         graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED, 
                                split_the_node_form_placeholder, add_and_delete_form_placeholder)
+        return False
     else:
         print_INFO_message_timestamp("Stop and clear state")
-        return
+        return True
 
 def graph_manipulation(session_state, TIMES):
     placeholder_button = st.container()
@@ -348,10 +349,9 @@ def graph_manipulation(session_state, TIMES):
                 return st.error("Please load data first!", icon="🚨")
         
         with placeholder:
-            graph_manipulation_process_template(session_state, TIMES, 
+            session_state["stop_and_clear"]  = graph_manipulation_process_template(session_state, TIMES, 
                                    LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED)
             session_state["button_load"] = False
-            session_state["stop_and_clear"] = False
 
         if session_state["stop_and_clear"] or stop_and_clear_button:
             placeholder.warning("Process interrupted and state cleared (load the data to start again)", icon="❌")

@@ -45,6 +45,12 @@ def sample_coords(coordinates, idx_sample):
     sample_coords = coordinates.iloc[idx_sample]
     return sample_coords
 
+def sort_coordinates(time, coordinates):
+    coordinates[time]["geometry_x"] = coordinates[time].geometry.x
+    coordinates[time]["geometry_y"] = coordinates[time].geometry.y
+    coordinates[time].sort_values(by=["geometry_x", "geometry_y"], inplace=True)
+    coordinates[time].drop(columns=["geometry_x", "geometry_y"], inplace=True)
+
 
 ## ------------------------------------------------------------- PREPARATION ------------------------------------------------------------- ##
 def verify_problem_already_solved(fl_data):
@@ -76,12 +82,12 @@ def set_up_fl_problems(fl_data, already_solved):
 
         ADJ_PATHS = {
             time: r"\/Pund/Stab$/guest801981/Documents/GitHub/GeoSpatial-analysis/facility-location-Bergen/"
-            + retrieve_adj_matrix_path(time)
+            + retrieve_adj_matrix_path(time, free_flow=False, handpicked=fl_data["handpicked"])
             for time in times
         }
         ADJ_PATHS["all_day_free_flow"] = (
             r"\/Pund/Stab$/guest801981/Documents/GitHub/GeoSpatial-analysis/facility-location-Bergen/"
-            + retrieve_adj_matrix_path("all_day", free_flow=True)
+            + retrieve_adj_matrix_path("all_day", free_flow=True, handpicked=fl_data["handpicked"])
         )
         adj_matricies = {time: None for time in times}
 
@@ -116,22 +122,23 @@ def set_up_fl_problems(fl_data, already_solved):
 
         idx_sampled = sample_idx(list(range(len(average_graphs["all_day"].nodes()))), RATIO1)
         idx_sampled2 = sample_idx(idx_sampled, RATIO2)
-        
+
+        original_order_coordinates = {}
         coordinates = {time: pd.Series(list(average_graphs[time].nodes())) for time in times}
         
         for time in times:
             coordinates[time] = coordinates[time].apply(lambda x: Point(x))
             coordinates[time] = gpd.GeoDataFrame(geometry=coordinates[time])
-            coordinates[time]["geometry_x"] = coordinates[time].geometry.x
-            coordinates[time]["geometry_y"] = coordinates[time].geometry.y
-            coordinates[time].sort_values(by=["geometry_x", "geometry_y"], inplace=True)
-            coordinates[time].drop(columns=["geometry_x", "geometry_y"], inplace=True)
+            original_order_coordinates[time] = copy.deepcopy(coordinates[time])
+            sort_coordinates(time, coordinates)
             
         coordinates_sampled = {time: sample_coords(coordinates[time], idx_sampled) for time in times}
         coordinates_sampled2 = {time: sample_coords(coordinates[time], idx_sampled2) for time in times}
         
         coordinates_sampled["all_day_free_flow"] = coordinates_sampled["all_day"]
         coordinates_sampled2["all_day_free_flow"] = coordinates_sampled2["all_day"]
+        
+        original_order_coordinates["all_day_free_flow"] = original_order_coordinates["all_day"]
 
         if fl_data["handpicked"]:
             extra_locations = []
@@ -143,15 +150,20 @@ def set_up_fl_problems(fl_data, already_solved):
             for time in coordinates_sampled.keys():
                 extra_locations_index[time] = []
                 for p in extra_locations:
-                    for i, e in zip(coordinates_sampled[time].index, coordinates_sampled[time].geometry):
+                    for i, e in zip(original_order_coordinates[time].index, original_order_coordinates[time].geometry):
                         if e == p:
                             extra_locations_index[time].append(i)
                             
             for time in coordinates_sampled.keys():
-                coordinates_sampled[time] = pd.concat([coordinates_sampled, 
-                                         gpd.GeoDataFrame(geometry=extra_locations[time], index=extra_locations_index)])
-                coordinates_sampled2[time] = pd.concat([coordinates_sampled2,
-                                         gpd.GeoDataFrame(geometry=extra_locations[time], index=extra_locations_index)])
+                coordinates_sampled[time] = pd.concat([coordinates_sampled[time], 
+                                         gpd.GeoDataFrame(geometry=extra_locations, index=extra_locations_index[time])]).\
+                                            drop_duplicates(subset=["geometry"])
+                coordinates_sampled2[time] = pd.concat([coordinates_sampled2[time],
+                                         gpd.GeoDataFrame(geometry=extra_locations, index=extra_locations_index[time])]).\
+                                            drop_duplicates(subset=["geometry"])
+                
+                sort_coordinates(time, coordinates_sampled)
+                sort_coordinates(time, coordinates_sampled2)
         
         # adj_sampled = {key: sample_matrix(adj_matricies[key], idx_sampled) for key in adj_matricies.keys()}
 
@@ -200,7 +212,11 @@ def solve_fl_problems(fls_exact, fl_data):
     
     if fls_exact != {}:
         for i, (time, fl_exact) in enumerate(zip(list(fls_exact.keys()), list(fls_exact.values()))):
-            root_path = rf"\\Pund\Stab$\guest801981\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\data\07_model_output\{fl_data['facilities_number']}_locations\deterministic_exact_solutions"
+            if fl_data["handpicked"]:
+                root_path = ROOTH + rf"\data\07_model_output\random_candidate_plus_handpicked\{fl_data['facilities_number']}_locations\deterministic_exact_solutions"
+            else:
+                root_path = ROOTH + rf"\data\07_model_output\only_random_candidate_location\{fl_data['facilities_number']}_locations\deterministic_exact_solutions"
+            
             saving_path = root_path + rf"\exact_solution_{time}.pkl"
             saving_path_light = root_path + rf"\light_exact_solution_{time}.pkl"
             saving_path_super_light = root_path + rf"\super_light_exact_solution_{time}.pkl"

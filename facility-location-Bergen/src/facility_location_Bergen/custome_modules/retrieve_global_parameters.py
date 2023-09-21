@@ -148,11 +148,17 @@ def retrieve_worst_adj_mapping_path(time):
     saving_path = f"data/03_primary/worst_adj_mapping_{time}.pkl"
     return saving_path
 
-def retrieve_solution_path(facilities_number, time, handpicked=False):
+def retrieve_solution_path(facilities_number, time=None, stochastic=False, handpicked=False):
     if handpicked:
-        path = f"data/07_model_output/random_candidate_plus_handpicked/{facilities_number}_locations/deterministic_exact_solutions/exact_solution_{time}.pkl"  
+        if stochastic:
+            path = f"data/07_model_output/random_candidate_plus_handpicked/{facilities_number}_locations/stochastic_solution/lshape_solution.pkl"
+        else:
+            path = f"data/07_model_output/random_candidate_plus_handpicked/{facilities_number}_locations/deterministic_exact_solutions/exact_solution_{time}.pkl"  
     else:
-        path = f"data/07_model_output/only_random_candidate_location/{facilities_number}_locations/deterministic_exact_solutions/exact_solution_{time}.pkl"  
+        if stochastic:
+            path = f"data/07_model_output/only_random_candidate_location/{facilities_number}_locations/stochastic_solution/lshape_solution.pkl"
+        else:
+            path = f"data/07_model_output/only_random_candidate_location/{facilities_number}_locations/deterministic_exact_solutions/exact_solution_{time}.pkl"  
     return path
 
 def retrieve_light_solution_path(facilities_number, time, handpicked=False):

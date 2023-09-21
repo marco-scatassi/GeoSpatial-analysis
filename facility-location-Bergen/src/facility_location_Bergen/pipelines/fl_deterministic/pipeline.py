@@ -22,22 +22,19 @@ def create_child_pipeline(key) -> list:
               func=verify_problem_already_solved,
               inputs=[f"params:{key}"],
               outputs="already_solved",
-              name="verify_problem_already_solved",  
             ),
             node(
                 func=set_up_fl_problems,
                 inputs=[f"params:{key}", "already_solved"],
                 outputs="fls_exact",
-                name="set_up_fl_problems",
             ),
             node(
                 func=solve_fl_problems,
                 inputs=[f"fls_exact", f"params:{key}"],
                 outputs="message",
-                name="solve_fl_problems",
             ),
         ],
-        namespace=f"fl_deterministic",
+        namespace=f"{key}",
         parameters={key: key},
     )
 

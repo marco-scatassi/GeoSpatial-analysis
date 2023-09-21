@@ -31,7 +31,7 @@ def create_child_pipeline(key) -> list:
                 name="update_data_catalog",
             ),
         ],
-        namespace=f"build_adjacency_matrix.{key}",
+        namespace=f"{key}",
         parameters={key: key},
     )
 

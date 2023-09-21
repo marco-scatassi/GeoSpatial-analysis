@@ -1,6 +1,46 @@
-fl_deterministic.data:
+fl_deterministic.data01:
   facilities_number: 1
   handpicked: True
+  handpicked_locations: [5229, 1688, 1842, 4647, 159, 2075, 2428, 361, 3477, 3745, 4731]
+  ratio1: 0.1
+  ratio2: 0.05
+  seed: 324324
+
+fl_deterministic.data02:
+  facilities_number: 2
+  handpicked: True
+  handpicked_locations: [5229, 1688, 1842, 4647, 159, 2075, 2428, 361, 3477, 3745, 4731]
+  ratio1: 0.1
+  ratio2: 0.05
+  seed: 324324
+
+fl_deterministic.data03:
+  facilities_number: 3
+  handpicked: True
+  handpicked_locations: [5229, 1688, 1842, 4647, 159, 2075, 2428, 361, 3477, 3745, 4731]
+  ratio1: 0.1
+  ratio2: 0.05
+  seed: 324324
+
+fl_deterministic.data11:
+  facilities_number: 1
+  handpicked: False
+  handpicked_locations: [5229, 1688, 1842, 4647, 159, 2075, 2428, 361, 3477, 3745, 4731]
+  ratio1: 0.1
+  ratio2: 0.05
+  seed: 324324
+
+fl_deterministic.data12:
+  facilities_number: 2
+  handpicked: False
+  handpicked_locations: [5229, 1688, 1842, 4647, 159, 2075, 2428, 361, 3477, 3745, 4731]
+  ratio1: 0.1
+  ratio2: 0.05
+  seed: 324324
+
+fl_deterministic.data13:
+  facilities_number: 3
+  handpicked: False
   handpicked_locations: [5229, 1688, 1842, 4647, 159, 2075, 2428, 361, 3477, 3745, 4731]
   ratio1: 0.1
   ratio2: 0.05

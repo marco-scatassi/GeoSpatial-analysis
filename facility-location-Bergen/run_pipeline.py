@@ -5,6 +5,7 @@ from kedro.framework.project import find_pipelines
 from kedro_datasets.yaml import YAMLDataSet
 import yaml
 import sys
+import time
 
 project_path = r"\/Pund/Stab$/guest801981/Documents/GitHub/GeoSpatial-analysis/facility-location-Bergen"
 metadata = bootstrap_project(project_path)
@@ -29,9 +30,7 @@ def run_build_adjacency_matrix():
                         ".all_day1", ".morning1", ".midday1", ".afternoon1"]
     runner, pipelines, params = initialize_session(pipeline_to_run)
     
-    print(pipelines[pipeline_to_run])
-    
-    for i, nms in enumerate(namespace_to_run):
+    for nms in namespace_to_run:
         print(f"Running namespace: {nms}")
         data_params_path = project_path + f"/conf/base/parameters/{pipeline_to_run}_TEMP.yml"
         params_data_set = YAMLDataSet(filepath=data_params_path)
@@ -52,7 +51,7 @@ def run_solution_comparison():
 
     for fn in facility_numbers:
         print(f"Running pipeline: {pipeline_to_run} with {fn} facilities")
-        for i, nms in enumerate(namespace_to_run):
+        for nms in namespace_to_run:
             print(f"Running namespace: {nms}")
             data_params_path = project_path + f"/conf/base/parameters/{pipeline_to_run}_TEMP.yml"
             params_data_set = YAMLDataSet(filepath=data_params_path)
@@ -60,6 +59,24 @@ def run_solution_comparison():
             params_data_set.save(params[pipeline_to_run+nms])
             data_catalog = DataCatalog(data_sets={f"params:{pipeline_to_run}{nms}": params_data_set})
             runner.run(pipelines[pipeline_to_run].only_nodes_with_namespace(f"{pipeline_to_run}.{nms}"), data_catalog)
+            
+# ------------------------------ FL DETERMINISTIC ------------------------------ #
+def run_fl_deterministic():
+    pipeline_to_run = "fl_deterministic"
+    namespace_to_run = [".data01", ".data02", ".data03", ".data11", ".data12", ".data13"]
+    runner, pipelines, params = initialize_session(pipeline_to_run)
+    
+    print(pipelines[pipeline_to_run])
+    print(params)
+    
+    for nms in namespace_to_run:
+        print(f"Running namespace: {nms}")
+        data_params_path = project_path + f"/conf/base/parameters/{pipeline_to_run}_TEMP.yml"
+        params_data_set = YAMLDataSet(filepath=data_params_path)
+        params_data_set.save(params[pipeline_to_run+nms])
+        data_catalog = DataCatalog(data_sets={f"params:{pipeline_to_run+nms}": params_data_set})
+        runner.run(pipelines[pipeline_to_run].only_nodes_with_namespace(f"{pipeline_to_run+nms}"), data_catalog)
+        time.sleep(10)
 
 def main():
     if len(sys.argv) != 2:
@@ -71,6 +88,8 @@ def main():
         run_build_adjacency_matrix()
     elif pipeline_name == "solution_comparison":
         run_solution_comparison()
+    elif pipeline_name == "fl_deterministic":
+        run_fl_deterministic()
     else:
         print("Pipeline name not recognized")
         return

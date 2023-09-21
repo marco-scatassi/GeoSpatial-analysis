@@ -107,11 +107,7 @@ def build_adj_matrix(params):
     coordinates_all_day = pd.Series(list(average_graph_all_day.nodes()))
     coordinates_all_day = coordinates_all_day.apply(lambda x: Point(x))
     coordinates_all_day = gpd.GeoDataFrame(geometry=coordinates_all_day)
-    coordinates_all_day["geometry_x"] = coordinates_all_day.geometry.x
-    coordinates_all_day["geometry_y"] = coordinates_all_day.geometry.y
-    coordinates_all_day.sort_values(by=["geometry_x", "geometry_y"], inplace=True)
-    coordinates_all_day.drop(columns=["geometry_x", "geometry_y"], inplace=True)
-            
+    
     coordinates_sampled = sample_coords(coordinates, idx_sampled)
     coordinates_sampled2 = sample_coords(coordinates, idx_sampled2)
     

@@ -47,6 +47,7 @@ metadata = bootstrap_project(project_path)
 
 TIMES = ["all_day_free_flow", "all_day", "morning", "midday", "afternoon"]
 FACILITIES_NUMBER = [1,2,3]
+HANDPICKED = True
 
 # LOG_FILE_PATH = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/split_roads.log"
 # LOG_FILE_PATH2 = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/split_roads_changes.log"
@@ -419,7 +420,7 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
         for i, time in enumerate(TIMES):
             print_INFO_message_timestamp(f"Loading deterministic solution for: {time}")
             progress_bar.progress((i+1)*1/len(TIMES), f"Loading exact solution for: {time}")
-            path = project_path+r"/"+retrieve_light_solution_path(facilities_number, time)
+            path = project_path+r"/"+retrieve_light_solution_path(facilities_number, time, handpicked=HANDPICKED)
             fls_exact[time] = FacilityLocation.load(path)
             
         session_state[f"fls_exact_{facilities_number}"] = fls_exact
@@ -727,8 +728,8 @@ def deterministic_analysis(session_state, TIMES, facilities_number, ratio1, rati
 def stochastic_load_data(session_state, facilities_number):
     if f"fls_stochastic_{facilities_number}" not in session_state:
         fls_solutions = {}
-        fls_solutions["stochastic"] = StochasticFacilityLocation.load(project_path+retrieve_solution_path(facilities_number, stochastic=True))
-        fls_solutions["deterministic"] = FacilityLocation.load(project_path+retrieve_light_solution_path(facilities_number, "all_day_free_flow"))
+        fls_solutions["stochastic"] = StochasticFacilityLocation.load(project_path+retrieve_solution_path(facilities_number, stochastic=True, handpicked=HANDPICKED))
+        fls_solutions["deterministic"] = FacilityLocation.load(project_path+retrieve_light_solution_path(facilities_number, "all_day_free_flow", handpicked=HANDPICKED))
         session_state[f"fls_stochastic_{facilities_number}"] = fls_solutions  
 
 def stochastic_load_metrics(session_state):

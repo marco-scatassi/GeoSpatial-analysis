@@ -427,7 +427,10 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
     c += 1
         
     if f"dfs_{facilities_number}" not in session_state:
-        root = project_path+rf"/data/08_reporting/{facilities_number}_locations"
+        if HANDPICKED:
+            root = project_path+rf"/data/08_reporting/random_candidate_plus_handpicked/{facilities_number}_locations"
+        else:
+            root = project_path+rf"/data/08_reporting/only_random_candidate_location/{facilities_number}_locations"
         paths = [p for p in os.listdir(root) if ("solution_vs_scenario" in p) and ("worst" not in p)]
             
         dfs = {}

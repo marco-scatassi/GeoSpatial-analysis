@@ -33,11 +33,7 @@ from kedro.pipeline import Pipeline, pipeline
 from kedro.runner import SequentialRunner
 from log import print_INFO_message, print_INFO_message_timestamp
 from PIL import Image
-from retrieve_global_parameters import (
-    retrieve_average_graph_path,
-    retrieve_light_solution_path,
-    retrieve_solution_vs_scenario_path,
-)
+from retrieve_global_parameters import *
 from src.facility_location_Bergen.custome_modules.graphical_analysis import *
 from streamlit_folium import st_folium
 
@@ -729,12 +725,10 @@ def deterministic_analysis(session_state, TIMES, facilities_number, ratio1, rati
 
 # -------------------------------------------- STOCHASTIC ANALYSIS ---------------------------------------------
 def stochastic_load_data(session_state, facilities_number):
-    root_path = project_path+r"/data/07_model_output"
-    
     if f"fls_stochastic_{facilities_number}" not in session_state:
         fls_solutions = {}
-        fls_solutions["stochastic"] = StochasticFacilityLocation.load(root_path+f"/{facilities_number}_locations/stochastic_solution/lshape_solution.pkl")
-        fls_solutions["deterministic"] = FacilityLocation.load(root_path+f"/{facilities_number}_locations/deterministic_exact_solutions/super_light_exact_solution_all_day_free_flow.pkl")
+        fls_solutions["stochastic"] = StochasticFacilityLocation.load(project_path+retrieve_solution_path(facilities_number, stochastic=True))
+        fls_solutions["deterministic"] = FacilityLocation.load(project_path+retrieve_light_solution_path(facilities_number, "all_day_free_flow"))
         session_state[f"fls_stochastic_{facilities_number}"] = fls_solutions  
 
 def stochastic_load_metrics(session_state):

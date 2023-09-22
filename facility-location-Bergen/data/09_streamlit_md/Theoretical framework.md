@@ -28,9 +28,12 @@ Then, following [2], discrete facility location problems can be divided in the f
 - **median based**, in which the objective is to minimize the weighted average distance between points and the associated facility;
 - other problems.
 
-Further classification can be done within each of the 3 previous categories. However, the one adopted in this work is the **p-center location problem**. This formulation as well as its stochastic version will be described in the following sections.
+Further classification can be done within each of the 3 previous categories. 
+
+In this work both the **p-center location problem** and the **p-median location problem** have been used and compared. The choice of the objective function is not so straightforward as it might seems and has implications both technical and political. In the following sections a brief overwiev of the two problem formulation is given.
 
 ### Deterministic Formulation 
+#### P-center location problem 
 Referring to [5], the **p-center location** problems aim to **minimize the maximum distance** among demand points and their associated facility. It is assumed that all demand points are covered. 
 
 This model, that is well known in literature, is particularly suitable to approach **emergency response** facility location problems. As already mentioned, an **emergency** is an event that occurs suddenly, unexpectedly and that requires an immediate intervention. This means that wherever an emergency event is originated, the **response time** should be as low as possible. The presence of some demand hardly reachable points represents a potential critical situation and should be avoided. Therefore, the **p-center** model is a valid solution able to take into account those aspects.
@@ -65,6 +68,9 @@ $$
 #### Decision variables:
 - $x_j$ : 1, if a facility is established at candidate location $j \in J$; 0 otherwise.
 - $y_{i j}$: 1, if demand point $i$ is assigned to a facility at candidate location $j \in N_i ; 0$ otherwise.
+
+#### P-median location problem
+The **p-center location problem** is a min-max problem, therefore it is strongly influenced by extreme points in the network. This can potentially disrupt the balance between not having one or more critical points (i.e. hardly reachable), and beeing close enough to high density locations in which the probability of an emergency situation to occur is higher. 
 
 ### Stochastic Formulation 
 The deterministic formulation is not able to take into account the stochastic nature of **travel time**, that depends on several factors (hour of the day, weather conditions, changes in the road viability, …). Many methodologies and approaches exist in order to embrace the stochastic nature of the model previously described, such as chance constraint optimization, stochastic programming, robust optimization, queuing theory.

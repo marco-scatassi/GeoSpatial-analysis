@@ -63,14 +63,13 @@ A possible formulation for the **p-median problem**, as described in [5], is pro
 ##### Formulation
 $$
 \begin{aligned}
-& \min \sum_{i \in I} \sum{j \in J} d_{i j} y_{i j} \\
+& \min \sum_{i \in I} \sum_{j \in J} d_{i j} y_{i j} \\
 & \text { subject to } \\
 & \sum_{j \in N_i} y_{i j}=1, i \in I \\
 & \sum_{j \in J} x_j=p \\
 & y_{i j} \leq x_j, i \in I, j \in N_i \\
 & y_{i j} \in\{0,1\}, i \in I, j \in N_i \\
 & x_j \in\{0,1\}, j \in J \\
-& L \geq 0 .
 \end{aligned}
 $$
 

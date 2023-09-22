@@ -48,6 +48,7 @@ metadata = bootstrap_project(project_path)
 TIMES = ["all_day_free_flow", "all_day", "morning", "midday", "afternoon"]
 FACILITIES_NUMBER = [1,2,3]
 HANDPICKED = True
+FL_CLASS = "p-center"
 
 # LOG_FILE_PATH = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/split_roads.log"
 # LOG_FILE_PATH2 = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/split_roads_changes.log"
@@ -428,9 +429,9 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
         
     if f"dfs_{facilities_number}" not in session_state:
         if HANDPICKED:
-            root = project_path+rf"/data/08_reporting/random_candidate_plus_handpicked/{facilities_number}_locations"
+            root = project_path+rf"/data/08_reporting/random_candidate_plus_handpicked/{FL_CLASS}/{facilities_number}_locations"
         else:
-            root = project_path+rf"/data/08_reporting/only_random_candidate_location/{facilities_number}_locations"
+            root = project_path+rf"/data/08_reporting/only_random_candidate_location/{FL_CLASS}/{facilities_number}_locations"
         paths = [p for p in os.listdir(root) if ("solution_vs_scenario" in p) and ("worst" not in p)]
             
         dfs = {}

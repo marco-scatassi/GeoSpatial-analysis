@@ -148,12 +148,18 @@ def retrieve_worst_adj_mapping_path(time):
     saving_path = f"data/03_primary/worst_adj_mapping_{time}.pkl"
     return saving_path
 
-def retrieve_solution_path(facilities_number, time=None, stochastic=False, handpicked=False):
+def retrieve_solution_path(facilities_number, time=None, stochastic=False, handpicked=False, fl_class="p-center"):
     if handpicked:
         if stochastic:
-            path = f"data/07_model_output/random_candidate_plus_handpicked/{facilities_number}_locations/stochastic_solution/lshape_solution.pkl"
+            if fl_class == "p-center":
+                path = f"data/07_model_output/random_candidate_plus_handpicked/p-center/{facilities_number}_locations/stochastic_solution/lshape_solution.pkl"
+            elif fl_class == "p-median":
+                path = f"data/07_model_output/random_candidate_plus_handpicked/p-median/{facilities_number}_locations/stochastic_solution/lshape_solution.pkl"
         else:
-            path = f"data/07_model_output/random_candidate_plus_handpicked/{facilities_number}_locations/deterministic_exact_solutions/exact_solution_{time}.pkl"  
+            if fl_class == "p-center":
+                path = f"data/07_model_output/random_candidate_plus_handpicked/p-center/{facilities_number}_locations/deterministic_exact_solutions/exact_solution_{time}.pkl"
+            elif fl_class == "p-median":
+                path = f"data/07_model_output/random_candidate_plus_handpicked/p-median/{facilities_number}_locations/deterministic_exact_solutions/exact_solution_{time}.pkl"
     else:
         if stochastic:
             path = f"data/07_model_output/only_random_candidate_location/{facilities_number}_locations/stochastic_solution/lshape_solution.pkl"
@@ -161,20 +167,29 @@ def retrieve_solution_path(facilities_number, time=None, stochastic=False, handp
             path = f"data/07_model_output/only_random_candidate_location/{facilities_number}_locations/deterministic_exact_solutions/exact_solution_{time}.pkl"  
     return path
 
-def retrieve_light_solution_path(facilities_number, time, handpicked=False):
+def retrieve_light_solution_path(facilities_number, time, handpicked=False, fl_class="p-center"):
     if handpicked:
-        path = f"data/07_model_output/random_candidate_plus_handpicked/{facilities_number}_locations/deterministic_exact_solutions/light_exact_solution_{time}.pkl"
+        if fl_class == "p-center":
+            path = f"data/07_model_output/random_candidate_plus_handpicked/p-center/{facilities_number}_locations/deterministic_exact_solutions/light_exact_solution_{time}.pkl"
+        elif fl_class == "p-median":
+            path = f"data/07_model_output/random_candidate_plus_handpicked/p-median/{facilities_number}_locations/deterministic_exact_solutions/light_exact_solution_{time}.pkl"
     else:
-        path = f"data/07_model_output/only_random_candidate_location/{facilities_number}_locations/deterministic_exact_solutions/light_exact_solution_{time}.pkl"
+        if fl_class == "p-center":
+            path = f"data/07_model_output/only_random_candidate_location/p-center/{facilities_number}_locations/deterministic_exact_solutions/light_exact_solution_{time}.pkl"
+        elif fl_class == "p-median":
+            path = f"data/07_model_output/only_random_candidate_location/p-median/{facilities_number}_locations/deterministic_exact_solutions/light_exact_solution_{time}.pkl"    
     return path
     
 def retrieve_solution_vs_scenario_path(facilities_number, time_solution, time_scenario, weight, 
-                                       worst=False, handpicked=False):
+                                       worst=False, handpicked=False, fl_class="p-center"):
     if handpicked:
         if worst:
             saving_path = f"data/08_reporting/random_candidate_plus_handpicked/{facilities_number}_locations/solution_vs_scenario_{time_solution}_{time_scenario}_{weight}_worst.pkl"
         else:
-            saving_path = f"data/08_reporting/random_candidate_plus_handpicked/{facilities_number}_locations/solution_vs_scenario_{time_solution}_{time_scenario}_{weight}.pkl"
+            if fl_class == "p-center":
+                saving_path = f"data/08_reporting/random_candidate_plus_handpicked/p-center/{facilities_number}_locations/solution_vs_scenario_{time_solution}_{time_scenario}_{weight}.pkl"
+            elif fl_class == "p-median":
+                saving_path = f"data/08_reporting/random_candidate_plus_handpicked/p-median/{facilities_number}_locations/solution_vs_scenario_{time_solution}_{time_scenario}_{weight}.pkl"
     else:
         if worst:
             saving_path = f"data/08_reporting/only_random_candidate_location/{facilities_number}_locations/solution_vs_scenario_{time_solution}_{time_scenario}_{weight}_worst.pkl"

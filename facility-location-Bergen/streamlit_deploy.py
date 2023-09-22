@@ -47,7 +47,7 @@ metadata = bootstrap_project(project_path)
 
 TIMES = ["all_day_free_flow", "all_day", "morning", "midday", "afternoon"]
 FACILITIES_NUMBER = [1,2,3]
-HANDPICKED = False
+HANDPICKED = True
 FL_CLASS = "p-center"
 
 # LOG_FILE_PATH = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/split_roads.log"

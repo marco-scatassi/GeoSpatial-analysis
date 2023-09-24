@@ -421,7 +421,7 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
         for i, time in enumerate(TIMES):
             print_INFO_message_timestamp(f"Loading deterministic solution for: {time}")
             progress_bar.progress((i+1)*1/len(TIMES), f"Loading exact solution for: {time}")
-            path = project_path+r"/"+retrieve_light_solution_path(facilities_number, time, handpicked=HANDPICKED)
+            path = project_path+r"/"+retrieve_light_solution_path(facilities_number, time, handpicked=HANDPICKED, fl_class=FL_CLASS)
             fls_exact[time] = FacilityLocation.load(path)
             
         session_state[f"fls_exact_{facilities_number}"] = fls_exact

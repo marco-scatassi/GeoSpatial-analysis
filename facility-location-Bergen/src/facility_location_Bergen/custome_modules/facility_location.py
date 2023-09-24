@@ -174,9 +174,9 @@ class FacilityLocation:
     locations_coordinates = None
     locations_index = None
     solution_value = None
+    fl_class = None
     algorithm = None
     solver_status = None
-    model = None
     instance = None
     result = None
     computation_time = None
@@ -198,6 +198,7 @@ class FacilityLocation:
         self.adjacency_matrix = adjancency_matrix.adjacency_matrix
         self.adjacency_matrix_weight = self.__get_weight(adjancency_matrix)
         self.n_of_demand_points = len(coordinates)
+        self.n_of_candidate_points = len(candidate_coordinates)
 
     # --------------------------- define the private method to retrieve the type of input matrix ---------------------------
     def __get_weight(self, adjancency_matrix):
@@ -286,7 +287,14 @@ class FacilityLocation:
     def __maximalDistanceObj(self, model):
         return model.L
 
-    def __DefineAbstractModel(self):
+    def __averageDistanceObj(self, model):
+        return sum(
+            model.d[j, i] * model.y[i, j]
+            for j in model.J
+            for i in model.I
+        ) / self.n_of_demand_points
+
+    def __DefineAbstractModel(self, location_problem="p-center"):
         # -------------------------abastract model----------------------------
         model = pyo.AbstractModel()
 
@@ -308,9 +316,10 @@ class FacilityLocation:
         # define the binary variables for the assignment decision (y)
         model.y = Var(model.I, model.J, within=Binary)
 
-        # define the auxiliary variable for the maximal distance (L)
-        model.L = Var(within=NonNegativeReals)
-
+        if location_problem == "p-center":
+            # define the auxiliary variable for the maximal distance (L)
+            model.L = Var(within=NonNegativeReals)
+            
         # --------------------------constraints-------------------------------
         # define a constraint for each demand point to be covered by a single location
         model.completeSingleCoverage = Constraint(
@@ -320,8 +329,9 @@ class FacilityLocation:
         # define a constraint for the maximum number of locations
         model.maximumLocations = Constraint(rule=self.__maximumLocations)
 
-        # define a constraint for the maximal distance (L is an auxiliary variable)
-        model.maximalDistance = Constraint(model.I, rule=self.__maximalDistance)
+        if location_problem == "p-center":
+            # define a constraint for the maximal distance (L is an auxiliary variable)
+            model.maximalDistance = Constraint(model.I, rule=self.__maximalDistance)
 
         # define a constraint for each demand point to be served by an open facility
         model.servedByOpenFacility = Constraint(
@@ -329,17 +339,22 @@ class FacilityLocation:
         )
 
         # -----------------------objective function---------------------------
-        model.maximalDistanceObj = Objective(
-            rule=self.__maximalDistanceObj, sense=minimize
-        )
+        if location_problem == "p-center":
+            model.maximalDistanceObj = Objective(
+                rule=self.__maximalDistanceObj, sense=minimize
+            )
+        elif location_problem == "p-median":
+            model.averageDistanceObj = Objective(
+                rule=self.__averageDistanceObj, sense=minimize
+            )
 
         self.model = model
 
         return model
 
-    def __solve_exact(self):
+    def __solve_exact(self, fl_class="p-center"):
         print_INFO_message("Defining the abstract model...")
-        model = self.__DefineAbstractModel()
+        model = self.__DefineAbstractModel(fl_class)
 
         print_INFO_message_timestamp("Initializing data...")
         distance_data = {
@@ -357,7 +372,10 @@ class FacilityLocation:
 
         self.result = opt.solve(self.instance)
 
-        self.solution_value = self.instance.L.value
+        if fl_class == "p-center":
+            self.solution_value = self.instance.L.value
+        elif fl_class == "p-median":
+            self.solution_value = value(self.instance.averageDistanceObj)
         self.locations_index = [
             j for j in self.candidate_coordinates.index if self.instance.x[j].value == 1
         ]
@@ -382,12 +400,12 @@ class FacilityLocation:
 
     
     # ---------------------------------------- implement the methods to solve the problem -----------------------------------
-    def solve(self, mode="exact", algorithm="gon", n_trial=None):
+    def solve(self, mode="exact", fl_class="p-center", algorithm="gon", n_trial=None):
         t1 = time.time()
 
         if mode == "exact":
             print_INFO_message_timestamp("Solving the problem exactly...")
-            self.__solve_exact()
+            self.__solve_exact(fl_class)
 
         elif mode == "approx":
             if algorithm == "gon":
@@ -406,7 +424,8 @@ class FacilityLocation:
             return "mode must be either 'exact' or 'approx'"
 
         t2 = time.time()
-
+        
+        self.fl_class = fl_class
         self.computation_time = t2 - t1
         self.algorithm = mode if mode == "exact" else algorithm
 

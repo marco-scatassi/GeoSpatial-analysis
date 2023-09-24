@@ -19,7 +19,7 @@ import pickle as pkl
 import geopandas as gpd
 from shapely.geometry import Point
 from log import print_INFO_message_timestamp, print_INFO_message
-from facility_location_staging import AdjacencyMatrix, FacilityLocation
+from facility_location import AdjacencyMatrix, FacilityLocation
 from retrieve_global_parameters import *
 
 ROOTH = rf"\/Pund/Stab$/guest801981/Documents/GitHub/GeoSpatial-analysis/facility-location-Bergen/"

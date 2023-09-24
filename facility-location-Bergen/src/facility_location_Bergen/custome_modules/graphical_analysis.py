@@ -67,9 +67,9 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
         
     for i in range(len(fls)):
         if "StochasticFacilityLocation" in str(type(fls[i])):
-            mapping[("stochastic", fls[i].n_of_locations_to_choose, fls[i].fl_class)] = fls[i]
+            mapping[(f"stochastic_{extra_text[i]}", fls[i].n_of_locations_to_choose, fls[i].fl_class)] = fls[i]
         else:
-            mapping[("deterministic", fls[i].n_of_locations_to_choose, fls[i].fl_class)] = fls[i]
+            mapping[(f"deterministic_{extra_text[i]}", fls[i].n_of_locations_to_choose, fls[i].fl_class)] = fls[i]
     
     lats = {}
     lons = {}

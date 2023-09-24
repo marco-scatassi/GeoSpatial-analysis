@@ -67,10 +67,9 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
         
     for i in range(len(fls)):
         if "StochasticFacilityLocation" in str(type(fls[i])):
-            mapping[f"stochastic_{extra_text[i]}_{fls[i].n_of_locations_to_choose}"] = fls[i]
-            print(mapping)
+            mapping[("stochastic", fls[i].n_of_locations_to_choose, fls[i].fl_class)] = fls[i]
         else:
-            mapping[f"deterministic_{extra_text[i]}_{fls[i].n_of_locations_to_choose}"] = fls[i]
+            mapping[("deterministic", fls[i].n_of_locations_to_choose, fls[i].fl_class)] = fls[i]
     
     lats = {}
     lons = {}
@@ -83,12 +82,12 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
 
         
     for k, fl in mapping.items():
-        if "deterministic" in k:
+        if k[0] == "deterministic":
             lats[k] = [p.geometry.y for p in fl.locations_coordinates]
             lons[k] = [p.geometry.x for p in fl.locations_coordinates]
-        elif "stochastic" in k:
-            idx = pd.Series([k if fl.first_stage_solution[k] != 0 else None 
-                 for k in fl.first_stage_solution.keys()]).dropna().values
+        elif k[0] == "stochastic":
+            idx = pd.Series([j if fl.first_stage_solution[j] != 0 else None 
+                 for j in fl.first_stage_solution.keys()]).dropna().values
 
             stochastic_locations_coordinates = fl.candidate_coordinates.iloc[idx]
                     
@@ -123,18 +122,16 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
     
     is_s = False
     for k in mapping.keys():
-        if "stochastic" in k:
+        if k[0] == "stochastic":
             is_s = True
     colors = ["red", "black", "blue", "purple", "green", "orange", "pink", "brown", "black", "grey"]
+    
     colors_mapping = {k: colors[i] for i, k in enumerate(mapping.keys())}
     layers = []
     size = 10
     for k, fl in mapping.items():
         c=colors_mapping[k]
-        if not is_s:
-            n=k[len("deterministic")+1:]
-        else:
-            n=k
+        n=f"{k[0]} {k[2]} {k[1]} facilities"
         
         fig.add_trace(go.Scattermapbox(
                 lat=rand_jitter(lats[k]),
@@ -152,7 +149,7 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
         geojd = {"type": "FeatureCollection"}
         geojd['features'] = []
         for lon, lat in zip(rand_jitter(lons[k]), rand_jitter(lats[k])):
-            b = control_polygon(lon, lat, width=0.02, height= 0.014) #The width and height of a location pin 
+            b = control_polygon(lon, lat, width=0.028, height= 0.020) #The width and height of a location pin 
                                                                     # are chosen by trial and error
             bez = BezierCv(b, nr=30)
 
@@ -165,7 +162,7 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
                             below=' ', 
                             type='fill',   
                             color = c,
-                            opacity=0.35
+                            opacity=0.9
             ))
 
 

@@ -20,7 +20,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 import yaml
-from facility_location import (
+from facility_location_staging import (
     FacilityLocation,
     FacilityLocationReport,
     StochasticFacilityLocation,

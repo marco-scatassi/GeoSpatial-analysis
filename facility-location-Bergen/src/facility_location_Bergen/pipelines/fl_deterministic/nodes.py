@@ -19,10 +19,10 @@ import pickle as pkl
 import geopandas as gpd
 from shapely.geometry import Point
 from log import print_INFO_message_timestamp, print_INFO_message
-from facility_location import AdjacencyMatrix, FacilityLocation
-from retrieve_global_parameters import retrieve_adj_matrix_path
+from facility_location_staging import AdjacencyMatrix, FacilityLocation
+from retrieve_global_parameters import *
 
-ROOTH = rf"\\Pund\Stab$\guest801981\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen"
+ROOTH = rf"\/Pund/Stab$/guest801981/Documents/GitHub/GeoSpatial-analysis/facility-location-Bergen/"
 
 ## ------------------------------------------------------------- UTILS FUNCTIONS ------------------------------------------------------------- ##
 
@@ -57,10 +57,11 @@ def verify_problem_already_solved(fl_data):
     print_INFO_message_timestamp("CHECKING IF PROBLEM HAS BEEN ALREADY SOLVED")
     n_facilities = fl_data["facilities_number"]
     handpicked = fl_data["handpicked"]
+    fl_class = fl_data["fl_class"]
     if handpicked:
-        path = ROOTH + rf"\data\07_model_output\random_candidate_plus_handpicked\{n_facilities}_locations\deterministic_exact_solutions"
+        path = ROOTH + rf"data/07_model_output/random_candidate_plus_handpicked/{fl_class}/{n_facilities}_locations/deterministic_exact_solutions"
     else:
-        path = ROOTH + rf"\data\07_model_output\only_random_candidate_location\{n_facilities}_locations\deterministic_exact_solutions"
+        path = ROOTH + rf"data/07_model_output/only_random_candidate_location/{fl_class}/{n_facilities}_locations/deterministic_exact_solutions"
     if len(os.listdir(path)) <15:
         return False
     else:
@@ -76,7 +77,7 @@ def set_up_fl_problems(fl_data, already_solved):
         for time in times:
             if time != "all_day_free_flow":
                 print_INFO_message(f"Loading adj matrix for {time}")
-                path = ROOTH + rf"\data\03_primary\average_graph_{time}_connected_splitted_firstSCC.pkl"
+                path = ROOTH + retrieve_average_graph_path(time, connected=True, splitted=True, firstSCC=True)
                 with open(path, "rb") as f:
                     average_graphs[time] = pkl.load(f)
 
@@ -213,19 +214,19 @@ def solve_fl_problems(fls_exact, fl_data):
     if fls_exact != {}:
         for i, (time, fl_exact) in enumerate(zip(list(fls_exact.keys()), list(fls_exact.values()))):
             if fl_data["handpicked"]:
-                root_path = ROOTH + rf"\data\07_model_output\random_candidate_plus_handpicked\{fl_data['facilities_number']}_locations\deterministic_exact_solutions"
+                root_path = ROOTH + rf"data/07_model_output/random_candidate_plus_handpicked/{fl_data['fl_class']}/{fl_data['facilities_number']}_locations/deterministic_exact_solutions"
             else:
-                root_path = ROOTH + rf"\data\07_model_output\only_random_candidate_location\{fl_data['facilities_number']}_locations\deterministic_exact_solutions"
+                root_path = ROOTH + rf"data/07_model_output/only_random_candidate_location/{fl_data['fl_class']}/{fl_data['facilities_number']}_locations/deterministic_exact_solutions"
             
-            saving_path = root_path + rf"\exact_solution_{time}.pkl"
-            saving_path_light = root_path + rf"\light_exact_solution_{time}.pkl"
-            saving_path_super_light = root_path + rf"\super_light_exact_solution_{time}.pkl"
+            saving_path = root_path + rf"/exact_solution_{time}.pkl"
+            saving_path_light = root_path + rf"/light_exact_solution_{time}.pkl"
+            saving_path_super_light = root_path + rf"/super_light_exact_solution_{time}.pkl"
             if os.path.exists(saving_path):
                 print_INFO_message(f"Exact solution for {time} already exists. Skipping...")
             else:
                 if time in solve_list:
                     print_INFO_message_timestamp(f"Solving exact solution for {time}")
-                    fl_exact.solve(mode="exact")
+                    fl_exact.solve(mode="exact", fl_class=fl_data["fl_class"])
                     print_INFO_message(f"Saving exact solution for {time}")
                     fl_exact.save(saving_path)
                     print_INFO_message(f"Exact solution for {time} SAVED")

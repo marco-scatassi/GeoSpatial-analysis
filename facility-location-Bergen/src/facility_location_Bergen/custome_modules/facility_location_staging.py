@@ -289,8 +289,10 @@ class FacilityLocation:
 
     def __averageDistanceObj(self, model):
         return sum(
-            (model.d[j, i] * model.y[i, j]) for j in model.J for i in model.I
-        ) / (self.n_of_candidate_points*self.n_of_locations_to_choose)
+            model.d[j, i] * model.y[i, j]
+            for j in model.J
+            for i in model.I
+        ) / self.n_of_demand_points
 
     def __DefineAbstractModel(self, location_problem="p-center"):
         # -------------------------abastract model----------------------------
@@ -350,9 +352,9 @@ class FacilityLocation:
 
         return model
 
-    def __solve_exact(self, location_problem="p-center"):
+    def __solve_exact(self, fl_class="p-center"):
         print_INFO_message("Defining the abstract model...")
-        model = self.__DefineAbstractModel(location_problem)
+        model = self.__DefineAbstractModel(fl_class)
 
         print_INFO_message_timestamp("Initializing data...")
         distance_data = {
@@ -370,7 +372,10 @@ class FacilityLocation:
 
         self.result = opt.solve(self.instance)
 
-        self.solution_value = self.instance.L.value
+        if fl_class == "p-center":
+            self.solution_value = self.instance.L.value
+        elif fl_class == "p-median":
+            self.solution_value = value(self.instance.averageDistanceObj)
         self.locations_index = [
             j for j in self.candidate_coordinates.index if self.instance.x[j].value == 1
         ]
@@ -395,12 +400,12 @@ class FacilityLocation:
 
     
     # ---------------------------------------- implement the methods to solve the problem -----------------------------------
-    def solve(self, mode="exact", algorithm="gon", n_trial=None):
+    def solve(self, mode="exact", fl_class="p-center", algorithm="gon", n_trial=None):
         t1 = time.time()
 
         if mode == "exact":
             print_INFO_message_timestamp("Solving the problem exactly...")
-            self.__solve_exact()
+            self.__solve_exact(fl_class)
 
         elif mode == "approx":
             if algorithm == "gon":

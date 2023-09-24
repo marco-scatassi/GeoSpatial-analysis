@@ -24,7 +24,7 @@ from graph_manipulation import create_gdf_from_mapping
 from log import print_INFO_message_timestamp, print_INFO_message
 from retrieve_global_parameters import *
 
-ROOTH = r"\/Pund/Stab$/guest801981/Documents/GitHub/GeoSpatial-analysis/facility-location-Bergen/"
+ROOT = r"\/Pund/Stab$/guest801981/Documents/GitHub/GeoSpatial-analysis/facility-location-Bergen/"
 
 ################################################################################## STEP 1 ######################################################################
 
@@ -36,11 +36,14 @@ def verify_df_already_created(data: dict):
     time_solution = data["time_solution"]
     time_scenario = data["time_scenario"]
     facilities_number = data["facilities_number"]
-    worst = True if data["worst"] == "True" else False
+    worst = data["worst"] 
+    handpicked = data["handpicked"] 
+    fl_class = data["fl_class"]
     saving_path = retrieve_solution_vs_scenario_path(
-        facilities_number, time_solution, time_scenario, weight, worst
+        facilities_number, time_solution, time_scenario, 
+        weight, worst, handpicked, fl_class
     )
-    if os.path.exists(saving_path) or os.path.exists(ROOTH+saving_path):
+    if os.path.exists(saving_path) or os.path.exists(ROOT+saving_path):
         is_created = True
 
     return is_created
@@ -71,23 +74,26 @@ def solution_vs_scenario(data, is_created=False):
     time_solution = data["time_solution"]
     time_scenario = data["time_scenario"]
     facilities_number = data["facilities_number"]
-    worst = True if data["worst"] == "True" else False
+    worst = data["worst"] 
+    handpicked = data["handpicked"]
+    fl_class = data["fl_class"]
     is_free_flow = True if time_solution == "all_day_free_flow" else False
 
     saving_path = retrieve_solution_vs_scenario_path(
-        facilities_number, time_solution, time_scenario, weight, worst
+        facilities_number, time_solution, time_scenario,
+        weight, worst, handpicked, fl_class
     )
     if not os.path.exists(saving_path):
-        saving_path = ROOTH+saving_path
+        saving_path = ROOT+saving_path
         
     df_ = PickleDataSet(filepath=saving_path)
 
     if not is_created:
         # Load the exact solution
         print_INFO_message_timestamp(f"Loading exact solution for {time_solution}")
-        path = retrieve_light_solution_path(facilities_number, time_solution)
-        adj_mapping_path = retrieve_adj_mapping_path(time_solution, is_free_flow)
-        adj_mapping_path_2 = retrieve_adj_mapping_path_2(time_solution, is_free_flow)
+        path = retrieve_light_solution_path(facilities_number, time_solution, handpicked, fl_class)
+        adj_mapping_path = retrieve_adj_mapping_path(time_solution, is_free_flow, handpicked)
+        adj_mapping_path_2 = retrieve_adj_mapping_path_2(time_solution, is_free_flow, handpicked)
         try:
             fls_exact_solution = FacilityLocation.load(path)
             with open(adj_mapping_path, "rb") as f:
@@ -96,11 +102,11 @@ def solution_vs_scenario(data, is_created=False):
             with open(adj_mapping_path_2, "rb") as f:
                 adj_mapping_2 = pkl.load(f)
         except:
-            fls_exact_solution = FacilityLocation.load(ROOTH+path)
-            with open(ROOTH+adj_mapping_path, "rb") as f:
+            fls_exact_solution = FacilityLocation.load(ROOT+path)
+            with open(ROOT+adj_mapping_path, "rb") as f:
                 adj_mapping = pkl.load(f)
             adj_mapping_reverse = {v: k for k, v in adj_mapping.items()}
-            with open(ROOTH+adj_mapping_path_2, "rb") as f:
+            with open(ROOT+adj_mapping_path_2, "rb") as f:
                 adj_mapping_2 = pkl.load(f)
 
         # Load the average graph
@@ -108,7 +114,7 @@ def solution_vs_scenario(data, is_created=False):
         if worst:
             path = rf"\\Pund\Stab$\guest801981\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\data\03_primary\worst_average_graph_{time_scenario}.pkl"
         else:
-            path = rf"\\Pund\Stab$\guest801981\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\data\03_primary\average_graph_{time_scenario}_connected_splitted_firstSCC.pkl"
+            path = ROOT+retrieve_average_graph_path(time_scenario, connected=True, splitted=True, firstSCC=True)
         with open(path, "rb") as f:
             average_graph = pkl.load(f)
 

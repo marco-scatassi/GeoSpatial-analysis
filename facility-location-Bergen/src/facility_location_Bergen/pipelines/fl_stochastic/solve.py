@@ -7,6 +7,7 @@ from shapely.errors import ShapelyDeprecationWarning
 warnings.filterwarnings("ignore", category=ShapelyDeprecationWarning)
 import os
 import dill
+import copy
 import random
 import numpy as np
 import pandas as pd
@@ -35,9 +36,14 @@ def sample_coords(coordinates, idx_sample):
     sample_coords = coordinates.iloc[idx_sample]
     return sample_coords
 
+def sort_coordinates(time, coordinates):
+    coordinates[time]["geometry_x"] = coordinates[time].geometry.x
+    coordinates[time]["geometry_y"] = coordinates[time].geometry.y
+    coordinates[time].sort_values(by=["geometry_x", "geometry_y"], inplace=True)
+    coordinates[time].drop(columns=["geometry_x", "geometry_y"], inplace=True)
 
-def load_data(handpicked=True):
-    times = ["morning", "midday", "afternoon"]
+
+def load_data(times, handpicked=True):
     average_graphs = {}
 
     for time in times:
@@ -67,58 +73,89 @@ def main():
     RATIO1 = 0.1
     RATIO2= 0.05
     n_locations = [1,2,3]
+    times = ["all_day", "morning", "midday", "afternoon"]
     handpicked = True
-    fl_class = sys.argv[1]
+    handpicked_locations = [5229, 1688, 1842, 4647, 159, 2075, 2428, 361, 3477, 3745, 4731]
+    fl_class = sys.argv[1] if len(sys.argv) > 1 else "p-center"
         
     if fl_class not in ["p-center", "p-median"]:
         raise Exception(f"Argument {fl_class} not valid")
         
-    average_graphs, adj_matricies = load_data(handpicked)
+    average_graphs, adj_matricies = load_data(times, handpicked)
 
-    idx_sampled = sample_idx(list(range(len(average_graphs["morning"].nodes()))), RATIO1)
+    idx_sampled = sample_idx(list(range(len(average_graphs["all_day"].nodes()))), RATIO1)
     idx_sampled2 = sample_idx(idx_sampled, RATIO2)
             
+    original_order_coordinates = {}
     coordinates = {time: pd.Series(list(average_graphs[time].nodes())) for time in times}
             
     for time in times:
         coordinates[time] = coordinates[time].apply(lambda x: Point(x))
         coordinates[time] = gpd.GeoDataFrame(geometry=coordinates[time])
-        coordinates[time]["geometry_x"] = coordinates[time].geometry.x
-        coordinates[time]["geometry_y"] = coordinates[time].geometry.y
-        coordinates[time].sort_values(by=["geometry_x", "geometry_y"], inplace=True)
-        coordinates[time].drop(columns=["geometry_x", "geometry_y"], inplace=True)
+        original_order_coordinates[time] = copy.deepcopy(coordinates[time])
+        sort_coordinates(time, coordinates)
 
     coordinates_sampled = {time: sample_coords(coordinates[time], idx_sampled) for time in times}
     coordinates_sampled2 = {time: sample_coords(coordinates[time], idx_sampled2) for time in times}
 
     coordinates_index_sampled = {time: coordinates_sampled[time].index for time in times}
     coordinates_index_sampled2 = {time: coordinates_sampled2[time].index for time in times}
+    
+    if handpicked:
+        extra_locations = []
+        for i, node in enumerate(average_graphs["all_day"].nodes()):
+            if i in handpicked_locations:
+                extra_locations.append(Point(node))
+                    
+        extra_locations_index = {}
+        for time in coordinates_sampled.keys():
+            extra_locations_index[time] = []
+            for p in extra_locations:
+                for i, e in zip(original_order_coordinates[time].index, original_order_coordinates[time].geometry):
+                    if e == p:
+                        extra_locations_index[time].append(i)
+                            
+        for time in coordinates_sampled.keys():
+            coordinates_sampled[time] = pd.concat([coordinates_sampled[time], 
+                                         gpd.GeoDataFrame(geometry=extra_locations, index=extra_locations_index[time])]).\
+                                            drop_duplicates(subset=["geometry"])
+            coordinates_sampled2[time] = pd.concat([coordinates_sampled2[time],
+                                         gpd.GeoDataFrame(geometry=extra_locations, index=extra_locations_index[time])]).\
+                                            drop_duplicates(subset=["geometry"])
+                
+            sort_coordinates(time, coordinates_sampled)
+            sort_coordinates(time, coordinates_sampled2)
 
-    adj_matricies_sampled = {time: adj_matricies[time][coordinates_index_sampled2[time], :][:, coordinates_index_sampled[time]] for time in times}
+    print(coordinates_sampled2["all_day"].index)
+
+    adj_matricies_sampled = {time: adj_matricies[time][coordinates_sampled2[time].index, :][:, coordinates_sampled[time].index] for time in times[1:]}
     print(f"adj_matricies_sampled.shape: {adj_matricies_sampled['morning'].shape}")
 
     weighted_adj_matricies = {time: AdjacencyMatrix(adj_matrix=adj_matricies_sampled[time],
                                       kind="empirical",
                                       epsg=None,
-                                      mode="time") for time in times}
+                                      mode="time") for time in times[1:]}
 
-    print_INFO_message_timestamp(f"coordinates_sampled shape: {coordinates_sampled['morning'].shape}"+
-                                 f"\ncoordinates_sampled2 shape: {coordinates_sampled2['morning'].shape}")
+    print_INFO_message_timestamp(f"coordinates_sampled shape: {coordinates_sampled['all_day'].shape}"+
+                                 f"\ncoordinates_sampled2 shape: {coordinates_sampled2['all_day'].shape}")
 
 
     for m in n_locations:
-        probabilities = {time: 1/len(weighted_adj_matricies) for time in times}
-        fl_stochastic = StochasticFacilityLocation(coordinates=coordinates_sampled["morning"],
+        probabilities = {time: 1/len(weighted_adj_matricies) for time in times[1:]}
+        fl_stochastic = StochasticFacilityLocation(coordinates=coordinates_sampled["all_day"],
                                                 n_of_locations_to_choose=m,
-                                                candidate_coordinates=coordinates_sampled2["morning"],)
+                                                candidate_coordinates=coordinates_sampled2["all_day"],)
         fl_stochastic.solve(scenarios_data=weighted_adj_matricies,
                             scenarioProbabilities=probabilities,
                             method="LS",
+                            fl_class=fl_class,
                             max_iter=20,)
 
         print_INFO_message_timestamp(f"Saving solution")
-        fl_stochastic.save(ROOTH + rf"data/07_model_output/{m}_locations/stochastic_solution/lshape_solution.pkl")
-        
+        if handpicked:
+            fl_stochastic.save(ROOTH + rf"data/07_model_output/random_candidate_plus_handpicked/{fl_class}/{m}_locations/stochastic_solution/lshape_solution.pkl")
+        else:
+            fl_stochastic.save(ROOTH + rf"data/07_model_output/only_random_candidate_location/{fl_class}/{m}_locations/stochastic_solution/lshape_solution.pkl")
 
 if __name__ == "__main__":
     main()

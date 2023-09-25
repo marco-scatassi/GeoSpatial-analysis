@@ -470,7 +470,8 @@ class FacilityLocation:
 # class to define the Stochastic Facility Location problem
 class StochasticFacilityLocation:
     # ----------------------------------------------- define the constructor -----------------------------------------------
-
+    
+    fl_class = None
     solver_status = None
     solution_value = None
     scenarios_names = None
@@ -513,8 +514,15 @@ class StochasticFacilityLocation:
     # define the objective function
     def __maximalDistanceObj(self, model):
         return model.L
+    
+    def __averageDistanceObj(self, model):
+        return sum(
+            model.d[j, i] * model.y[i, j]
+            for j in model.J
+            for i in model.I
+        ) / self.n_of_demand_points
 
-    def __DefineAbstractModel(self):
+    def __DefineAbstractModel(self, fl_class="p-center"):
         # -------------------------abastract model----------------------------
         model = pyo.AbstractModel()
 
@@ -536,8 +544,9 @@ class StochasticFacilityLocation:
         # define the binary variables for the assignment decision (y)
         model.y = Var(model.I, model.J, within=Binary)
 
-        # define the auxiliary variable for the maximal distance (L)
-        model.L = Var(within=NonNegativeReals)
+        if fl_class == "p-center":
+            # define the auxiliary variable for the maximal distance (L)
+            model.L = Var(within=NonNegativeReals)
 
         # --------------------------constraints-------------------------------
         # define a constraint for each demand point to be covered by a single location
@@ -548,8 +557,9 @@ class StochasticFacilityLocation:
         # define a constraint for the maximum number of locations
         model.maximumLocations = Constraint(rule=self.__maximumLocations)
 
-        # define a constraint for the maximal distance (L is an auxiliary variable)
-        model.maximalDistance = Constraint(model.I, rule=self.__maximalDistance)
+        if fl_class == "p-center":
+            # define a constraint for the maximal distance (L is an auxiliary variable)
+            model.maximalDistance = Constraint(model.I, rule=self.__maximalDistance)
 
         # define a constraint for each demand point to be served by an open facility
         model.servedByOpenFacility = Constraint(
@@ -563,9 +573,14 @@ class StochasticFacilityLocation:
         )
         
         # ------ second stage objective function ------    
-        model.secondStageObj = Expression(
-            rule=self.__maximalDistanceObj
-        )
+        if fl_class == "p-center":
+            model.secondStageObj = Expression(
+                rule=self.__maximalDistanceObj
+            )
+        elif fl_class == "p-median":
+            model.secondStageObj = Expression(
+                rule=self.__averageDistanceObj
+            )
 
         #------- global objective function -------
         def globalObj(model):
@@ -596,12 +611,12 @@ class StochasticFacilityLocation:
         return scenariosProbabilities[scenarioName]
     
     # ---------------------------------------- implement the methods to solve the problem -----------------------------------
-    def solve(self, scenarios_data: dict, scenarioProbabilities: dict, method="EF", max_iter=25):
+    def solve(self, scenarios_data: dict, scenarioProbabilities: dict, method="EF", fl_class="p-center", max_iter=25):
         t1 = time.time()
         
         # ------------------------- abastract model ----------------------------
         print_INFO_message("Defining the abstract model...")
-        model = self.__DefineAbstractModel()
+        model = self.__DefineAbstractModel(fl_class)
         
         # ------------------------- initialize data ----------------------------
         print_INFO_message_timestamp("Initializing data...")

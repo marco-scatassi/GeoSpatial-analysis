@@ -7,6 +7,7 @@ from shapely.errors import ShapelyDeprecationWarning
 warnings.filterwarnings("ignore", category=ShapelyDeprecationWarning)
 import os
 import dill
+import copy
 import random
 import numpy as np
 import pandas as pd
@@ -102,25 +103,25 @@ def main():
 
     idx_sampled = sample_idx(list(range(len(average_graphs["all_day_free_flow"].nodes()))), RATIO1)
     idx_sampled2 = sample_idx(idx_sampled, RATIO2)
+    
+    dict_keys = list(adj_matricies.keys())
             
     original_order_coordinates = {}
-    coordinates = {time: pd.Series(list(average_graphs[time].nodes())) for time in times}
+    coordinates = {time: pd.Series(list(average_graphs[time].nodes())) for time in adj_matricies.keys()}
 
-    keys = list(adj_matricies.keys())
-
-    for time in keys:
+    for time in adj_matricies.keys():
         coordinates[time] = coordinates[time].apply(lambda x: Point(x))
         coordinates[time] = gpd.GeoDataFrame(geometry=coordinates[time])
         original_order_coordinates[time] = copy.deepcopy(coordinates[time])
         sort_coordinates(time, coordinates)
 
-    coordinates_sampled = {time: sample_coords(coordinates[time], idx_sampled) for time in keys}
-    coordinates_sampled2 = {time: sample_coords(coordinates[time], idx_sampled2) for time in keys}
+    coordinates_sampled = {time: sample_coords(coordinates[time], idx_sampled) for time in dict_keys}
+    coordinates_sampled2 = {time: sample_coords(coordinates[time], idx_sampled2) for time in dict_keys}
 
-    coordinates_index_sampled = {time: coordinates_sampled[time].index for time in keys}
-    coordinates_index_sampled2 = {time: coordinates_sampled2[time].index for time in keys}
+    coordinates_index_sampled = {time: coordinates_sampled[time].index for time in dict_keys}
+    coordinates_index_sampled2 = {time: coordinates_sampled2[time].index for time in dict_keys}
 
-    adj_matricies_sampled = {time: adj_matricies[time][coordinates_index_sampled2[time], :][:, coordinates_index_sampled[time]] for time in keys}
+    adj_matricies_sampled = {time: adj_matricies[time][coordinates_index_sampled2[time], :][:, coordinates_index_sampled[time]] for time in dict_keys}
     print(f"adj_matricies_sampled.shape: {adj_matricies_sampled['morning'].shape}")
 
     if handpicked:
@@ -130,28 +131,28 @@ def main():
                 extra_locations.append(Point(node))
                         
         extra_locations_index = {}
-        for time in keys:
+        for time in dict_keys:
             extra_locations_index[time] = []
             for p in extra_locations:
                 for i, e in zip(original_order_coordinates[time].index, original_order_coordinates[time].geometry):
                     if e == p:
                         extra_locations_index[time].append(i)
-                        
-            for time in coordinates_sampled.keys():
-                coordinates_sampled[time] = pd.concat([coordinates_sampled[time], 
+        
+        for time in coordinates_sampled.keys():
+            coordinates_sampled[time] = pd.concat([coordinates_sampled[time], 
                                             gpd.GeoDataFrame(geometry=extra_locations, index=extra_locations_index[time])]).\
                                                 drop_duplicates(subset=["geometry"])
-                coordinates_sampled2[time] = pd.concat([coordinates_sampled2[time],
+            coordinates_sampled2[time] = pd.concat([coordinates_sampled2[time],
                                             gpd.GeoDataFrame(geometry=extra_locations, index=extra_locations_index[time])]).\
                                                 drop_duplicates(subset=["geometry"])
                     
-                sort_coordinates(time, coordinates_sampled)
-                sort_coordinates(time, coordinates_sampled2)
+            sort_coordinates(time, coordinates_sampled)
+            sort_coordinates(time, coordinates_sampled2)
 
 
-        print(coordinates_sampled2["all_day"].index)
+        print(coordinates_sampled2["all_day_free_flow"].index)
 
-        adj_matricies_sampled = {time: adj_matricies[time][coordinates_sampled2[time].index, :][:, coordinates_sampled[time].index] for time in keys}
+        adj_matricies_sampled = {time: adj_matricies[time][coordinates_sampled2[time].index, :][:, coordinates_sampled[time].index] for time in dict_keys}
         print(f"adj_matricies_sampled.shape: {adj_matricies_sampled['morning'].shape}")
 
     weighted_adj_matricies = {time: AdjacencyMatrix(adj_matrix=adj_matricies_sampled[time],
@@ -195,6 +196,7 @@ def main():
                 fls_deterministics=fls_deterministics,
                 df = pd.DataFrame(columns=['n_locations', 'RP', 'RP_Out_of_Sample', 'WS', 'EVPI', 'VSS']),
                 method="LS", 
+                fl_class=fl_class,
                 max_iter=max_iter,
                 custom_scenario=custom_scenario
             )
@@ -205,25 +207,29 @@ def main():
                 fls_deterministics=fls_deterministics,
                 df = df_metrics,
                 method="LS", 
+                fl_class=fl_class,
                 max_iter=max_iter,
                 custom_scenario=custom_scenario
             )
         print_INFO_message_timestamp(f"Metrics for {m} locations computed")
         print_INFO_message(f"Saving metrics for {m} locations")
         if handpicked:
-            df_metrics.to_csv(ROOT + rf"data/07_model_output/random_candidate_plus_handpicked/stochastic_solution_evaluation_metrics_{m}.csv", index=False)
+            df_metrics.to_csv(ROOT + rf"data/07_model_output/random_candidate_plus_handpicked/{fl_class}/stochastic_solution_evaluation_metrics_{m}.csv", index=False)
         else:
-            df_metrics.to_csv(ROOT + rf"data/07_model_output/only_random_candidate_location/stochastic_solution_evaluation_metrics_{m}.csv", index=False)
+            df_metrics.to_csv(ROOT + rf"data/07_model_output/only_random_candidate_location/{fl_class}/stochastic_solution_evaluation_metrics_{m}.csv", index=False)
         print_INFO_message(f"Metrics for {m} locations saved")
             
     print_INFO_message(f"Saving metrics")
     try:
         if handpicked:
-            saving_path = ROOT + rf"/data/07_model_output/random_candidate_plus_handpicked/stochastic_solution_evaluation_metrics.csv"
+            saving_path = ROOT + rf"/data/07_model_output/random_candidate_plus_handpicked/{fl_class}/stochastic_solution_evaluation_metrics.csv"
         else:
-            saving_path = ROOT + rf"/data/07_model_output/only_random_candidate_location/stochastic_solution_evaluation_metrics.csv"
+            saving_path = ROOT + rf"/data/07_model_output/only_random_candidate_location/{fl_class}/stochastic_solution_evaluation_metrics.csv"
         df_metrics.to_csv(saving_path, index=False)
     except:
         print_INFO_message(f"Path {saving_path} not valid")
         saving_path = input("Insert the path where you want to save the metrics: ")
         df_metrics.to_csv(saving_path, index=False)
+        
+if __name__ == "__main__":
+    main()

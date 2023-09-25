@@ -32,12 +32,7 @@ from kedro.pipeline import Pipeline, pipeline
 from kedro.runner import SequentialRunner
 from log import print_INFO_message, print_INFO_message_timestamp
 from PIL import Image
-from retrieve_global_parameters import (
-    retrieve_average_graph_path,
-    retrieve_light_solution_path,
-    retrieve_worst_average_graph_path,
-    retrieve_solution_vs_scenario_path,
-)
+from retrieve_global_parameters import *
 from src.facility_location_Bergen.custome_modules.graphical_analysis import *
 from streamlit_folium import st_folium
 
@@ -742,11 +737,11 @@ def deterministic_analysis(session_state, TIMES, facilities_number, ratio1, rati
 def stochastic_load_data(session_state, facilities_number):
     root_path = project_path+r"/data/07_model_output/"
     
-    if f"fls_stochastic_{facilities_number}" not in session_state:
+    if (f"fls_stochastic_{facilities_number}", FL_CLASS) not in session_state:
         fls_solutions = {}
-        fls_solutions["stochastic"] = StochasticFacilityLocation.load(project_path+"/"+retrieve_solution_path(facilities_number, stochastic=True, handpicked=HANDPICKED))
-        fls_solutions["deterministic"] = FacilityLocation.load(project_path+"/"+retrieve_light_solution_path(facilities_number, "all_day_free_flow", handpicked=HANDPICKED))
-        session_state[f"fls_stochastic_{facilities_number}"] = fls_solutions  
+        fls_solutions["stochastic"] = StochasticFacilityLocation.load(project_path+"/"+retrieve_solution_path(facilities_number, stochastic=True, handpicked=HANDPICKED, fl_class=FL_CLASS))
+        fls_solutions["deterministic"] = FacilityLocation.load(project_path+"/"+retrieve_light_solution_path(facilities_number, "all_day_free_flow", handpicked=HANDPICKED, fl_class=FL_CLASS))
+        session_state[(f"fls_stochastic_{facilities_number}", FL_CLASS)] = fls_solutions  
 
 def stochastic_load_metrics(session_state):
     if HANDPICKED:
@@ -769,15 +764,14 @@ def stochastic_load_metrics(session_state):
         session_state[f"df_metrics"] = df_metrics 
 
 def stochastic_generate_viz(session_state, facilities_number):
-    if f"fls_stochastic_{facilities_number}" not in session_state:
+    if (f"fls_stochastic_{facilities_number}", FL_CLASS) not in session_state:
         st.error("Please load data first!", icon="🚨")
         return go.Figure()
 
-    fl_stochastic = session_state[f"fls_stochastic_{facilities_number}"]["stochastic"]
-    fl_deterministic = session_state[f"fls_stochastic_{facilities_number}"]["deterministic"]
-    fls = [fl_stochastic, fl_deterministic]
+    fls = {fl_class: [session_state[(f"fls_stochastic_{facilities_number}", fl_class)]["stochastic"],
+                     session_state[(f"fls_stochastic_{facilities_number}", fl_class)]["deterministic"]] for fl_class in [FL_CLASS]}
     
-    return facilities_on_map(fls)
+    return facilities_on_map(fls[FL_CLASS], fl_classes=[FL_CLASS]*len(fls[FL_CLASS]))
 
 def stochastic_analysis(session_state):
     col1, col2, col3, _ = st.columns(4)

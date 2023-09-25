@@ -688,6 +688,7 @@ class StochasticFacilityLocation:
         t2 = time.time()
 
         self.computation_time = t2 - t1
+        self.fl_class = fl_class
 
     # ---------------------------------------- implement the methods to save and load the matrix -----------------------------------
     # save the solution
@@ -743,7 +744,7 @@ class StochasticFacilityLocationTemplate:
     def maximalDistanceObj(self, model):
         return model.L
     
-    def __averageDistanceObj(self, model):
+    def averageDistanceObj(self, model):
         return sum(
             model.d[j, i] * model.y[i, j]
             for j in model.J
@@ -787,7 +788,7 @@ class StochasticFacilityLocationTemplate:
 
         if fl_class == "p-center":
             # define a constraint for the maximal distance (L is an auxiliary variable)
-            model.maximalDistance = Constraint(model.I, rule=self.__maximalDistance)
+            model.maximalDistance = Constraint(model.I, rule=self.maximalDistance)
 
         # define a constraint for each demand point to be served by an open facility
         model.servedByOpenFacility = Constraint(
@@ -803,11 +804,11 @@ class StochasticFacilityLocationTemplate:
         # ------ second stage objective function ------    
         if fl_class == "p-center":
             model.secondStageObj = Expression(
-                rule=self.__maximalDistanceObj
+                rule=self.maximalDistanceObj
             )
         elif fl_class == "p-median":
             model.secondStageObj = Expression(
-                rule=self.__averageDistanceObj
+                rule=self.averageDistanceObj
             )
 
         #------- global objective function -------
@@ -857,12 +858,13 @@ class StochasticFacilityLocationMetrics(StochasticFacilityLocationTemplate):
                                      custom_scenario = None,
                                      df = pd.DataFrame(columns=['n_locations', 'RP', 'RP_Out_of_Sample', 'WS', 'EVPI', 'VSS']),
                                      method="EF", 
+                                     fl_class="p-center",
                                      max_iter=25):
         t1 = time.time()
         
         # ------------------------- abastract model ----------------------------
         print_INFO_message("Defining the abstract model...")
-        model = super().DefineAbstractModel()
+        model = super().DefineAbstractModel(fl_class)
         
         # ------------------------- initialize data ----------------------------
         print_INFO_message_timestamp("Initializing data...")
@@ -876,7 +878,7 @@ class StochasticFacilityLocationMetrics(StochasticFacilityLocationTemplate):
                 "max_iter": max_iter,
             }
         elif method == "EF":
-            options = {"solver": "cplex_direct"}
+            options = {"solver": "cplex"}
                 
         all_scenario_names = list(scenarios_data.keys())
         

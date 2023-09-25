@@ -757,7 +757,7 @@ def stochastic_load_metrics(session_state):
         session_state[f"df_metrics"] = df_metrics 
 
 def stochastic_generate_viz(session_state, facilities_number):
-    if f"fls_stochastic_{facilities_number}" not in session_state:
+    if (f"fls_stochastic_{facilities_number}", FL_CLASS) not in session_state:
         st.error("Please load data first!", icon="🚨")
         return go.Figure()
 

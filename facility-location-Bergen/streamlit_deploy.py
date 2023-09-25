@@ -740,7 +740,7 @@ def deterministic_analysis(session_state, TIMES, facilities_number, ratio1, rati
 
 # -------------------------------------------- STOCHASTIC ANALYSIS ---------------------------------------------
 def stochastic_load_data(session_state, facilities_number):
-    root_path = project_path+r"/data/07_model_output"
+    root_path = project_path+r"/data/07_model_output/"
     
     if f"fls_stochastic_{facilities_number}" not in session_state:
         fls_solutions = {}
@@ -749,7 +749,10 @@ def stochastic_load_data(session_state, facilities_number):
         session_state[f"fls_stochastic_{facilities_number}"] = fls_solutions  
 
 def stochastic_load_metrics(session_state):
-    root_path = project_path+r"/data/07_model_output"
+    if HANDPICKED:
+        root_path = project_path+rf"/data/07_model_output/random_candidate_plus_handpicked/{FL_CLASS}"
+    else:
+        root_path = project_path+rf"/data/07_model_output/only_random_candidate_location/{FL_CLASS}"
     if f"df_metrics" not in session_state:
         df_metrics = pd.read_csv(root_path+f"/stochastic_solution_evaluation_metrics.csv")
         new_cols_name = ["n_locations"]

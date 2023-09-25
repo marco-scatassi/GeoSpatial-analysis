@@ -734,7 +734,7 @@ def stochastic_load_data(session_state, facilities_number):
         fls_solutions = {}
         fls_solutions["stochastic"] = StochasticFacilityLocation.load(project_path+"/"+retrieve_solution_path(facilities_number, stochastic=True, handpicked=HANDPICKED))
         fls_solutions["deterministic"] = FacilityLocation.load(project_path+"/"+retrieve_light_solution_path(facilities_number, "all_day_free_flow", handpicked=HANDPICKED))
-        session_state[f"fls_stochastic_{facilities_number}"] = fls_solutions  
+        session_state[(f"fls_stochastic_{facilities_number}", FL_CLASS)] = fls_solutions  
 
 def stochastic_load_metrics(session_state):
     if HANDPICKED:
@@ -764,8 +764,13 @@ def stochastic_generate_viz(session_state, facilities_number):
     fl_stochastic = session_state[f"fls_stochastic_{facilities_number}"]["stochastic"]
     fl_deterministic = session_state[f"fls_stochastic_{facilities_number}"]["deterministic"]
     fls = [fl_stochastic, fl_deterministic]
+
+    fl_classes = []
+    for fl in fls:
+        for k in fl.keys():
+            fl_classes.append(k[1])
     
-    return facilities_on_map(fls)
+    return facilities_on_map(fls, fl_classes=fl_classes)
 
 def stochastic_analysis(session_state):
     col1, col2, col3, _ = st.columns(4)

@@ -738,9 +738,9 @@ def stochastic_load_data(session_state, facilities_number):
 
 def stochastic_load_metrics(session_state):
     if HANDPICKED:
-        root = project_path+rf"/data/07_model_output/random_candidate_plus_handpicked/{FL_CLASS}/"
+        root_path = project_path+rf"/data/07_model_output/random_candidate_plus_handpicked/{FL_CLASS}/"
     else:
-        root = project_path+rf"/data/07_model_output/only_random_candidate_location/{FL_CLASS}/"
+        root_path = project_path+rf"/data/07_model_output/only_random_candidate_location/{FL_CLASS}/"
     if f"df_metrics" not in session_state:
         df_metrics = pd.read_csv(root_path+f"/stochastic_solution_evaluation_metrics.csv")
         new_cols_name = ["n_locations"]

@@ -761,8 +761,8 @@ def stochastic_generate_viz(session_state, facilities_number):
         st.error("Please load data first!", icon="🚨")
         return go.Figure()
 
-    fl_stochastic = session_state[f"fls_stochastic_{facilities_number}"]["stochastic"]
-    fl_deterministic = session_state[f"fls_stochastic_{facilities_number}"]["deterministic"]
+    fl_stochastic = session_state[(f"fls_stochastic_{facilities_number}", FL_CLASS)]["stochastic"]
+    fl_deterministic = session_state[(f"fls_stochastic_{facilities_number}", FL_CLASS)]["deterministic"]
     fls = [fl_stochastic, fl_deterministic]
 
     fl_classes = []

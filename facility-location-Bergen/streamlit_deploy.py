@@ -761,16 +761,10 @@ def stochastic_generate_viz(session_state, facilities_number):
         st.error("Please load data first!", icon="🚨")
         return go.Figure()
 
-    fl_stochastic = session_state[(f"fls_stochastic_{facilities_number}", FL_CLASS)]["stochastic"]
-    fl_deterministic = session_state[(f"fls_stochastic_{facilities_number}", FL_CLASS)]["deterministic"]
-    fls = [fl_stochastic, fl_deterministic]
-
-    fl_classes = []
-    for fl in fls:
-        for k in fl.keys():
-            fl_classes.append(k[1])
+    fls = {fl_class: [session_state[(f"fls_stochastic_{facilities_number}", fl_class)]["stochastic"],
+                     session_state[(f"fls_stochastic_{facilities_number}", fl_class)]["deterministic"]] for fl_class in [FL_CLASS]}
     
-    return facilities_on_map(fls, fl_classes=fl_classes)
+    return facilities_on_map(fls[FL_CLASS], fl_classes=[FL_CLASS]*len(fls[FL_CLASS]))
 
 def stochastic_analysis(session_state):
     col1, col2, col3, _ = st.columns(4)

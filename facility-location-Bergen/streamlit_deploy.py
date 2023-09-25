@@ -1,7 +1,7 @@
 import sys
 
 # Get the directory path to add to PYTHONPATH
-directory_path = r"\\Pund\Stab$\guest801968\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\src\facility_location_Bergen\custome_modules"
+directory_path = r"\\Pund\Stab$\guest801981\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\src\facility_location_Bergen\custome_modules"
 if directory_path not in sys.path:
     sys.path.append(directory_path)
     
@@ -50,6 +50,8 @@ metadata = bootstrap_project(project_path)
 
 TIMES = ["all_day_free_flow", "all_day", "morning", "midday", "afternoon"]
 FACILITIES_NUMBER = [1,2,3]
+HANDPICKED = True
+FL_CLASS = "p-median"
 
 LOG_FILE_PATH = r"\\Pund\Stab$\guest801981\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\logs\split_roads.log"
 LOG_FILE_PATH2 = r"\\Pund\Stab$\guest801981\Documents\GitHub\GeoSpatial-analysis\facility-location-Bergen\logs\split_roads_changes.log"
@@ -419,14 +421,17 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
         for i, time in enumerate(TIMES):
             print_INFO_message_timestamp(f"Loading deterministic solution for: {time}")
             progress_bar.progress((i+1)*1/len(TIMES), f"Loading exact solution for: {time}")
-            path = project_path+r"/"+retrieve_light_solution_path(facilities_number, time)
+            path = project_path+r"/"+retrieve_light_solution_path(facilities_number, time, handpicked=HANDPICKED, fl_class=FL_CLASS)
             fls_exact[time] = FacilityLocation.load(path)
             
         session_state[f"fls_exact_{facilities_number}"] = fls_exact
     c += 1
         
     if f"dfs_{facilities_number}" not in session_state:
-        root = project_path+rf"/data/08_reporting/{facilities_number}_locations"
+        if HANDPICKED:
+            root = project_path+rf"/data/08_reporting/random_candidate_plus_handpicked/{FL_CLASS}/{facilities_number}_locations"
+        else:
+            root = project_path+rf"/data/08_reporting/only_random_candidate_location/{FL_CLASS}/{facilities_number}_locations"
         paths = [p for p in os.listdir(root) if ("solution_vs_scenario" in p) and ("worst" not in p)]
             
         dfs = {}
@@ -739,8 +744,8 @@ def stochastic_load_data(session_state, facilities_number):
     
     if f"fls_stochastic_{facilities_number}" not in session_state:
         fls_solutions = {}
-        fls_solutions["stochastic"] = StochasticFacilityLocation.load(root_path+f"/{facilities_number}_locations/stochastic_solution/lshape_solution.pkl")
-        fls_solutions["deterministic"] = FacilityLocation.load(root_path+f"/{facilities_number}_locations/deterministic_exact_solutions/super_light_exact_solution_all_day.pkl")
+        fls_solutions["stochastic"] = StochasticFacilityLocation.load(project_path+"/"+retrieve_solution_path(facilities_number, stochastic=True, handpicked=HANDPICKED))
+        fls_solutions["deterministic"] = FacilityLocation.load(project_path+"/"+retrieve_light_solution_path(facilities_number, "all_day_free_flow", handpicked=HANDPICKED))
         session_state[f"fls_stochastic_{facilities_number}"] = fls_solutions  
 
 def stochastic_load_metrics(session_state):

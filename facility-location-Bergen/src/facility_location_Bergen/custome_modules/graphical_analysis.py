@@ -67,9 +67,10 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
         
     for i in range(len(fls)):
         if "StochasticFacilityLocation" in str(type(fls[i])):
-            mapping[("stochastic", fls[i].n_of_locations_to_choose, fls[i].fl_class)] = fls[i]
+            mapping[(f"stochastic_{extra_text[i]}", fls[i].n_of_locations_to_choose, fls[i].fl_class)] = fls[i]
         else:
-            mapping[("deterministic", fls[i].n_of_locations_to_choose, fls[i].fl_class)] = fls[i]
+            mapping[(f"deterministic_{extra_text[i]}", fls[i].n_of_locations_to_choose, fls[i].fl_class)] = fls[i]
+    
     
     lats = {}
     lons = {}
@@ -82,10 +83,10 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
 
         
     for k, fl in mapping.items():
-        if k[0] == "deterministic":
+        if "deterministic" in k[0]:
             lats[k] = [p.geometry.y for p in fl.locations_coordinates]
             lons[k] = [p.geometry.x for p in fl.locations_coordinates]
-        elif k[0] == "stochastic":
+        elif "stochastic" in k[0]:
             idx = pd.Series([j if fl.first_stage_solution[j] != 0 else None 
                  for j in fl.first_stage_solution.keys()]).dropna().values
 
@@ -122,7 +123,7 @@ def facilities_on_map(fls, extra_text=None, title_pad_l=50):
     
     is_s = False
     for k in mapping.keys():
-        if k[0] == "stochastic":
+        if "stochastic" in k[0]:
             is_s = True
     colors = ["red", "black", "blue", "purple", "green", "orange", "pink", "brown", "black", "grey"]
     

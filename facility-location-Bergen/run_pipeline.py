@@ -71,7 +71,7 @@ def run_fl_deterministic(fl_class="p-center"):
         return Exception("Facility location class not recognized")
     
     pipeline_to_run = "fl_deterministic"
-    namespace_to_run = [".data01", ".data02", ".data03", ".data11", ".data12", ".data13"]
+    namespace_to_run = [".data01", ".data02", ".data03"]#, ".data11", ".data12", ".data13"]
     if fl_class == "p-median":
         namespace_to_run = namespace_to_run[:3]
     

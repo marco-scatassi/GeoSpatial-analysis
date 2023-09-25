@@ -36,73 +36,89 @@ def sample_coords(coordinates, idx_sample):
     return sample_coords
 
 
-times = ["morning", "midday", "afternoon"]
-average_graphs = {}
+def load_data(handpicked=True):
+    times = ["morning", "midday", "afternoon"]
+    average_graphs = {}
 
-for time in times:
-    print_INFO_message(f"Loading avg graph for {time}")
-    path = ROOTH + retrieve_average_graph_path(time, connected=True, splitted=True, firstSCC=True)
-    with open(path, "rb") as f:
-        average_graphs[time] = pkl.load(f)
+    for time in times:
+        print_INFO_message(f"Loading avg graph for {time}")
+        path = ROOTH + retrieve_average_graph_path(time, connected=True, splitted=True, firstSCC=True)
+        with open(path, "rb") as f:
+            average_graphs[time] = pkl.load(f)
 
-adj_paths = {time: ROOTH + retrieve_adj_matrix_path(time) for time in times}
-adj_matricies = {time: None for time in times}
+    adj_paths = {time: ROOTH + retrieve_adj_matrix_path(time, handpicked=handpicked) for time in times}
+    adj_matricies = {time: None for time in times}
 
-print_INFO_message(f"Loading adj matrices")
-for time in times:
-    print_INFO_message(f"Loading adj matrix for {time}")
-    with open(adj_paths[time], "rb") as f:
-        adj_matricies[time] = pkl.load(f)
-    print_INFO_message(f"Adj matrix for {time} loaded with shape {adj_matricies[time].shape}")
+    print_INFO_message(f"Loading adj matrices")
+    for time in times:
+        print_INFO_message(f"Loading adj matrix for {time}")
+        with open(adj_paths[time], "rb") as f:
+            adj_matricies[time] = pkl.load(f)
+        print_INFO_message(f"Adj matrix for {time} loaded with shape {adj_matricies[time].shape}")
+      
+    return average_graphs, adj_matricies
 
 
-## Problem initialization
-#It's not possible to solve the problem exactly using all the nodes in the graph. The problem is too big. We can try to solve it using a subset of the nodes.
-random.seed(324324)
-RATIO1 = 0.1
-RATIO2= 0.05
-n_locations = [1,2,3]
 
-idx_sampled = sample_idx(list(range(len(average_graphs["morning"].nodes()))), RATIO1)
-idx_sampled2 = sample_idx(idx_sampled, RATIO2)
+def main():
+    ## Problem initialization
+    #It's not possible to solve the problem exactly using all the nodes in the graph. The problem is too big. We can try to solve it using a subset of the nodes.
+    random.seed(324324)
+    RATIO1 = 0.1
+    RATIO2= 0.05
+    n_locations = [1,2,3]
+    handpicked = True
+    fl_class = sys.argv[1]
         
-coordinates = {time: pd.Series(list(average_graphs[time].nodes())) for time in times}
+    if fl_class not in ["p-center", "p-median"]:
+        raise Exception(f"Argument {fl_class} not valid")
         
-for time in times:
-    coordinates[time] = coordinates[time].apply(lambda x: Point(x))
-    coordinates[time] = gpd.GeoDataFrame(geometry=coordinates[time])
-    coordinates[time]["geometry_x"] = coordinates[time].geometry.x
-    coordinates[time]["geometry_y"] = coordinates[time].geometry.y
-    coordinates[time].sort_values(by=["geometry_x", "geometry_y"], inplace=True)
-    coordinates[time].drop(columns=["geometry_x", "geometry_y"], inplace=True)
+    average_graphs, adj_matricies = load_data(handpicked)
 
-coordinates_sampled = {time: sample_coords(coordinates[time], idx_sampled) for time in times}
-coordinates_sampled2 = {time: sample_coords(coordinates[time], idx_sampled2) for time in times}
+    idx_sampled = sample_idx(list(range(len(average_graphs["morning"].nodes()))), RATIO1)
+    idx_sampled2 = sample_idx(idx_sampled, RATIO2)
+            
+    coordinates = {time: pd.Series(list(average_graphs[time].nodes())) for time in times}
+            
+    for time in times:
+        coordinates[time] = coordinates[time].apply(lambda x: Point(x))
+        coordinates[time] = gpd.GeoDataFrame(geometry=coordinates[time])
+        coordinates[time]["geometry_x"] = coordinates[time].geometry.x
+        coordinates[time]["geometry_y"] = coordinates[time].geometry.y
+        coordinates[time].sort_values(by=["geometry_x", "geometry_y"], inplace=True)
+        coordinates[time].drop(columns=["geometry_x", "geometry_y"], inplace=True)
 
-coordinates_index_sampled = {time: coordinates_sampled[time].index for time in times}
-coordinates_index_sampled2 = {time: coordinates_sampled2[time].index for time in times}
+    coordinates_sampled = {time: sample_coords(coordinates[time], idx_sampled) for time in times}
+    coordinates_sampled2 = {time: sample_coords(coordinates[time], idx_sampled2) for time in times}
 
-adj_matricies_sampled = {time: adj_matricies[time][coordinates_index_sampled2[time], :][:, coordinates_index_sampled[time]] for time in times}
-print(f"adj_matricies_sampled.shape: {adj_matricies_sampled['morning'].shape}")
+    coordinates_index_sampled = {time: coordinates_sampled[time].index for time in times}
+    coordinates_index_sampled2 = {time: coordinates_sampled2[time].index for time in times}
 
-weighted_adj_matricies = {time: AdjacencyMatrix(adj_matrix=adj_matricies_sampled[time],
-                                  kind="empirical",
-                                  epsg=None,
-                                  mode="time") for time in times}
+    adj_matricies_sampled = {time: adj_matricies[time][coordinates_index_sampled2[time], :][:, coordinates_index_sampled[time]] for time in times}
+    print(f"adj_matricies_sampled.shape: {adj_matricies_sampled['morning'].shape}")
 
-print_INFO_message_timestamp(f"coordinates_sampled shape: {coordinates_sampled['morning'].shape}"+
-                             f"\ncoordinates_sampled2 shape: {coordinates_sampled2['morning'].shape}")
+    weighted_adj_matricies = {time: AdjacencyMatrix(adj_matrix=adj_matricies_sampled[time],
+                                      kind="empirical",
+                                      epsg=None,
+                                      mode="time") for time in times}
+
+    print_INFO_message_timestamp(f"coordinates_sampled shape: {coordinates_sampled['morning'].shape}"+
+                                 f"\ncoordinates_sampled2 shape: {coordinates_sampled2['morning'].shape}")
 
 
-for m in n_locations:
-    probabilities = {time: 1/len(weighted_adj_matricies) for time in times}
-    fl_stochastic = StochasticFacilityLocation(coordinates=coordinates_sampled["morning"],
-                                            n_of_locations_to_choose=m,
-                                            candidate_coordinates=coordinates_sampled2["morning"],)
-    fl_stochastic.solve(scenarios_data=weighted_adj_matricies,
-                        scenarioProbabilities=probabilities,
-                        method="LS",
-                        max_iter=20,)
+    for m in n_locations:
+        probabilities = {time: 1/len(weighted_adj_matricies) for time in times}
+        fl_stochastic = StochasticFacilityLocation(coordinates=coordinates_sampled["morning"],
+                                                n_of_locations_to_choose=m,
+                                                candidate_coordinates=coordinates_sampled2["morning"],)
+        fl_stochastic.solve(scenarios_data=weighted_adj_matricies,
+                            scenarioProbabilities=probabilities,
+                            method="LS",
+                            max_iter=20,)
 
-    print_INFO_message_timestamp(f"Saving solution")
-    fl_stochastic.save(ROOTH + rf"data/07_model_output/{m}_locations/stochastic_solution/lshape_solution.pkl")
+        print_INFO_message_timestamp(f"Saving solution")
+        fl_stochastic.save(ROOTH + rf"data/07_model_output/{m}_locations/stochastic_solution/lshape_solution.pkl")
+        
+
+if __name__ == "__main__":
+    main()

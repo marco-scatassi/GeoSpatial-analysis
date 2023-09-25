@@ -730,7 +730,7 @@ def deterministic_analysis(session_state, TIMES, facilities_number, ratio1, rati
 
 # -------------------------------------------- STOCHASTIC ANALYSIS ---------------------------------------------
 def stochastic_load_data(session_state, facilities_number):
-    if f"fls_stochastic_{facilities_number}" not in session_state:
+    if (f"fls_stochastic_{facilities_number}", FL_CLASS) not in session_state:
         fls_solutions = {}
         fls_solutions["stochastic"] = StochasticFacilityLocation.load(project_path+"/"+retrieve_solution_path(facilities_number, stochastic=True, handpicked=HANDPICKED))
         fls_solutions["deterministic"] = FacilityLocation.load(project_path+"/"+retrieve_light_solution_path(facilities_number, "all_day_free_flow", handpicked=HANDPICKED))

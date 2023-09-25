@@ -60,7 +60,7 @@ def deCasteljau(b, t): #de Casteljau algorithm to evaluste a point on a Bezier c
         a[:N-r,:] = (1-t) * a[:N-r,:] + t * a[1:N-r+1,:]# convex combinations in step r                               
     return tuple(a[0,:])
 
-def facilities_on_map(fls, extra_text=None, fl_class="not-provided", title_pad_l=50):
+def facilities_on_map(fls, extra_text=None, fl_classes="not-provided", title_pad_l=50):
     mapping = {}
     if extra_text is None:
         extra_text = [""]*len(fls)
@@ -69,7 +69,7 @@ def facilities_on_map(fls, extra_text=None, fl_class="not-provided", title_pad_l
         try:
             fl_class = fls[i].fl_class
         except:
-            fl_class = fl_class
+            fl_class = fl_classes[i]
         if "StochasticFacilityLocation" in str(type(fls[i])):
             mapping[(f"stochastic_{extra_text[i]}", fls[i].n_of_locations_to_choose, fl_class)] = fls[i]
         else:

@@ -552,15 +552,6 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
                     returned_objects=[],
                     width=800)
 
-    #---------------------------------- MAP LONGEST PATH -------------------------------------        
-
-    with col2:
-        st.markdown("<h3 style='text-align: center;'>Longest paths</h3>", unsafe_allow_html=True)
-        st_folium(
-                session_state[f"map_longest_paths_{facilities_number}"],
-                returned_objects=[],
-                width=800)
-
     #------------------ FREE FLOW SOLUTION UNDER DIFFERENT SCENARIOS COMPARISON ------------------
     #------------------ OBJ FUNCTION VALUE -------------
     col1, col2 = st.columns(2)

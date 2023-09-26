@@ -552,19 +552,19 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
                         session_state[("map_longest_paths", facilities_number, fl_class)],
                         returned_objects=[],
                         width=800)
-
-        # with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBysideWithMap.md", "r") as f:
-        #     content = f.read()
-
-        # with col2:
-        #     for i in range(7):
-        #         st.write("")
-        #     st.markdown(content)
-            
-        # with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/underTheMap.md", "r") as f:
-        #     content = f.read()
-
-        # st.markdown(content)
+    
+            # with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBysideWithMap.md", "r") as f:
+            #     content = f.read()
+    
+            # with col2:
+            #     for i in range(7):
+            #         st.write("")
+            #     st.markdown(content)
+                
+            # with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/underTheMap.md", "r") as f:
+            #     content = f.read()
+    
+            # st.markdown(content)
 
 
     #------------------ FREE FLOW SOLUTION UNDER DIFFERENT SCENARIOS COMPARISON ------------------
@@ -592,10 +592,10 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
                         
             session_state[("abs_diff_barplot", facilities_number)] = (a,b,b_worst)
 
-            with cols[list(cols.keys())[0]]:
-                (a,b,b_worst) = session_state[("abs_diff_barplot", facilities_number)]
-                fig = objective_function_value_under_different_cases(a, b, b_worst)
-                st.plotly_chart(fig, use_container_width=True)
+        with cols[list(cols.keys())[0]]:
+            (a,b,b_worst) = session_state[("abs_diff_barplot", facilities_number)]
+            fig = objective_function_value_under_different_cases(a, b, b_worst)
+            st.plotly_chart(fig, use_container_width=True)
 
             # with col2:
             #     with open(project_path+
@@ -626,15 +626,15 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
             #     st.plotly_chart(fig, use_container_width=True)
     
             # #------------------------------------ DISTRIBUTION ANALYSIS ---------------------------------------
-            # col1, col2 = st.columns(2)
-            if ("average_travel_time", facilities_number) not in session_state:
-                df_min = {fl_class: session_state[("df_min", facilities_number, fl_class)] for fl_class in FL_CLASSES}
-                fig = average_travel_time_across_under_different_cases(df_min)
-                session_state[("average_travel_time", facilities_number)] = fig
+        # col1, col2 = st.columns(2)
+        if ("average_travel_time", facilities_number) not in session_state:
+            df_min = {fl_class: session_state[("df_min", facilities_number, fl_class)] for fl_class in FL_CLASSES}
+            fig = average_travel_time_across_under_different_cases(df_min)
+            session_state[("average_travel_time", facilities_number)] = fig
     
-            with cols[list(cols.keys())[1]]:
-                st.plotly_chart(session_state[("average_travel_time", facilities_number)], 
-                use_container_width=True)
+        with cols[list(cols.keys())[1]]:
+            st.plotly_chart(session_state[("average_travel_time", facilities_number)], 
+            use_container_width=True)
                 
             # df_min = session_state[f"df_min_{facilities_number}"]
                     

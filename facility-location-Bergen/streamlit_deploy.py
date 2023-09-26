@@ -494,136 +494,152 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
             return st.error("Please load data first!", icon="🚨")
 
     # --------------------------------- TRAFFIC JAM ------------------------------------------
-    col1, col2, col3, col4 = st.columns([1,1,1,1])
-    average_graphs = session_state[f"average_graphs"]
-    data_for_traffic_jam_visualization = session_state[f"data_for_traffic_jam_visualization"]
-    jam_vector = []
-    for _, _, diff_weight in data_for_traffic_jam_visualization.values():
-        jam_vector.append(diff_weight)
-    
-    for key, col in zip(TIMES[1:], [col1, col2, col3, col4]):
-        if f"map_traffic_jam_{key}" not in session_state:
-            map = show_traffic_jam(average_graphs[key], 
-                                   display_jam=True, 
-                                   title="TRAFFIC JAM - " + key,
-                                   precomputed_data=data_for_traffic_jam_visualization[key],
-                                   overall_jam = np.mean(jam_vector, axis=0),
-                                   )
-            session_state[f"map_traffic_jam_{key}"] = map
-        with col:
-            st.plotly_chart(
-                session_state[f"map_traffic_jam_{key}"],
-                use_container_width=True
-            )
-    
-    
-    #------------------------------- FACILITIES ON MAP ---------------------------------------
-    cols = st.columns([1]*len(FL_CLASSES))
-    cols = {fl_class: col for fl_class, col in zip(FL_CLASSES, cols)}
-    dfs = {fl_class: session_state[("dfs", facilities_number, fl_class)] for fl_class in FL_CLASSES}
-    # dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
-    for fl_class in FL_CLASSES:
-        session_state[("df_min", facilities_number, fl_class)] = compute_min_distance_df(dfs[fl_class], None)#, dfs_worst)
-
-    for fl_class in FL_CLASSES:
-        if ("facilities_on_map", facilities_number, fl_class) not in session_state:
-            fls_exact = session_state[("fls_exact", facilities_number, fl_class)]
-            fig = facilities_on_map([fl for fl in fls_exact.values()], 
-                                        extra_text=[time for time in fls_exact.keys()],
-                                        title_pad_l=200)
-            session_state[("facilities_on_map", facilities_number, fl_class)] = fig
+    with st.expander("Traffic jam"):
+        col1, col2, col3, col4 = st.columns([1,1,1,1])
+        average_graphs = session_state[f"average_graphs"]
+        data_for_traffic_jam_visualization = session_state[f"data_for_traffic_jam_visualization"]
+        jam_vector = []
+        for _, _, diff_weight in data_for_traffic_jam_visualization.values():
+            jam_vector.append(diff_weight)
         
-        if ("map_longest_paths", facilities_number, fl_class) not in session_state:
-            dfs = session_state[("dfs", facilities_number, fl_class)]
-            average_graphs = session_state[f"average_graphs"]
-            map = visualize_longest_paths(dfs, average_graphs)
-            session_state[("map_longest_paths", facilities_number, fl_class)] = map
-    
-    for fl_class, col in cols.items():
-        with col:
-            st.markdown(f"<h2 style='text-align: center;'>{fl_class}</h2>", unsafe_allow_html=True)
-            st.markdown("<h3 style='text-align: center;'>Optimal locations</h3>", unsafe_allow_html=True)
-            st.plotly_chart(session_state[("facilities_on_map", facilities_number, fl_class)], 
-                        use_container_width=True)
+        for key, col in zip(TIMES[1:], [col1, col2, col3, col4]):
+            if f"map_traffic_jam_{key}" not in session_state:
+                map = show_traffic_jam(average_graphs[key], 
+                                    display_jam=True, 
+                                    title="TRAFFIC JAM - " + key,
+                                    precomputed_data=data_for_traffic_jam_visualization[key],
+                                    overall_jam = np.mean(jam_vector, axis=0),
+                                    )
+                session_state[f"map_traffic_jam_{key}"] = map
+            with col:
+                st.plotly_chart(
+                    session_state[f"map_traffic_jam_{key}"],
+                    use_container_width=True
+                )
+        
+    #------------------------------- FACILITIES ON MAP ---------------------------------------
+    with st.expander("Facilities on map"):
+        cols = st.columns([1]*len(FL_CLASSES))
+        cols = {fl_class: col for fl_class, col in zip(FL_CLASSES, cols)}
+        dfs = {fl_class: session_state[("dfs", facilities_number, fl_class)] for fl_class in FL_CLASSES}
+        # dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
+        for fl_class in FL_CLASSES:
+            session_state[("df_min", facilities_number, fl_class)] = compute_min_distance_df(dfs[fl_class], None)#, dfs_worst)
+
+        for fl_class in FL_CLASSES:
+            if ("facilities_on_map", facilities_number, fl_class) not in session_state:
+                fls_exact = session_state[("fls_exact", facilities_number, fl_class)]
+                fig = facilities_on_map([fl for fl in fls_exact.values()], 
+                                            extra_text=[time for time in fls_exact.keys()],
+                                            title_pad_l=200)
+                session_state[("facilities_on_map", facilities_number, fl_class)] = fig
             
-            st.markdown("<h3 style='text-align: center;'>Longest paths</h3>", unsafe_allow_html=True)
-            st_folium(
-                    session_state[("map_longest_paths", facilities_number, fl_class)],
-                    returned_objects=[],
-                    width=800)
+            if ("map_longest_paths", facilities_number, fl_class) not in session_state:
+                dfs = session_state[("dfs", facilities_number, fl_class)]
+                average_graphs = session_state[f"average_graphs"]
+                map = visualize_longest_paths(dfs, average_graphs)
+                session_state[("map_longest_paths", facilities_number, fl_class)] = map
+        
+        for fl_class, col in cols.items():
+            with col:
+                st.markdown(f"<h2 style='text-align: center;'>{fl_class}</h2>", unsafe_allow_html=True)
+                st.markdown("<h3 style='text-align: center;'>Optimal locations</h3>", unsafe_allow_html=True)
+                st.plotly_chart(session_state[("facilities_on_map", facilities_number, fl_class)], 
+                            use_container_width=True)
+                
+                st.markdown("<h3 style='text-align: center;'>Longest paths</h3>", unsafe_allow_html=True)
+                st_folium(
+                        session_state[("map_longest_paths", facilities_number, fl_class)],
+                        returned_objects=[],
+                        width=800)
+
+        # with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBysideWithMap.md", "r") as f:
+        #     content = f.read()
+
+        # with col2:
+        #     for i in range(7):
+        #         st.write("")
+        #     st.markdown(content)
+            
+        # with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/underTheMap.md", "r") as f:
+        #     content = f.read()
+
+        # st.markdown(content)
+
 
     #------------------ FREE FLOW SOLUTION UNDER DIFFERENT SCENARIOS COMPARISON ------------------
     #------------------ OBJ FUNCTION VALUE -------------
-    a = list(range(len(TIMES)-1))
-    b = {fl_class: list(range(len(TIMES)-1)) for fl_class in FL_CLASSES}
-    
-    if ("abs_diff_barplot", facilities_number) not in session_state:
-        for fl_class in FL_CLASSES:
-            fls_exact = session_state[("fls_exact", facilities_number, fl_class)]
-            dfs = session_state[("dfs", facilities_number, fl_class)]
-            try:
-                dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
-            except:
-                dfs_worst = None
-                
-            b_worst = list(range(len(TIMES)-1))
-
-            for i, time in enumerate(TIMES[1:]):
-                if fl_class == "p-center":
-                    a[i], b[fl_class][i], b_worst[i] = compute_rel_diff(fls_exact, dfs, dfs_worst, time)
-                else:   
-                    _, b[fl_class][i], b_worst[i] = compute_rel_diff(fls_exact, dfs, dfs_worst, time)
-                    
-        session_state[("abs_diff_barplot", facilities_number)] = (a,b,b_worst)
-
-    with cols[list(cols.keys())[0]]:
-        (a,b,b_worst) = session_state[("abs_diff_barplot", facilities_number)]
-        fig = objective_function_value_under_different_cases(a, b, b_worst)
-        st.plotly_chart(fig, use_container_width=True)
-
-    # with col2:
-    #     with open(project_path+
-    #               rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBySideWithFirstBarplot.md", 
-    #               "r",
-    #               encoding="utf-8") as f:
-    #         content = f.read()
-
-    #     for i in range(6):
-    #         st.write("")
-    #     st.markdown(content)
-    
-    # #------------------ RELATIVE DIFFERENCES ------------  
-    # col1, col2 = st.columns(2)
-    # with col1:
-    #     with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBySideWithSecondBarplot.md", 
-    #               "r",
-    #               encoding="utf-8") as f:
-    #         content = f.read()
-
-    #     for i in range(6):
-    #         st.write("")
-    #     st.markdown(content)
-    
-    # with col2:    
-    #     (a,b,b_worst) = session_state[f"abs_diff_barplot_{facilities_number}"]
-    #     fig = outsample_evaluation_relative_differences(a, b, b_worst)
-    #     st.plotly_chart(fig, use_container_width=True)
-
-    # #------------------------------------ DISTRIBUTION ANALYSIS ---------------------------------------
-    # col1, col2 = st.columns(2)
-    if ("average_travel_time", facilities_number) not in session_state:
-        df_min = {fl_class: session_state[("df_min", facilities_number, fl_class)] for fl_class in FL_CLASSES}
-        fig = average_travel_time_across_under_different_cases(df_min)
-        session_state[("average_travel_time", facilities_number)] = fig
-
-    with cols[list(cols.keys())[1]]:
-        st.plotly_chart(session_state[("average_travel_time", facilities_number)], 
-        use_container_width=True)
+    with st.expander("Objective function value analysis"):
+        a = list(range(len(TIMES)-1))
+        b = {fl_class: list(range(len(TIMES)-1)) for fl_class in FL_CLASSES}
         
-    # df_min = session_state[f"df_min_{facilities_number}"]
+        if ("abs_diff_barplot", facilities_number) not in session_state:
+            for fl_class in FL_CLASSES:
+                fls_exact = session_state[("fls_exact", facilities_number, fl_class)]
+                dfs = session_state[("dfs", facilities_number, fl_class)]
+                try:
+                    dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
+                except:
+                    dfs_worst = None
+                    
+                b_worst = list(range(len(TIMES)-1))
+
+                for i, time in enumerate(TIMES[1:]):
+                    if fl_class == "p-center":
+                        a[i], b[fl_class][i], b_worst[i] = compute_rel_diff(fls_exact, dfs, dfs_worst, time)
+                    else:   
+                        _, b[fl_class][i], b_worst[i] = compute_rel_diff(fls_exact, dfs, dfs_worst, time)
+                        
+            session_state[("abs_diff_barplot", facilities_number)] = (a,b,b_worst)
+
+        with cols[list(cols.keys())[0]]:
+            (a,b,b_worst) = session_state[("abs_diff_barplot", facilities_number)]
+            fig = objective_function_value_under_different_cases(a, b, b_worst)
+            st.plotly_chart(fig, use_container_width=True)
+
+        # with col2:
+        #     with open(project_path+
+        #               rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBySideWithFirstBarplot.md", 
+        #               "r",
+        #               encoding="utf-8") as f:
+        #         content = f.read()
+
+        #     for i in range(6):
+        #         st.write("")
+        #     st.markdown(content)
+        
+        # #------------------ RELATIVE DIFFERENCES ------------  
+        # col1, col2 = st.columns(2)
+        # with col1:
+        #     with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBySideWithSecondBarplot.md", 
+        #               "r",
+        #               encoding="utf-8") as f:
+        #         content = f.read()
+
+        #     for i in range(6):
+        #         st.write("")
+        #     st.markdown(content)
+        
+        # with col2:    
+        #     (a,b,b_worst) = session_state[f"abs_diff_barplot_{facilities_number}"]
+        #     fig = outsample_evaluation_relative_differences(a, b, b_worst)
+        #     st.plotly_chart(fig, use_container_width=True)
+
+        # #------------------------------------ DISTRIBUTION ANALYSIS ---------------------------------------
+        # col1, col2 = st.columns(2)
+        if ("average_travel_time", facilities_number) not in session_state:
+            df_min = {fl_class: session_state[("df_min", facilities_number, fl_class)] for fl_class in FL_CLASSES}
+            fig = average_travel_time_across_under_different_cases(df_min)
+            session_state[("average_travel_time", facilities_number)] = fig
+
+        with cols[list(cols.keys())[1]]:
+            st.plotly_chart(session_state[("average_travel_time", facilities_number)], 
+            use_container_width=True)
             
-    # fig = travel_times_distribution_under_different_cases(df_min)
-    # st.plotly_chart(fig, use_container_width=True)
+        # df_min = session_state[f"df_min_{facilities_number}"]
+                
+        # fig = travel_times_distribution_under_different_cases(df_min)
+        # st.plotly_chart(fig, use_container_width=True)
         
 def deterministic_analysis(session_state, TIMES, facilities_number, ratio1, ratio2, seed):
     ############################################## RUN THE MODEL ##############################################
@@ -739,41 +755,51 @@ def deterministic_analysis(session_state, TIMES, facilities_number, ratio1, rati
 
 # -------------------------------------------- STOCHASTIC ANALYSIS ---------------------------------------------
 def stochastic_load_data(session_state, facilities_number):
-    if (f"fls_stochastic_{facilities_number}", FL_CLASS) not in session_state:
-        fls_solutions = {}
-        fls_solutions["stochastic"] = StochasticFacilityLocation.load(project_path+"/"+retrieve_solution_path(facilities_number, stochastic=True, handpicked=HANDPICKED))
-        fls_solutions["deterministic"] = FacilityLocation.load(project_path+"/"+retrieve_light_solution_path(facilities_number, "all_day_free_flow", handpicked=HANDPICKED))
-        session_state[(f"fls_stochastic_{facilities_number}", FL_CLASS)] = fls_solutions  
+    root_path = project_path+r"/data/07_model_output/"
+    
+    for fl_class in FL_CLASSES:
+        if ("fls_stochastic", facilities_number, fl_class) not in session_state:
+            fls_solutions = {}
+            fls_solutions["stochastic"] = StochasticFacilityLocation.load(project_path+"/"+
+                                                                          retrieve_solution_path(facilities_number, stochastic=True, 
+                                                                                                 handpicked=HANDPICKED, fl_class=fl_class))
+            fls_solutions["deterministic"] = FacilityLocation.load(project_path+"/"
+                                                                   +retrieve_light_solution_path(facilities_number, "all_day_free_flow", 
+                                                                                                 handpicked=HANDPICKED, fl_class=fl_class))
+            session_state[("fls_stochastic", facilities_number, fl_class)] = fls_solutions  
 
 def stochastic_load_metrics(session_state):
-    if HANDPICKED:
-        root_path = project_path+rf"/data/07_model_output/random_candidate_plus_handpicked/{FL_CLASS}/"
-    else:
-        root_path = project_path+rf"/data/07_model_output/only_random_candidate_location/{FL_CLASS}/"
-    if f"df_metrics" not in session_state:
-        df_metrics = pd.read_csv(root_path+f"/stochastic_solution_evaluation_metrics.csv")
-        new_cols_name = ["n_locations"]
-        for col in df_metrics.columns[1:]:
-            new_cols_name.append(col+" (min)")    
-            try:
-                df_metrics[col] = df_metrics[col]/60
-                df_metrics[col] = df_metrics[col].round(2)
-            except:
-                continue
+    for fl_class in FL_CLASSES:
+        if HANDPICKED:
+            root_path = project_path+rf"/data/07_model_output/random_candidate_plus_handpicked/{fl_class}"
+        else:
+            root_path = project_path+rf"/data/07_model_output/only_random_candidate_location/{fl_class}"
         
-        df_metrics.columns = new_cols_name
-        
-        session_state[f"df_metrics"] = df_metrics 
+        if ("df_metrics", fl_class) not in session_state:
+            df_metrics = pd.read_csv(root_path+f"/stochastic_solution_evaluation_metrics.csv")
+            new_cols_name = ["n_locations"]
+            for col in df_metrics.columns[1:]:
+                new_cols_name.append(col+" (min)")    
+                try:
+                    df_metrics[col] = df_metrics[col]/60
+                    df_metrics[col] = df_metrics[col].round(2)
+                except:
+                    continue
+            
+            df_metrics.columns = new_cols_name
+            
+            session_state[("df_metrics", fl_class)] = df_metrics 
 
 def stochastic_generate_viz(session_state, facilities_number):
-    if (f"fls_stochastic_{facilities_number}", FL_CLASS) not in session_state:
-        st.error("Please load data first!", icon="🚨")
-        return go.Figure()
+    for fl_class in FL_CLASSES:
+        if ("fls_stochastic", facilities_number, fl_class) not in session_state:
+            st.error("Please load data first!", icon="🚨")
+            return go.Figure()
 
-    fls = {fl_class: [session_state[(f"fls_stochastic_{facilities_number}", fl_class)]["stochastic"],
-                     session_state[(f"fls_stochastic_{facilities_number}", fl_class)]["deterministic"]] for fl_class in [FL_CLASS]}
+    fls = {fl_class: [session_state[("fls_stochastic", facilities_number, fl_class)]["stochastic"],
+                     session_state[("fls_stochastic", facilities_number, fl_class)]["deterministic"]] for fl_class in FL_CLASSES}
     
-    return facilities_on_map(fls[FL_CLASS], fl_classes=[FL_CLASS]*len(fls[FL_CLASS]))
+    return {fl_class: facilities_on_map(fls[fl_class], fl_classes=[fl_class]*len(fls[fl_class])) for fl_class in FL_CLASSES}
 
 def stochastic_analysis(session_state):
     col1, col2, col3, _ = st.columns(4)
@@ -797,25 +823,43 @@ def stochastic_analysis(session_state):
     
     ############################################## GENERATE VIZ ##############################################    
     if button_viz:
-        col1, col2, col3 = st.columns(3)
-        cols = [col1, col2, col3]
-    
-        for facilities_number in FACILITIES_NUMBER:
-            fig = stochastic_generate_viz(session_state, facilities_number)
-            with cols[facilities_number-1]:
-                st.plotly_chart(fig, use_container_width=True)
+        for fl_class in FL_CLASSES:
+            # st.markdown(f"<h2 style='text-align: center;'>{fl_class}</h2>", unsafe_allow_html=True)
+            st.write(f"## {fl_class}:")
+            st.write("### Stochastic and deterministic solution comparison")
+            cols = st.columns(3)
+            for facilities_number in FACILITIES_NUMBER:
+                fig = stochastic_generate_viz(session_state, facilities_number)
+                with cols[facilities_number-1]:
+                    st.plotly_chart(fig[fl_class], use_container_width=True)
 
     ############################################## GENERATE METRICS ##############################################
     if button_metrics:
-        col1, col2, col3 = st.columns([1,2,1])
-        cols = [col1, col2, col3]
-        if session_state.get(f"df_metrics") is None:
-            with col1:  
-                st.error("Please load data first!", icon="🚨")
-        else:
+        if len(FL_CLASSES) == 1:
+            cols = st.columns([1,2,1])
+        elif len(FL_CLASSES) == 2:
+            cols = st.columns([2,0.5,2])
+            
+        for fl_class in FL_CLASSES:
+            if session_state.get(("df_metrics", fl_class)) is None:
+                with col1:  
+                    st.error("Please load data first!", icon="🚨")
+        if len(FL_CLASSES) == 1:
             with col2:
-                df_metrics = session_state[f"df_metrics"]
+                df_metrics = session_state[("df_metrics", FL_CLASSES[0])]
                 st.dataframe(df_metrics)
+        elif len(FL_CLASSES) == 2:
+            with cols[0]:
+                st.markdown(f"<h3 style='text-align: center;'>{FL_CLASSES[0]} metrics</h3>", unsafe_allow_html=True)
+                df_metrics = session_state[("df_metrics", FL_CLASSES[0])]
+                st.dataframe(df_metrics)
+            with cols[2]:
+                st.markdown(f"<h3 style='text-align: center;'>{FL_CLASSES[1]} metrics</h3>", unsafe_allow_html=True)
+                df_metrics = session_state[("df_metrics", FL_CLASSES[1])]
+                st.dataframe(df_metrics)
+        else:
+            st.write("NonImplementedError: too many classes")
+        
 
 @st.cache_data
 def read_project_description(project_path):

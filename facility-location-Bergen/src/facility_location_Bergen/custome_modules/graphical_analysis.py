@@ -487,44 +487,27 @@ def compute_rel_diff(fls_exact, dfs, dfs_worst, time):
     return a, b, b_worst
 
 def objective_function_value_under_different_cases(a, b, b_worst=None):
-    plot_data = []
-    b_keys = list(b.keys())
+    times = ["all_day", "morning", "midday", "afternoon"]
+    groups = ["opt sol", "ff sol (p-center)", "ff sol (p-median)"]
+    plot_data = [a] + [b[k] for k in b.keys()]
+
+    colors = ["lightblue", "blue", "navy", "black"]
     
-    for i in range(len(a)):
-        plot_data.append(a[i])
-        for k in b_keys:
-            plot_data.append(b[k][i])
-        if b_worst is not None and b_worst[i] is not None:
-            plot_data.append(b_worst[i])
-        plot_data.append(0.001)
-    
-    fig = make_subplots(rows=1, cols=1,)
+    fig = go.Figure(data=[
+        go.Bar(x=times, 
+                y=plot_data[i],
+                marker=dict(color=[colors[i]]*len(times)),
+                name=groups[i]) for i in range(len(groups))])
+                            
     fig.update_layout(title="<b>Outsample evaluation of free flow solution<b>",
                         title_pad_l=175,
-                        height=500,
+                        height=600,
                         width=1200,
+                        barmode='group',
                         yaxis_title="time (minutes)")
-
-    x = []
-    for time in ["all_day", "morning", "midday", "afternoon"]:
-        x.append(f"op sol {time}")
-        for k in b_keys:
-            x.append(f"ff sol in {time} ({k})")
-        if b_worst is not None and b_worst[0] is not None:
-            x.append(f"ff sol in {time} worst scenario")
-        x.append("------")
-            
-    colors = ["lightblue", "royalblue", "blue", "navy", "black"]
-    selected_color = len(b_keys)+3 if (b_worst is not None and b_worst[0] is not None) else len(b_keys)+2
     
-    fig.add_trace(go.Bar(y=plot_data,
-                        x=x,
-                        marker=dict(
-                            color=colors[:selected_color]*4,
-                            )), row=1, col=1)
-    
-    print(plot_data, "\n", x, "\n", colors[:selected_color]*4)
-    
+    fig.update_yaxes(range=[0, 30])
+                        
     return fig
 
 def outsample_evaluation_relative_differences(a, b, b_worst=None):
@@ -629,15 +612,15 @@ def compute_CI(df_min, extra_text=""):
     df_min_keys = list(df_min.keys())
     for i in range(len(df_min[df_min_keys[0]].columns[1:])):
         for k in df_min_keys:
-            index.append(f"{df_min.columns[i+1]} {k}")
+            index.append(tuple([df_min[k].columns[i+1], k]))
         
     mean_ci = pd.DataFrame({"mean": None, "lower_bound": None, "upper_bound": None}, 
                             index=index)
 
     for k in df_min_keys:
-        for col in df_min.columns[1:]:
+        for col in df_min[k].columns[1:]:
             # Number of bootstrap iterations
-            n_iterations = 1000
+            n_iterations = 100
 
             # Confidence level (e.g., 95%)
             confidence_level = 0.95
@@ -656,38 +639,44 @@ def compute_CI(df_min, extra_text=""):
             upper_bound = np.percentile(bootstrap_means, (1 + confidence_level) / 2 * 100)
 
             # Add to dataframe
-            mean_ci.loc[f"{df_min.columns[i+1]} {k}"] = [df_min[k][col].mean(), lower_bound, upper_bound]
+            mean_ci.loc[((col, k),), :] = [df_min[k][col].mean(), lower_bound, upper_bound]
         
     # Print the confidence interval
-    mean_ci = mean_ci.sort_values(by="mean", ascending=False).round(3)
+    # mean_ci = mean_ci.sort_values(by="mean", ascending=False).round(3)
     
     return mean_ci
 
-def average_travel_time_across_under_different_cases(df_min):
-    fig = go.Figure()
-    keys_df_min = df_min.keys()
+def average_travel_time_across_under_different_cases(df_min, ci_interval=False):
+    colors = ["blue", "navy", "black"]
+    keys_df_min = list(df_min.keys())
+    mean_ci_dict = {fl_class: compute_CI({fl_class: df_min[fl_class]}) for fl_class in keys_df_min}
+
+    data = []
+    for i, k in enumerate(mean_ci_dict.keys()):
+        mean_ci_dict[k].index = pd.MultiIndex.from_tuples(mean_ci_dict[k].index)
+        mean_ci_dict[k].index = mean_ci_dict[k].index.droplevel(1)
+        data += [go.Bar(x=mean_ci_dict[k].index, 
+                        y = mean_ci_dict[k]["mean"],
+                        marker=dict(color=[colors[i]]*len(mean_ci_dict[k].index)),
+                        name=k)]
+           
+    fig = go.Figure(data=data)
     
     fig.update_layout(title="<b>Average travel time for free flow solution across average scenarios<b>",
                     title_pad_l=130,
                     height=600,
-                    width=1100,
+                    width=1200,
+                    barmode='group',
                     yaxis_title="mean travel time [min]")
     
-    mean_ci = compute_CI(df)
-    fig.add_trace(go.Bar(x=mean_ci.index, 
-                            y = mean_ci["mean"],
-                            width=0.5,
-                            name=f'mean travel time'))
+    if ci_interval:
+        for i in mean_ci.index:
+            fig.add_shape(type='line',
+                                x0=i, y0=mean_ci.loc[i]["lower_bound"],
+                                x1=i, y1=mean_ci.loc[i]["upper_bound"],
+                                xref='x', yref='y',
+                                line=dict(color='red', width=10))
 
-    for fl_class in keys_df_min:
-        # Add the vertical line
-        for col in df.columns[1:]:
-                fig.add_shape(type='line',
-                            x0=f"{col} {fl_class}", y0=mean_ci.loc[col]["lower_bound"],
-                            x1=f"{col} {fl_class}", y1=mean_ci.loc[col]["upper_bound"],
-                            xref='x', yref='y',
-                            line=dict(color='red', width=10))
-
-    fig.update_yaxes(range=[0, mean_ci["upper_bound"].max()+1])
+    fig.update_yaxes(range=[0, 30])
 
     return fig

@@ -619,24 +619,16 @@ def compute_rel_diff(fls_exact, dfs, dfs_worst, time):
 
 def objective_function_value_under_different_cases(a, b, b_worst=None):
     times = ["all_day", "morning", "midday", "afternoon"]
-    groups = ["opt sol", "ff sol (p-center)", "opt sol (p-median)"]
-    plot_data = {group: [] for group in groups}
-    b_keys = list(b.keys())
-    
-    for i, group in enumerate(groups):
-        plot_data[group].append(a[i])
-        for k in b_keys:
-            plot_data[group].append(b[k][i])
-        if b_worst is not None and b_worst[i] is not None:
-            plot_data[group].append(b_worst[i])
-            
+    groups = ["opt sol", "ff sol (p-center)", "ff sol (p-median)"]
+    plot_data = [a] + [b[k] for k in b.keys()]
+
     colors = ["lightblue", "royalblue", "blue", "navy", "black"]
-    
     
     fig = go.Figure(data=[
         go.Bar(x=times, 
-                y = plot_data[group],
-                name=group) for group in groups])
+                y=plot_data[i],
+                marker=dict(color=[colors[i]]*len(times)),
+                name=groups[i]) for i in range(len(groups))])
                             
     fig.update_layout(title="<b>Outsample evaluation of free flow solution<b>",
                         title_pad_l=175,
@@ -645,7 +637,6 @@ def objective_function_value_under_different_cases(a, b, b_worst=None):
                         barmode='group',
                         yaxis_title="time (minutes)")
                         
-    
     return fig
 
 def outsample_evaluation_relative_differences(a, b, b_worst=None):
@@ -789,15 +780,17 @@ def compute_CI(df_min, extra_text=""):
     return mean_ci
 
 def average_travel_time_across_under_different_cases(df_min, ci_interval=False):
+    colors = ["royalblue", "blue", "navy", "black"]
     keys_df_min = list(df_min.keys())
     mean_ci_dict = {fl_class: compute_CI({fl_class: df_min[fl_class]}) for fl_class in keys_df_min}
 
     data = []
-    for k in mean_ci_dict.keys():
+    for i, k in enumerate(mean_ci_dict.keys()):
         mean_ci_dict[k].index = pd.MultiIndex.from_tuples(mean_ci_dict[k].index)
         mean_ci_dict[k].index = mean_ci_dict[k].index.droplevel(1)
         data += [go.Bar(x=mean_ci_dict[k].index, 
                         y = mean_ci_dict[k]["mean"],
+                        marker=dict(color=[colors[i]]*len(mean_ci_dict[k].index)),
                         name=k)]
            
     fig = go.Figure(data=data)

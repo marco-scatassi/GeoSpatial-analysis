@@ -636,6 +636,8 @@ def objective_function_value_under_different_cases(a, b, b_worst=None):
                         width=1200,
                         barmode='group',
                         yaxis_title="time (minutes)")
+
+    fig.update_yaxes(range=[0, 30])
                         
     return fig
 
@@ -810,6 +812,6 @@ def average_travel_time_across_under_different_cases(df_min, ci_interval=False):
                                 xref='x', yref='y',
                                 line=dict(color='red', width=10))
 
-    # fig.update_yaxes(range=[0, mean_ci["upper_bound"].max()+1])
+    fig.update_yaxes(range=[0, 30])
 
     return fig

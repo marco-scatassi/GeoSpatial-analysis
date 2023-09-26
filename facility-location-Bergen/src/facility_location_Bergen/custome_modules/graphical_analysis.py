@@ -796,7 +796,7 @@ def compute_CI(df_min, extra_text=""):
             mean_ci.loc[f"{col} {k}"] = [df_min[k][col].mean(), lower_bound, upper_bound]
         
     # Print the confidence interval
-    mean_ci = mean_ci.sort_values(by="mean", ascending=False).round(3)
+    # mean_ci = mean_ci.sort_values(by="mean", ascending=False).round(3)
     
     return mean_ci
 

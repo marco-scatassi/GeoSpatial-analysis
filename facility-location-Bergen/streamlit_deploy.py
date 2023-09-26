@@ -494,7 +494,7 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
             return st.error("Please load data first!", icon="🚨")
 
     # --------------------------------- TRAFFIC JAM ------------------------------------------
-    with st.expander("Traffic jam"):
+    with st.expander("# Traffic jam"):
         col1, col2, col3, col4 = st.columns([1,1,1,1])
         average_graphs = session_state[f"average_graphs"]
         data_for_traffic_jam_visualization = session_state[f"data_for_traffic_jam_visualization"]
@@ -518,7 +518,7 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
                 )
         
     #------------------------------- FACILITIES ON MAP ---------------------------------------
-    with st.expander("Facilities on map"):
+    with st.expander("# Facilities on map"):
         cols = st.columns([1]*len(FL_CLASSES))
         cols = {fl_class: col for fl_class, col in zip(FL_CLASSES, cols)}
         dfs = {fl_class: session_state[("dfs", facilities_number, fl_class)] for fl_class in FL_CLASSES}
@@ -569,7 +569,7 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
 
     #------------------ FREE FLOW SOLUTION UNDER DIFFERENT SCENARIOS COMPARISON ------------------
     #------------------ OBJ FUNCTION VALUE -------------
-    with st.expander("Objective function value analysis"):
+    with st.expander("# Objective function value analysis"):
         a = list(range(len(TIMES)-1))
         b = {fl_class: list(range(len(TIMES)-1)) for fl_class in FL_CLASSES}
         

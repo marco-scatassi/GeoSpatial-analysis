@@ -816,12 +816,10 @@ def average_travel_time_across_under_different_cases(df_min):
                             width=0.5,
                             name=f'mean travel time'))
 
-    for fl_class in keys_df_min:
-        # Add the vertical line
-        for col in df_min[fl_class].columns[1:]:
-                fig.add_shape(type='line',
-                            x0=f"{col} {fl_class}", y0=mean_ci.loc[col]["lower_bound"],
-                            x1=f"{col} {fl_class}", y1=mean_ci.loc[col]["upper_bound"],
+    for i in mean_ci.index:
+        fig.add_shape(type='line',
+                            x0=i, y0=mean_ci.loc[i]["lower_bound"],
+                            x1=i, y1=mean_ci.loc[i]["upper_bound"],
                             xref='x', yref='y',
                             line=dict(color='red', width=10))
 

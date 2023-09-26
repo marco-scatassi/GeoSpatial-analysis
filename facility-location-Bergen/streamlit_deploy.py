@@ -48,7 +48,7 @@ metadata = bootstrap_project(project_path)
 TIMES = ["all_day_free_flow", "all_day", "morning", "midday", "afternoon"]
 FACILITIES_NUMBER = [1,2,3]
 HANDPICKED = True
-FL_CLASS = "p-center"
+FL_CLASSES = ["p-center", "p-median"]
 
 # LOG_FILE_PATH = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/split_roads.log"
 # LOG_FILE_PATH2 = r"/mount/src/geospatial-analysis/facility-location-Bergen/logs/split_roads_changes.log"
@@ -416,36 +416,38 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
     c = 0
     
     progress_bar = st.progress(0, "Loading data...")
-    if f"fls_exact_{facilities_number}" not in session_state:
-        fls_exact = {}
-        for i, time in enumerate(TIMES):
-            print_INFO_message_timestamp(f"Loading deterministic solution for: {time}")
-            progress_bar.progress((i+1)*1/len(TIMES), f"Loading exact solution for: {time}")
-            path = project_path+r"/"+retrieve_light_solution_path(facilities_number, time, handpicked=HANDPICKED, fl_class=FL_CLASS)
-            fls_exact[time] = FacilityLocation.load(path)
-            
-        session_state[f"fls_exact_{facilities_number}"] = fls_exact
+    for fl_class in FL_CLASSES:
+        if ("fls_exact", facilities_number, fl_class) not in session_state:
+            fls_exact = {}
+            for i, time in enumerate(TIMES):
+                print_INFO_message_timestamp(f"Loading deterministic solution for: {time}")
+                progress_bar.progress((i+1)*1/len(TIMES), f"Loading exact solution for: {time}")
+                path = project_path+r"/"+retrieve_light_solution_path(facilities_number, time, handpicked=HANDPICKED, fl_class=fl_class)
+                fls_exact[time] = FacilityLocation.load(path)
+                
+            session_state[("fls_exact", facilities_number, fl_class)] = fls_exact
     c += 1
         
-    if f"dfs_{facilities_number}" not in session_state:
-        if HANDPICKED:
-            root = project_path+rf"/data/08_reporting/random_candidate_plus_handpicked/{FL_CLASS}/{facilities_number}_locations"
-        else:
-            root = project_path+rf"/data/08_reporting/only_random_candidate_location/{FL_CLASS}/{facilities_number}_locations"
-        paths = [p for p in os.listdir(root) if ("solution_vs_scenario" in p) and ("worst" not in p)]
-            
-        dfs = {}
+    for fl_class in FL_CLASSES:
+        if ("dfs", facilities_number, fl_class) not in session_state:
+            if HANDPICKED:
+                root = project_path+rf"/data/08_reporting/random_candidate_plus_handpicked/{fl_class}/{facilities_number}_locations"
+            else:
+                root = project_path+rf"/data/08_reporting/only_random_candidate_location/{fl_class}/{facilities_number}_locations"
+            paths = [p for p in os.listdir(root) if ("solution_vs_scenario" in p) and ("worst" not in p)]
+                
+            dfs = {}
 
-        for path in paths:
-            with open(os.path.join(root, path), "rb") as f:
-                key = tuple(path.
-                        replace("all_day_free_flow", "all-day-free-flow").
-                        replace("all_day", "all-day").
-                        removesuffix(".pkl").split("_")[-3:])
-                        
-                dfs[key] = pkl.load(f)
-            
-        session_state[f"dfs_{facilities_number}"] = dfs
+            for path in paths:
+                with open(os.path.join(root, path), "rb") as f:
+                    key = tuple(path.
+                            replace("all_day_free_flow", "all-day-free-flow").
+                            replace("all_day", "all-day").
+                            removesuffix(".pkl").split("_")[-3:])
+                            
+                    dfs[key] = pkl.load(f)
+                
+            session_state[("dfs", facilities_number, fl_class)] = dfs
     c += 1
             
     # if f"dfs_worst_{facilities_number}" not in session_state:
@@ -487,8 +489,9 @@ def deterministic_load_data(session_state, TIMES, facilities_number):
         progress_bar.progress(100, "Loading data completed!")
 
 def deterministic_generate_viz(session_state, TIMES, facilities_number):
-    if f"fls_exact_{facilities_number}" not in session_state:
-        return st.error("Please load data first!", icon="🚨")
+    for fl_class in FL_CLASSES:
+        if ("fls_exact", facilities_number, fl_class) not in session_state:
+            return st.error("Please load data first!", icon="🚨")
 
     # --------------------------------- TRAFFIC JAM ------------------------------------------
     col1, col2, col3, col4 = st.columns([1,1,1,1])
@@ -515,27 +518,39 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
     
     
     #------------------------------- FACILITIES ON MAP ---------------------------------------
-    col1, col2 = st.columns([1,1])
-    dfs = session_state[f"dfs_{facilities_number}"]
+    cols = st.columns([1]*len(FL_CLASSES))
+    cols = {fl_class: col for fl_class, col in zip(FL_CLASSES, cols)}
+    dfs = {fl_class: session_state[("dfs", facilities_number, fl_class)] for fl_class in FL_CLASSES}
     # dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
-    session_state[f"df_min_{facilities_number}"] = compute_min_distance_df(dfs, None)#, dfs_worst)
+    for fl_class in FL_CLASSES:
+        session_state[("df_min", facilities_number, fl_class)] = compute_min_distance_df(dfs[fl_class], None)#, dfs_worst)
 
-    if f"facilities_on_map_{facilities_number}" not in session_state:
-        fls_exact = session_state[f"fls_exact_{facilities_number}"]
-        fig = facilities_on_map([fl for fl in fls_exact.values()], 
-                                    extra_text=[time for time in fls_exact.keys()],
-                                    title_pad_l=200)
-        session_state[f"facilities_on_map_{facilities_number}"] = fig
-    
-    if f"map_longest_paths_{facilities_number}" not in session_state:
-        dfs = session_state[f"dfs_{facilities_number}"]
-        average_graphs = session_state[f"average_graphs"]
-        map = visualize_longest_paths(dfs, average_graphs)
-        session_state[f"map_longest_paths_{facilities_number}"] = map
+    for fl_class in FL_CLASSES:
+        if ("facilities_on_map", facilities_number, fl_class) not in session_state:
+            fls_exact = session_state[("fls_exact", facilities_number, fl_class)]
+            fig = facilities_on_map([fl for fl in fls_exact.values()], 
+                                        extra_text=[time for time in fls_exact.keys()],
+                                        title_pad_l=200)
+            session_state[("facilities_on_map", facilities_number, fl_class)] = fig
         
-    with col1:
-        st.plotly_chart(session_state[f"facilities_on_map_{facilities_number}"], 
+        if ("map_longest_paths", facilities_number, fl_class) not in session_state:
+            dfs = session_state[("dfs", facilities_number, fl_class)]
+            average_graphs = session_state[f"average_graphs"]
+            map = visualize_longest_paths(dfs, average_graphs)
+            session_state[("map_longest_paths", facilities_number, fl_class)] = map
+    
+    for fl_class, col in cols.items():
+        with col:
+            st.markdown(f"<h2 style='text-align: center;'>{fl_class}</h2>", unsafe_allow_html=True)
+            st.markdown("<h3 style='text-align: center;'>Optimal locations</h3>", unsafe_allow_html=True)
+            st.plotly_chart(session_state[("facilities_on_map", facilities_number, fl_class)], 
                         use_container_width=True)
+            
+            st.markdown("<h3 style='text-align: center;'>Longest paths</h3>", unsafe_allow_html=True)
+            st_folium(
+                    session_state[("map_longest_paths", facilities_number, fl_class)],
+                    returned_objects=[],
+                    width=800)
 
     #---------------------------------- MAP LONGEST PATH -------------------------------------        
 

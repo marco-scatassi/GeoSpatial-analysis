@@ -175,7 +175,7 @@ def facilities_on_map(fls, extra_text=None, fl_classes="not-provided", title_pad
     else:
         title = "deterministic solution comparison"
         
-    fig.update_layout(title=f"<b>{title}</b><br>             number of facilities: "+str(fls[0].n_of_locations_to_choose),
+    fig.update_layout(# title=f"<b>{title}</b><br>             number of facilities: "+str(fls[0].n_of_locations_to_choose),
                         mapbox=dict(
                             style="open-street-map",
                             center=dict(lat=fls[0].coordinates.geometry.y.mean(), lon=fls[0].coordinates.geometry.x.mean()),
@@ -189,7 +189,7 @@ def facilities_on_map(fls, extra_text=None, fl_classes="not-provided", title_pad
                             xanchor='left',  # Anchor the legend to the left
                             x=0  # Adjust the x position if necessary
                         ),
-                        title_pad_l=title_pad_l,
+                        # title_pad_l=title_pad_l,
                         height=700,
                         width=500,
                         xaxis_title="time of the day",)

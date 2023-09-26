@@ -622,7 +622,7 @@ def objective_function_value_under_different_cases(a, b, b_worst=None):
     groups = ["opt sol", "ff sol (p-center)", "ff sol (p-median)"]
     plot_data = [a] + [b[k] for k in b.keys()]
 
-    colors = ["lightblue", "royalblue", "blue", "navy", "black"]
+    colors = ["lightblue", "blue", "navy", "black"]
     
     fig = go.Figure(data=[
         go.Bar(x=times, 
@@ -782,7 +782,7 @@ def compute_CI(df_min, extra_text=""):
     return mean_ci
 
 def average_travel_time_across_under_different_cases(df_min, ci_interval=False):
-    colors = ["royalblue", "blue", "navy", "black"]
+    colors = ["blue", "navy", "black"]
     keys_df_min = list(df_min.keys())
     mean_ci_dict = {fl_class: compute_CI({fl_class: df_min[fl_class]}) for fl_class in keys_df_min}
 

@@ -793,7 +793,7 @@ def compute_CI(df_min, extra_text=""):
             upper_bound = np.percentile(bootstrap_means, (1 + confidence_level) / 2 * 100)
 
             # Add to dataframe
-            mean_ci.loc[f"{df_min[k].columns[i+1]} {k}"] = [df_min[k][col].mean(), lower_bound, upper_bound]
+            mean_ci.loc[f"{col} {k}"] = [df_min[k][col].mean(), lower_bound, upper_bound]
         
     # Print the confidence interval
     mean_ci = mean_ci.sort_values(by="mean", ascending=False).round(3)

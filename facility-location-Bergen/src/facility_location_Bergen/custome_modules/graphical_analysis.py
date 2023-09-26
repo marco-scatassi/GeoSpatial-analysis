@@ -618,45 +618,40 @@ def compute_rel_diff(fls_exact, dfs, dfs_worst, time):
     return a, b, b_worst
 
 def objective_function_value_under_different_cases(a, b, b_worst=None):
-    plot_data = []
+    times = ["all_day", "morning", "midday", "afternoon"]
+    plot_data = {time: [] for time in times}
     b_keys = list(b.keys())
     
-    for i in range(len(a)):
-        plot_data.append(a[i])
+    for i, time in enumerate(times):
+        plot_data[time].append(a[i])
         for k in b_keys:
-            plot_data.append(b[k][i])
+            plot_data[time].append(b[k][i])
         if b_worst is not None and b_worst[i] is not None:
-            plot_data.append(b_worst[i])
-        plot_data.append(0)
+            plot_data[time].append(b_worst[i])
     
-    fig = make_subplots(rows=1, cols=1,)
+    x_names = {time: [] for time in times}
+    for time in times:
+        x_names[time].append(f"op sol {time}")
+        for k in b_keys:
+            x_names[time].append(f"ff sol in {time} ({k})")
+        if b_worst is not None and b_worst[0] is not None:
+            x_names[time].append(f"ff sol in {time} worst scenario")
+            
+    colors = ["lightblue", "royalblue", "blue", "navy", "black"]
+    
+    fig = go.Figure(data=[
+        go.Bar(x=x_names[time], 
+                y = plot_data[time],
+                width=0.5,
+                name=time) for time in times])
+                            
     fig.update_layout(title="<b>Outsample evaluation of free flow solution<b>",
                         title_pad_l=175,
                         height=500,
                         width=1200,
+                        barmode='group',
                         yaxis_title="time (minutes)")
-
-    x_names = []
-    for time in ["all_day", "morning", "midday", "afternoon"]:
-        x_names.append(f"op sol {time}")
-        for k in b_keys:
-            x_names.append(f"ff sol in {time} ({k})")
-        if b_worst is not None and b_worst[0] is not None:
-            x_names.append(f"ff sol in {time} worst scenario")
-        x_names.append("")
-            
-    colors = ["lightblue", "royalblue", "blue", "navy", "black"]
-    selected_color_n = len(b_keys)+3 if (b_worst is not None and b_worst[0] is not None) else len(b_keys)+2
-    selected_colors = colors[:selected_color_n]*4
-    
-    fig.add_trace(go.Bar(y=plot_data,
-                        x=x_names,
-                        marker=dict(
-                            color=selected_colors,
-                            )), row=1, col=1)
-    
-    print(plot_data, "\n", x_names, "\n", selected_colors)
-    print(len(plot_data), len(x_names), len(selected_colors))
+                        
     
     return fig
 

@@ -554,73 +554,76 @@ def deterministic_generate_viz(session_state, TIMES, facilities_number):
 
     #------------------ FREE FLOW SOLUTION UNDER DIFFERENT SCENARIOS COMPARISON ------------------
     #------------------ OBJ FUNCTION VALUE -------------
-    col1, col2 = st.columns(2)
-    if f"abs_diff_barplot_{facilities_number}" not in session_state:
-        fls_exact = session_state[f"fls_exact_{facilities_number}"]
-        dfs = session_state[f"dfs_{facilities_number}"]
-        try:
-            dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
-        except:
-            dfs_worst = None
-            
-        a = list(range(len(TIMES)-1))
-        b = list(range(len(TIMES)-1))
-        b_worst = list(range(len(TIMES)-1))
+    a = list(range(len(TIMES)-1))
+    b = {fl_class: list(range(len(TIMES)-1)) for fl_class in FL_CLASSES}
+    
+    if ("abs_diff_barplot", facilities_number) not in session_state:
+        for fl_class in FL_CLASSES:
+            fls_exact = session_state[("fls_exact", facilities_number, fl_class)]
+            dfs = session_state[("dfs", facilities_number, fl_class)]
+            try:
+                dfs_worst = session_state[f"dfs_worst_{facilities_number}"]
+            except:
+                dfs_worst = None
+                
+            b_worst = list(range(len(TIMES)-1))
 
-        for i, time in enumerate(TIMES[1:]):
-            a[i], b[i], b_worst[i] = compute_rel_diff(fls_exact, dfs, dfs_worst, time)
-        session_state[f"abs_diff_barplot_{facilities_number}"] = (a,b,b_worst)
+            for i, time in enumerate(TIMES[1:]):
+                if fl_class == "p-center":
+                    a[i], b[fl_class][i], b_worst[i] = compute_rel_diff(fls_exact, dfs, dfs_worst, time)
+                else:   
+                    _, b[fl_class][i], b_worst[i] = compute_rel_diff(fls_exact, dfs, dfs_worst, time)
+                    
+        session_state[("abs_diff_barplot", facilities_number)] = (a,b,b_worst)
 
-    with col1:
-        (a,b,b_worst) = session_state[f"abs_diff_barplot_{facilities_number}"]
+    with cols[list(cols.keys())[0]]:
+        (a,b,b_worst) = session_state[("abs_diff_barplot", facilities_number)]
         fig = objective_function_value_under_different_cases(a, b, b_worst)
         st.plotly_chart(fig, use_container_width=True)
 
-    with col2:
-        with open(project_path+
-                  rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBySideWithFirstBarplot.md", 
-                  "r",
-                  encoding="utf-8") as f:
-            content = f.read()
+    # with col2:
+    #     with open(project_path+
+    #               rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBySideWithFirstBarplot.md", 
+    #               "r",
+    #               encoding="utf-8") as f:
+    #         content = f.read()
 
-        for i in range(6):
-            st.write("")
-        st.markdown(content)
+    #     for i in range(6):
+    #         st.write("")
+    #     st.markdown(content)
     
-    #------------------ RELATIVE DIFFERENCES ------------  
-    col1, col2 = st.columns(2)
-    with col1:
-        with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBySideWithSecondBarplot.md", 
-                  "r",
-                  encoding="utf-8") as f:
-            content = f.read()
+    # #------------------ RELATIVE DIFFERENCES ------------  
+    # col1, col2 = st.columns(2)
+    # with col1:
+    #     with open(project_path+rf"/data/09_streamlit_md/Deterministic_results/{facilities_number} facilities/sideBySideWithSecondBarplot.md", 
+    #               "r",
+    #               encoding="utf-8") as f:
+    #         content = f.read()
 
-        for i in range(6):
-            st.write("")
-        st.markdown(content)
+    #     for i in range(6):
+    #         st.write("")
+    #     st.markdown(content)
     
-    with col2:    
-        (a,b,b_worst) = session_state[f"abs_diff_barplot_{facilities_number}"]
-        fig = outsample_evaluation_relative_differences(a, b, b_worst)
-        st.plotly_chart(fig, use_container_width=True)
+    # with col2:    
+    #     (a,b,b_worst) = session_state[f"abs_diff_barplot_{facilities_number}"]
+    #     fig = outsample_evaluation_relative_differences(a, b, b_worst)
+    #     st.plotly_chart(fig, use_container_width=True)
 
-    #------------------------------------ DISTRIBUTION ANALYSIS ---------------------------------------
-    col1, col2 = st.columns(2)
-    if f"distribution_violin_plot_{facilities_number}" not in session_state:
-        df_min = session_state[f"df_min_{facilities_number}"]
+    # #------------------------------------ DISTRIBUTION ANALYSIS ---------------------------------------
+    # col1, col2 = st.columns(2)
+    if ("average_travel_time", facilities_number) not in session_state:
+        df_min = {fl_class: session_state[("df_min", facilities_number, fl_class)] for fl_class in FL_CLASSES}
         fig = average_travel_time_across_under_different_cases(df_min)
-        session_state[f"distribution_violin_plot_{facilities_number}"] = fig
+        session_state[("average_travel_time", facilities_number)] = fig
 
-    with col1:
-        st.plotly_chart(session_state[f"distribution_violin_plot_{facilities_number}"], 
+    with cols[list(cols.keys())[1]]:
+        st.plotly_chart(session_state[("average_travel_time", facilities_number)], 
         use_container_width=True)
         
-        
-        
-    df_min = session_state[f"df_min_{facilities_number}"]
+    # df_min = session_state[f"df_min_{facilities_number}"]
             
-    fig = travel_times_distribution_under_different_cases(df_min)
-    st.plotly_chart(fig, use_container_width=True)
+    # fig = travel_times_distribution_under_different_cases(df_min)
+    # st.plotly_chart(fig, use_container_width=True)
         
 def deterministic_analysis(session_state, TIMES, facilities_number, ratio1, ratio2, seed):
     ############################################## RUN THE MODEL ##############################################

@@ -766,13 +766,13 @@ def compute_CI(df_min, extra_text=""):
     df_min_keys = list(df_min.keys())
     for i in range(len(df_min[df_min_keys[0]].columns[1:])):
         for k in df_min_keys:
-            index.append(f"{df_min.columns[i+1]} {k}")
+            index.append(f"{df_min[k].columns[i+1]} {k}")
         
     mean_ci = pd.DataFrame({"mean": None, "lower_bound": None, "upper_bound": None}, 
                             index=index)
 
     for k in df_min_keys:
-        for col in df_min.columns[1:]:
+        for col in df_min[k].columns[1:]:
             # Number of bootstrap iterations
             n_iterations = 1000
 
@@ -793,7 +793,7 @@ def compute_CI(df_min, extra_text=""):
             upper_bound = np.percentile(bootstrap_means, (1 + confidence_level) / 2 * 100)
 
             # Add to dataframe
-            mean_ci.loc[f"{df_min.columns[i+1]} {k}"] = [df_min[k][col].mean(), lower_bound, upper_bound]
+            mean_ci.loc[f"{df_min[k].columns[i+1]} {k}"] = [df_min[k][col].mean(), lower_bound, upper_bound]
         
     # Print the confidence interval
     mean_ci = mean_ci.sort_values(by="mean", ascending=False).round(3)

@@ -618,14 +618,16 @@ def compute_rel_diff(fls_exact, dfs, dfs_worst, time):
     return a, b, b_worst
 
 def objective_function_value_under_different_cases(a, b, b_worst=None):
-    
     plot_data = []
+    b_keys = list(b.keys())
     
     for i in range(len(a)):
         plot_data.append(a[i])
-        plot_data.append(b[i])
-        if b_worst is not None:
+        for k in b_keys:
+            plot_data.append(b[k][i])
+        if b_worst is not None and b_worst[i] is not None:
             plot_data.append(b_worst[i])
+        plot_data.append(0)
     
     fig = make_subplots(rows=1, cols=1,)
     fig.update_layout(title="<b>Outsample evaluation of free flow solution<b>",
@@ -634,14 +636,27 @@ def objective_function_value_under_different_cases(a, b, b_worst=None):
                         width=1200,
                         yaxis_title="time (minutes)")
 
+    x_names = []
+    for time in ["all_day", "morning", "midday", "afternoon"]:
+        x_names.append(f"op sol {time}")
+        for k in b_keys:
+            x_names.append(f"ff sol in {time} ({k})")
+        if b_worst is not None and b_worst[0] is not None:
+            x_names.append(f"ff sol in {time} worst scenario")
+        x_names.append("")
+            
+    colors = ["lightblue", "royalblue", "blue", "navy", "black"]
+    selected_color_n = len(b_keys)+3 if (b_worst is not None and b_worst[0] is not None) else len(b_keys)+2
+    selected_colors = colors[:selected_color_n]*4
+    
     fig.add_trace(go.Bar(y=plot_data,
-                        x=["op sol all_day", "ff sol in all_day scenario",# "ff sol in all_day worst scenario", 
-                           "op sol morning", "ff sol in morning",# "ff sol in morning worst scenario",
-                           "op sol midday", "ff sol in midday",# "ff sol in midday worst scenario",
-                           "op sol afternoon", "ff sol in afternoon"],# "ff sol in afternoon worst scenario"],
+                        x=x_names,
                         marker=dict(
-                            color=["lightblue", "blue", "navy"]*len(plot_data),
+                            color=selected_colors,
                             )), row=1, col=1)
+    
+    print(plot_data, "\n", x_names, "\n", selected_colors)
+    print(len(plot_data), len(x_names), len(selected_colors))
     
     return fig
 
@@ -746,32 +761,39 @@ def travel_times_distribution_under_different_cases(df_min, worst=False):
         
     return fig
 
-def compute_CI(df_min):
+def compute_CI(df_min, extra_text=""):
+    index = []
+    df_min_keys = list(df_min.keys())
+    for i in range(len(df_min[df_min_keys[0]].columns[1:])):
+        for k in df_min_keys:
+            index.append(f"{df_min.columns[i+1]} {k}")
+        
     mean_ci = pd.DataFrame({"mean": None, "lower_bound": None, "upper_bound": None}, 
-                       index=df_min.columns[1:])
+                            index=index)
 
-    for col in df_min.columns[1:]:
-        # Number of bootstrap iterations
-        n_iterations = 1000
+    for k in df_min_keys:
+        for col in df_min.columns[1:]:
+            # Number of bootstrap iterations
+            n_iterations = 1000
 
-        # Confidence level (e.g., 95%)
-        confidence_level = 0.95
+            # Confidence level (e.g., 95%)
+            confidence_level = 0.95
 
-        # Array to store bootstrap sample statistics
-        bootstrap_means = []
+            # Array to store bootstrap sample statistics
+            bootstrap_means = []
 
-        # Perform bootstrap iterations
-        for _ in range(n_iterations):
-            bootstrap_sample = resample(df_min[col], replace=True, n_samples=len(df_min))
-            bootstrap_mean = np.mean(bootstrap_sample)
-            bootstrap_means.append(bootstrap_mean)
+            # Perform bootstrap iterations
+            for _ in range(n_iterations):
+                bootstrap_sample = resample(df_min[k][col], replace=True, n_samples=len(df_min[k]))
+                bootstrap_mean = np.mean(bootstrap_sample)
+                bootstrap_means.append(bootstrap_mean)
 
-        # Compute confidence interval
-        lower_bound = np.percentile(bootstrap_means, (1 - confidence_level) / 2 * 100)
-        upper_bound = np.percentile(bootstrap_means, (1 + confidence_level) / 2 * 100)
+            # Compute confidence interval
+            lower_bound = np.percentile(bootstrap_means, (1 - confidence_level) / 2 * 100)
+            upper_bound = np.percentile(bootstrap_means, (1 + confidence_level) / 2 * 100)
 
-        # Add to dataframe
-        mean_ci.loc[col] = [df_min[col].mean(), lower_bound, upper_bound]
+            # Add to dataframe
+            mean_ci.loc[f"{df_min.columns[i+1]} {k}"] = [df_min[k][col].mean(), lower_bound, upper_bound]
         
     # Print the confidence interval
     mean_ci = mean_ci.sort_values(by="mean", ascending=False).round(3)
@@ -780,27 +802,28 @@ def compute_CI(df_min):
 
 def average_travel_time_across_under_different_cases(df_min):
     fig = go.Figure()
-
-    mean_ci = compute_CI(df_min)
+    keys_df_min = df_min.keys()
     
     fig.update_layout(title="<b>Average travel time for free flow solution across average scenarios<b>",
                     title_pad_l=130,
                     height=600,
                     width=1100,
                     yaxis_title="mean travel time [min]")
-
+    
+    mean_ci = compute_CI(df_min)
     fig.add_trace(go.Bar(x=mean_ci.index, 
-                        y = mean_ci["mean"],
-                        width=0.5,
-                        name='mean'))
+                            y = mean_ci["mean"],
+                            width=0.5,
+                            name=f'mean travel time'))
 
-    # Add the vertical line
-    for col in df_min.columns[1:]:
-            fig.add_shape(type='line',
-                    x0=col, y0=mean_ci.loc[col]["lower_bound"],
-                    x1=col, y1=mean_ci.loc[col]["upper_bound"],
-                    xref='x', yref='y',
-                    line=dict(color='red', width=10))
+    for fl_class in keys_df_min:
+        # Add the vertical line
+        for col in df.columns[1:]:
+                fig.add_shape(type='line',
+                            x0=f"{col} {fl_class}", y0=mean_ci.loc[col]["lower_bound"],
+                            x1=f"{col} {fl_class}", y1=mean_ci.loc[col]["upper_bound"],
+                            xref='x', yref='y',
+                            line=dict(color='red', width=10))
 
     fig.update_yaxes(range=[0, mean_ci["upper_bound"].max()+1])
 

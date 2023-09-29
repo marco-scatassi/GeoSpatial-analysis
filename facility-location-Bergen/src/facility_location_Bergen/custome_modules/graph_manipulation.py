@@ -568,9 +568,9 @@ def on_submit_refine_form(session_state, G, node_mapping_r):
         deleted_edges = []
 
     if new_edges != []:
-        session_state["history_changes_refine"]["graph"]["new_edges"] += new_edges
+        session_state["history_changes"]["graph"]["new_edges"] += new_edges
     if deleted_edges != []:
-        session_state["history_changes_refine"]["graph"]["edges_to_delete"] += deleted_edges
+        session_state["history_changes"]["graph"]["edges_to_delete"] += deleted_edges
         
     for e in new_edges:
         add_edge(e, G)
@@ -602,9 +602,9 @@ def refine_graph(G_dict, form_placeholder, session_state, apply_to_all=False):
     node_mapping_r = {v: k for k, v in node_mapping.items()}
     
     if "graph" not in session_state["history_changes_refine"].keys():
-        session_state["history_changes_refine"]["graph"] = {}
-        session_state["history_changes_refine"]["graph"]["new_edges"] = []
-        session_state["history_changes_refine"]["graph"]["edges_to_delete"] = []
+        session_state["history_changes"]["graph"] = {}
+        session_state["history_changes"]["graph"]["new_edges"] = []
+        session_state["history_changes"]["graph"]["edges_to_delete"] = []
 
     if not apply_to_all:
         form_placeholder.empty()

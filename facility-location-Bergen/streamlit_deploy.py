@@ -304,7 +304,7 @@ def graph_manipulation_process_template(session_state, TIMES,
         print_INFO_message_timestamp("Stop and clear state")
         return True
 
-    return False
+    # return False
 
 def graph_manipulation(session_state, TIMES):
     placeholder_button = st.container()
@@ -349,7 +349,9 @@ def graph_manipulation(session_state, TIMES):
                 return st.error("Please load data first!", icon="🚨")
         
         with placeholder:
-            session_state["stop_and_clear"]  = graph_manipulation_process_template(session_state, TIMES, 
+            # session_state["stop_and_clear"]  = graph_manipulation_process_template(session_state, TIMES, 
+            #                        LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED)
+            graph_manipulation_process_template(session_state, TIMES, 
                                    LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED)
             session_state["button_load"] = False
 

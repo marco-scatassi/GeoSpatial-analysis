@@ -61,12 +61,12 @@ HTML_IMG_PATH = r"/app/geospatial-analysis/facility-location-Bergen/logs/img_spl
 GRAPH_MANIPULATION_SEED=8797
 # --------------------------------------------- UTILITY AND CALLBACK --------------------------------------------
 def initialize_session_state_attributes(from_graph_button_load=False):
-    keys = ["node", "modified_graph", "refine_graph", "history_changes", 
+    keys = ["node", "modified_graph", "is_manipulation", "refine_graph", "history_changes", 
             "history_changes_refine", "load_data_error","node_mapping", "predecessors_id", 
             "successors_id", "apply_graph_modification","stop_and_clear", "button_load", 
             "is_form1_disabled", "is_form2_disabled"]
     
-    default = ["___", None, {}, {}, {}, False, {}, [], [], False, False, False, False, True]
+    default = ["___", None, False, {}, {}, {}, False, {}, [], [], False, False, False, False, True]
     
     for key, value in zip(keys, default):
         if key not in st.session_state:
@@ -76,6 +76,7 @@ def initialize_session_state_attributes(from_graph_button_load=False):
         st.session_state["button_load"] = True
         st.session_state["stop_and_clear"] = False
         st.session_state["load_data_error"] = False
+        st.session_state["is_manipulation"] = False
         st.session_state["is_form1_disabled"] = False
         st.session_state["is_form2_disabled"] = True
         st.session_state["apply_graph_modification"] = False
@@ -125,6 +126,9 @@ def stop_and_clear_callback():
     for key in keys:
         if key != "stop_and_clear" and key != "button_load":
             del st.session_state[key]
+
+def on_submit_manipulation():
+    st.session_state["is_manipulation"] = True
 
 def on_submit_refine(placeholder):
     st.session_state["apply_graph_modification"] = False
@@ -299,12 +303,10 @@ def graph_manipulation_process_template(session_state, TIMES,
     if not stop_and_clear_button and not session_state["stop_and_clear"]:
         graph_manipulation_process(session_state, LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED, 
                                split_the_node_form_placeholder, add_and_delete_form_placeholder)
-        # return False
+        return False
     else:
         print_INFO_message_timestamp("Stop and clear state")
         return True
-
-    # return False
 
 def graph_manipulation(session_state, TIMES):
     placeholder_button = st.container()
@@ -318,7 +320,7 @@ def graph_manipulation(session_state, TIMES):
         with col1:
             button_load = st.button("Load data for graph manipulation")
         with col2:
-            button_manipulation = st.button("Start graph manipulation process")
+            button_manipulation = st.button("Start graph manipulation process", on_click=on_submit_manipulation)
         with col3:
             button_refine = st.button("Refine modified graph", on_click=on_submit_refine, args=(placeholder,))
         with col4:
@@ -343,15 +345,13 @@ def graph_manipulation(session_state, TIMES):
             st.session_state["stop_and_clear"] = True
     
     ############################################## MODIFY GRAPH ##############################################    
-    if button_manipulation and not st.session_state["load_data_error"]:
+    if st.session_state["is_manipulation"] and not st.session_state["load_data_error"]:
         for att in ["average_graphs", "node", "node_mapping", "predecessors_id", "successors_id", "stop_and_clear", "button_load"]:
             if att not in st.session_state:
                 return st.error("Please load data first!", icon="🚨")
         
         with placeholder:
-            # session_state["stop_and_clear"]  = graph_manipulation_process_template(session_state, TIMES, 
-            #                        LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED)
-            graph_manipulation_process_template(session_state, TIMES, 
+            session_state["stop_and_clear"]  = graph_manipulation_process_template(session_state, TIMES, 
                                    LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED)
             session_state["button_load"] = False
 

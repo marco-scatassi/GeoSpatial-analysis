@@ -355,7 +355,7 @@ def graph_manipulation(session_state, TIMES):
                                    LOG_FILE_PATH, LOG_FILE_PATH2, HTML_IMG_PATH, GRAPH_MANIPULATION_SEED)
             session_state["button_load"] = False
 
-        if session_state["stop_and_clear"] or st.session_state["button_load"]:
+        if session_state["stop_and_clear"]:
             placeholder.warning("Process interrupted and state cleared (load the data to start again)", icon="❌")
         else:
             placeholder.success("Process completed: changes has been saved. Download data using the download button", icon="✅")

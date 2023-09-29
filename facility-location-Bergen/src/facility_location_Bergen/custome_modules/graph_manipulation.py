@@ -601,7 +601,7 @@ def refine_graph(G_dict, form_placeholder, session_state, apply_to_all=False):
     
     node_mapping_r = {v: k for k, v in node_mapping.items()}
     
-    if "graph" not in session_state["history_changes_refine"].keys():
+    if "graph" not in session_state["history_changes"].keys():
         session_state["history_changes"]["graph"] = {}
         session_state["history_changes"]["graph"]["new_edges"] = []
         session_state["history_changes"]["graph"]["edges_to_delete"] = []

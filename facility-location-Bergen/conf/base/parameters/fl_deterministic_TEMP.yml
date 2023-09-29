@@ -1,0 +1,19 @@
+facilities_number: 1
+fl_class: p-center&p-median
+handpicked: true
+handpicked_locations:
+- 5229
+- 1688
+- 1842
+- 4647
+- 159
+- 2075
+- 2428
+- 361
+- 3477
+- 3745
+- 4731
+ratio1: 0.1
+ratio2: 0.05
+seed: 324324
+weight: 0.25

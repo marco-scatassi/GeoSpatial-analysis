@@ -6,6 +6,7 @@ fl_deterministic.data01:
   ratio2: 0.05
   seed: 324324
   fl_class: "p-center"
+  weight: 0
 
 fl_deterministic.data02:
   facilities_number: 2
@@ -15,6 +16,7 @@ fl_deterministic.data02:
   ratio2: 0.05
   seed: 324324
   fl_class: "p-center"
+  weight: 0
 
 fl_deterministic.data03:
   facilities_number: 3
@@ -24,6 +26,7 @@ fl_deterministic.data03:
   ratio2: 0.05
   seed: 324324
   fl_class: "p-center"
+  weight: 0
 
 fl_deterministic.data11:
   facilities_number: 1
@@ -33,6 +36,7 @@ fl_deterministic.data11:
   ratio2: 0.05
   seed: 324324
   fl_class: "p-center"
+  weight: 0
 
 fl_deterministic.data12:
   facilities_number: 2
@@ -42,6 +46,7 @@ fl_deterministic.data12:
   ratio2: 0.05
   seed: 324324
   fl_class: "p-center"
+  weight: 0
 
 fl_deterministic.data13:
   facilities_number: 3
@@ -51,3 +56,4 @@ fl_deterministic.data13:
   ratio2: 0.05
   seed: 324324
   fl_class: "p-center"
+  weight: 0

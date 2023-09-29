@@ -22,7 +22,7 @@ from log import print_INFO_message_timestamp, print_INFO_message
 from facility_location import AdjacencyMatrix, FacilityLocation
 from retrieve_global_parameters import *
 
-ROOTH = rf"\/Pund/Stab$/guest801981/Documents/GitHub/GeoSpatial-analysis/facility-location-Bergen/"
+ROOTH = rf"\/Pund/Stab$/guest801996/Documents/GitHub/GeoSpatial-analysis/facility-location-Bergen/"
 
 ## ------------------------------------------------------------- UTILS FUNCTIONS ------------------------------------------------------------- ##
 
@@ -82,12 +82,12 @@ def set_up_fl_problems(fl_data, already_solved):
                     average_graphs[time] = pkl.load(f)
 
         ADJ_PATHS = {
-            time: r"\/Pund/Stab$/guest801981/Documents/GitHub/GeoSpatial-analysis/facility-location-Bergen/"
+            time: r"\/Pund/Stab$/guest801996/Documents/GitHub/GeoSpatial-analysis/facility-location-Bergen/"
             + retrieve_adj_matrix_path(time, free_flow=False, handpicked=fl_data["handpicked"])
             for time in times
         }
         ADJ_PATHS["all_day_free_flow"] = (
-            r"\/Pund/Stab$/guest801981/Documents/GitHub/GeoSpatial-analysis/facility-location-Bergen/"
+            r"\/Pund/Stab$/guest801996/Documents/GitHub/GeoSpatial-analysis/facility-location-Bergen/"
             + retrieve_adj_matrix_path("all_day", free_flow=True, handpicked=fl_data["handpicked"])
         )
         adj_matricies = {time: None for time in times}
@@ -225,8 +225,9 @@ def solve_fl_problems(fls_exact, fl_data):
                 print_INFO_message(f"Exact solution for {time} already exists. Skipping...")
             else:
                 if time in solve_list:
+                    print_INFO_message_timestamp(f"Solving exact solution for {time} and weight {fl_data['weight']} with type {type(fl_data['weight'])}")
                     print_INFO_message_timestamp(f"Solving exact solution for {time}")
-                    fl_exact.solve(mode="exact", fl_class=fl_data["fl_class"])
+                    fl_exact.solve(mode="exact", fl_class=fl_data["fl_class"], weight=fl_data["weight"])
                     print_INFO_message(f"Saving exact solution for {time}")
                     fl_exact.save(saving_path)
                     print_INFO_message(f"Exact solution for {time} SAVED")

@@ -175,6 +175,7 @@ class FacilityLocation:
     locations_index = None
     solution_value = None
     fl_class = None
+    weight = None
     algorithm = None
     solver_status = None
     instance = None
@@ -293,8 +294,11 @@ class FacilityLocation:
             for j in model.J
             for i in model.I
         ) / self.n_of_demand_points
+        
+    def __weightedObjective(self, model):
+        return self.weight * self.__maximalDistanceObj(model) + (1 - self.weight) * self.__averageDistanceObj(model)
 
-    def __DefineAbstractModel(self, location_problem="p-center"):
+    def __DefineAbstractModel(self, fl_class="p-center"):
         # -------------------------abastract model----------------------------
         model = pyo.AbstractModel()
 
@@ -316,7 +320,7 @@ class FacilityLocation:
         # define the binary variables for the assignment decision (y)
         model.y = Var(model.I, model.J, within=Binary)
 
-        if location_problem == "p-center":
+        if fl_class == "p-center" or fl_class == "p-center&p-median":
             # define the auxiliary variable for the maximal distance (L)
             model.L = Var(within=NonNegativeReals)
             
@@ -329,7 +333,7 @@ class FacilityLocation:
         # define a constraint for the maximum number of locations
         model.maximumLocations = Constraint(rule=self.__maximumLocations)
 
-        if location_problem == "p-center":
+        if fl_class == "p-center" or fl_class == "p-center&p-median":
             # define a constraint for the maximal distance (L is an auxiliary variable)
             model.maximalDistance = Constraint(model.I, rule=self.__maximalDistance)
 
@@ -339,13 +343,17 @@ class FacilityLocation:
         )
 
         # -----------------------objective function---------------------------
-        if location_problem == "p-center":
+        if fl_class == "p-center":
             model.maximalDistanceObj = Objective(
                 rule=self.__maximalDistanceObj, sense=minimize
             )
-        elif location_problem == "p-median":
+        elif fl_class == "p-median":
             model.averageDistanceObj = Objective(
                 rule=self.__averageDistanceObj, sense=minimize
+            )
+        elif fl_class == "p-center&p-median":
+            model.weightedObjective = Objective(
+                rule=self.__weightedObjective, sense=minimize
             )
 
         self.model = model
@@ -376,6 +384,9 @@ class FacilityLocation:
             self.solution_value = self.instance.L.value
         elif fl_class == "p-median":
             self.solution_value = value(self.instance.averageDistanceObj)
+        elif fl_class == "p-center&p-median":
+            self.solution_value = value(self.instance.weightedObjective)
+            
         self.locations_index = [
             j for j in self.candidate_coordinates.index if self.instance.x[j].value == 1
         ]
@@ -400,8 +411,10 @@ class FacilityLocation:
 
     
     # ---------------------------------------- implement the methods to solve the problem -----------------------------------
-    def solve(self, mode="exact", fl_class="p-center", algorithm="gon", n_trial=None):
+    def solve(self, mode="exact", fl_class="p-center", weight=0, algorithm="gon", n_trial=None):
         t1 = time.time()
+        self.fl_class = fl_class
+        self.weight = weight
 
         if mode == "exact":
             print_INFO_message_timestamp("Solving the problem exactly...")
@@ -425,7 +438,6 @@ class FacilityLocation:
 
         t2 = time.time()
         
-        self.fl_class = fl_class
         self.computation_time = t2 - t1
         self.algorithm = mode if mode == "exact" else algorithm
 
@@ -472,6 +484,7 @@ class StochasticFacilityLocation:
     # ----------------------------------------------- define the constructor -----------------------------------------------
     
     fl_class = None
+    weight = None
     solver_status = None
     solution_value = None
     scenarios_names = None
@@ -521,6 +534,9 @@ class StochasticFacilityLocation:
             for j in model.J
             for i in model.I
         ) / self.n_of_demand_points
+        
+    def __weightedObjective(self, model):
+        return self.weight * self.__maximalDistanceObj(model) + (1 - self.weight) * self.__averageDistanceObj(model)
 
     def __DefineAbstractModel(self, fl_class="p-center"):
         # -------------------------abastract model----------------------------
@@ -544,7 +560,7 @@ class StochasticFacilityLocation:
         # define the binary variables for the assignment decision (y)
         model.y = Var(model.I, model.J, within=Binary)
 
-        if fl_class == "p-center":
+        if fl_class == "p-center" or fl_class == "p-center&p-median":
             # define the auxiliary variable for the maximal distance (L)
             model.L = Var(within=NonNegativeReals)
 
@@ -557,7 +573,7 @@ class StochasticFacilityLocation:
         # define a constraint for the maximum number of locations
         model.maximumLocations = Constraint(rule=self.__maximumLocations)
 
-        if fl_class == "p-center":
+        if fl_class == "p-center" or fl_class == "p-center&p-median":
             # define a constraint for the maximal distance (L is an auxiliary variable)
             model.maximalDistance = Constraint(model.I, rule=self.__maximalDistance)
 
@@ -580,6 +596,10 @@ class StochasticFacilityLocation:
         elif fl_class == "p-median":
             model.secondStageObj = Expression(
                 rule=self.__averageDistanceObj
+            )
+        elif fl_class == "p-center&p-median":
+            model.secondStageObj = Expression(
+                rule=self.__weightedObjective
             )
 
         #------- global objective function -------
@@ -611,8 +631,10 @@ class StochasticFacilityLocation:
         return scenariosProbabilities[scenarioName]
     
     # ---------------------------------------- implement the methods to solve the problem -----------------------------------
-    def solve(self, scenarios_data: dict, scenarioProbabilities: dict, method="EF", fl_class="p-center", max_iter=25):
+    def solve(self, scenarios_data: dict, scenarioProbabilities: dict, method="EF", fl_class="p-center", weight=0, max_iter=25):
         t1 = time.time()
+        self.fl_class = fl_class
+        self.weight = weight
         
         # ------------------------- abastract model ----------------------------
         print_INFO_message("Defining the abstract model...")
@@ -688,7 +710,6 @@ class StochasticFacilityLocation:
         t2 = time.time()
 
         self.computation_time = t2 - t1
-        self.fl_class = fl_class
 
     # ---------------------------------------- implement the methods to save and load the matrix -----------------------------------
     # save the solution
@@ -750,6 +771,9 @@ class StochasticFacilityLocationTemplate:
             for j in model.J
             for i in model.I
         ) / self.n_of_demand_points
+        
+    def weightedObjective(self, model):
+        return self.weight * self.maximalDistanceObj(model) + (1 - self.weight) * self.averageDistanceObj(model)
 
     def DefineAbstractModel(self, fl_class="p-center"):
         # -------------------------abastract model----------------------------
@@ -773,7 +797,7 @@ class StochasticFacilityLocationTemplate:
         # define the binary variables for the assignment decision (y)
         model.y = Var(model.I, model.J, within=Binary)
 
-        if fl_class == "p-center":
+        if fl_class == "p-center" or fl_class == "p-center&p-median":
             # define the auxiliary variable for the maximal distance (L)
             model.L = Var(within=NonNegativeReals)
 
@@ -786,7 +810,7 @@ class StochasticFacilityLocationTemplate:
         # define a constraint for the maximum number of locations
         model.maximumLocations = Constraint(rule=self.maximumLocations)
 
-        if fl_class == "p-center":
+        if fl_class == "p-center" or fl_class == "p-center&p-median":
             # define a constraint for the maximal distance (L is an auxiliary variable)
             model.maximalDistance = Constraint(model.I, rule=self.maximalDistance)
 
@@ -809,6 +833,10 @@ class StochasticFacilityLocationTemplate:
         elif fl_class == "p-median":
             model.secondStageObj = Expression(
                 rule=self.averageDistanceObj
+            )
+        elif fl_class == "p-center&p-median":
+            model.secondStageObj = Expression(
+                rule=self.weightedObjective
             )
 
         #------- global objective function -------
@@ -859,8 +887,11 @@ class StochasticFacilityLocationMetrics(StochasticFacilityLocationTemplate):
                                      df = pd.DataFrame(columns=['n_locations', 'RP', 'RP_Out_of_Sample', 'WS', 'EVPI', 'VSS']),
                                      method="EF", 
                                      fl_class="p-center",
+                                     weight=0,
                                      max_iter=25):
         t1 = time.time()
+        self.fl_class = fl_class
+        self.weight = weight
         
         # ------------------------- abastract model ----------------------------
         print_INFO_message("Defining the abstract model...")

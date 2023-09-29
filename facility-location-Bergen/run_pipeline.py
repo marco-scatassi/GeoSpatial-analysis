@@ -7,7 +7,7 @@ import yaml
 import sys
 import time
 
-project_path = r"\/Pund/Stab$/guest801981/Documents/GitHub/GeoSpatial-analysis/facility-location-Bergen"
+project_path = r"\/Pund/Stab$/guest801996/Documents/GitHub/GeoSpatial-analysis/facility-location-Bergen"
 metadata = bootstrap_project(project_path)
 
 def initialize_session(pipeline_to_run):
@@ -65,9 +65,9 @@ def run_solution_comparison(fl_class="p-center"):
                 runner.run(pipelines[pipeline_to_run].only_nodes_with_namespace(f"{pipeline_to_run}.{nms}"), data_catalog)
             
 # ------------------------------ FL DETERMINISTIC ------------------------------ #
-def run_fl_deterministic(fl_class="p-center"):
+def run_fl_deterministic(fl_class="p-center", weight=0.25):
     
-    if fl_class not in ["p-center", "p-median"]:
+    if fl_class not in ["p-center", "p-median", "p-center&p-median"]:
         return Exception("Facility location class not recognized")
     
     pipeline_to_run = "fl_deterministic"
@@ -85,6 +85,7 @@ def run_fl_deterministic(fl_class="p-center"):
         data_params_path = project_path + f"/conf/base/parameters/{pipeline_to_run}_TEMP.yml"
         params_data_set = YAMLDataSet(filepath=data_params_path)
         params[pipeline_to_run+nms]["fl_class"] = fl_class
+        params[pipeline_to_run+nms]["weight"] = weight
         params_data_set.save(params[pipeline_to_run+nms])
         data_catalog = DataCatalog(data_sets={f"params:{pipeline_to_run+nms}": params_data_set})
         runner.run(pipelines[pipeline_to_run].only_nodes_with_namespace(f"{pipeline_to_run+nms}"), data_catalog)
@@ -95,14 +96,17 @@ def main():
         print(f"Argument {i}: {sys.argv[i]}")
     
     pipelines_to_run = []
-    extra_params = {"fl_class": "p-center"}
+    extra_params = {"fl_class": "p-center", "weight": 0.25}
     
     for i in range(1, len(sys.argv)):
-        if sys.argv[i] in ["build_adjacency_matrix", "solution_comparison", "fl_deterministic"]:
-            pipelines_to_run.append(sys.argv[i])
-        elif sys.argv[i] in ["p-center", "p-median"]:
-            extra_params["fl_class"] = sys.argv[i]
-        else:
+        try:
+            if sys.argv[i] in ["build_adjacency_matrix", "solution_comparison", "fl_deterministic"]:
+                pipelines_to_run.append(sys.argv[i])
+            elif sys.argv[i] in ["p-center", "p-median", "p-center&p-median"]:
+                extra_params["fl_class"] = sys.argv[i]
+                if sys.argv[i] == "p-center&p-median":
+                    extra_params["weight"] = float(sys.argv[i+1]) if i+1 < len(sys.argv) else 0.25
+        except:
             raise Exception(f"Argument {i} not recognized")
 
     for pipeline_name in pipelines_to_run:
@@ -111,7 +115,7 @@ def main():
         elif pipeline_name == "solution_comparison":
             run_solution_comparison(extra_params["fl_class"])
         elif pipeline_name == "fl_deterministic":
-            run_fl_deterministic(extra_params["fl_class"])
+            run_fl_deterministic(**extra_params)
         else:
             print("Pipeline name not recognized")
             return

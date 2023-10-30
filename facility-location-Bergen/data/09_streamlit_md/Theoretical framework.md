@@ -28,9 +28,12 @@ Then, following [2], discrete facility location problems can be divided in the f
 - **median based**, in which the objective is to minimize the weighted average distance between points and the associated facility;
 - other problems.
 
-Further classification can be done within each of the 3 previous categories. However, the one adopted in this work is the **p-center location problem**. This formulation as well as its stochastic version will be described in the following sections.
+Further classification can be done within each of the 3 previous categories. 
+
+In this work both the **p-center location problem** and the **p-median location problem** have been used and compared. The choice of the objective function is not so straightforward as it might seems and has implications both technical and political. In the following sections a brief overwiev of the two problem formulation is given.
 
 ### Deterministic Formulation 
+#### P-center location problem 
 Referring to [5], the **p-center location** problems aim to **minimize the maximum distance** among demand points and their associated facility. It is assumed that all demand points are covered. 
 
 This model, that is well known in literature, is particularly suitable to approach **emergency response** facility location problems. As already mentioned, an **emergency** is an event that occurs suddenly, unexpectedly and that requires an immediate intervention. This means that wherever an emergency event is originated, the **response time** should be as low as possible. The presence of some demand hardly reachable points represents a potential critical situation and should be avoided. Therefore, the **p-center** model is a valid solution able to take into account those aspects.
@@ -52,6 +55,11 @@ $$
 \end{aligned}
 $$
 
+#### P-median location problem
+The **p-center location problem** is a min-max problem, therefore it is strongly influenced by extreme points in the network. This can potentially disrupt the balance between not having one or more critical points (i.e. hardly reachable), and beeing close enough to high density locations in which the probability of an emergency situation to occur is higher. Because of this, the **p-median** formulation has been used and compared with the **p-center**.
+
+A possible formulation for the **p-median problem**, as described in [5], is provided below.
+
 #### Sets:
 - $I$ : The set of demand points.
 - $J$ : The set of candidate locations.
@@ -66,26 +74,25 @@ $$
 - $x_j$ : 1, if a facility is established at candidate location $j \in J$; 0 otherwise.
 - $y_{i j}$: 1, if demand point $i$ is assigned to a facility at candidate location $j \in N_i ; 0$ otherwise.
 
+##### Formulation
+$$
+\begin{aligned}
+& \min \sum_{i \in I} \sum_{j \in J} d_{i j} y_{i j} \\
+& \text { subject to } \\
+& \sum_{j \in N_i} y_{i j}=1, i \in I \\
+& \sum_{j \in J} x_j=p \\
+& y_{i j} \leq x_j, i \in I, j \in N_i \\
+& y_{i j} \in\{0,1\}, i \in I, j \in N_i \\
+& x_j \in\{0,1\}, j \in J \\
+\end{aligned}
+$$
+
 ### Stochastic Formulation 
 The deterministic formulation is not able to take into account the stochastic nature of **travel time**, that depends on several factors (hour of the day, weather conditions, changes in the road viability, …). Many methodologies and approaches exist in order to embrace the stochastic nature of the model previously described, such as chance constraint optimization, stochastic programming, robust optimization, queuing theory.
 
 The two-stage optimization model has been used in this work. This decision is justified observing that the location of the facilities can be viewed as a first stage decision, that need to be robust with respect to changing scenarios. While, once the uncertainty has been disclosed, it is possible to decide which facility should serve a specific demand point [6].
 
-Specifically, the deterministic model can be reformulated as follows:
-
-$$
-\begin{aligned}
-& \min L \\
-& \text { subject to } \\
-& \sum_{j \in N_i} y_{i j}^k=1, i \in I, k\in{K}\\
-& \sum_{j \in J} x_j=p \\
-& \sum_{j \in N_i} d_{i j}^k y_{i j}^k \leq L, i \in I, k\in K \\
-& y_{i j}^k \leq x_j, i \in I, j \in N_i, k\in K \\
-& y_{i j}^k \in\{0,1\}, i \in I, j \in N_i, k\in K \\
-& x_j \in\{0,1\}, j \in J \\
-& L \geq 0 .
-\end{aligned}
-$$
+In what follows, we provide the two-stage stochastic programming formulation of the $p$-center problem. The one relative to the $p$-median can be done similarly.
 
 #### Sets:
 - $I$ : The set of demand points.
@@ -101,6 +108,22 @@ $$
 #### Decision variables:
 - $x_j$ : 1, if a facility is established at candidate location $j \in J$; 0 otherwise.
 - $y_{i j}^k$: 1, if demand point $i$ is assigned to a facility at candidate location $j \in N_i$ in the $k$-th scenario; $0$ otherwise.
+
+##### Formulation
+$$
+\begin{aligned}
+& \min \sum_{k\in K} q_k\cdot L_k \\
+& \text { subject to } \\
+& \sum_{j \in N_i} y_{i j}^k=1, i \in I, k\in{K}\\
+& \sum_{j \in J} x_j=p \\
+& \sum_{j \in N_i} d_{i j}^k y_{i j}^k \leq L_k, i \in I, k\in K \\
+& y_{i j}^k \leq x_j, i \in I, j \in N_i, k\in K \\
+& y_{i j}^k \in\{0,1\}, i \in I, j \in N_i, k\in K \\
+& x_j \in\{0,1\}, j \in J \\
+& L \geq 0 .
+\end{aligned}
+$$
+
 
 ### Observation 
 The formulation adopted in this work assumes $D_i = +\infty$. This allows every solution to be feasible, and it's motivated by the absence of a specific requirement.

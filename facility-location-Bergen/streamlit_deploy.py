@@ -2,9 +2,12 @@ import sys
 
 # Get the directory path to add to PYTHONPATH
 directory_path = r"/mount/src/geospatial-analysis/facility-location-Bergen/src/facility_location_Bergen/custome_modules"
+if directory_path not in sys.path:
+    sys.path.append(directory_path)
 directory_path = r"/app/geospatial-analysis/facility-location-Bergen/src/facility_location_Bergen/custome_modules"
 if directory_path not in sys.path:
     sys.path.append(directory_path)
+    
     
 import os
 import pickle as pkl

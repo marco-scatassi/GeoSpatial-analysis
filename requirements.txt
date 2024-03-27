@@ -7,7 +7,7 @@ pandas
 geopandas
 shapely
 datetime
-kedro
+kedro==0.18.7
 pyomo
 # INSTALL (IF WINDOWS) MICROSOFT MPI AND THEN
 mpi4py
